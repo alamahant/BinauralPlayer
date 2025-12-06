@@ -2,7 +2,7 @@
 #include<QApplication>
 namespace ConstantGlobals {
 
-const QString appDirPath = QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation) + "/Binaural";
+const QString appDirPath = QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation) + "/BinauralPlayer";
 const QString ambientFilePath = appDirPath + "/ambient";
 const QString presetFilePath = appDirPath + "/presets";
 const QString playlistFilePath = appDirPath + "/playlists";
