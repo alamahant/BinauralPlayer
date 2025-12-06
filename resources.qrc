@@ -1,0 +1,33 @@
+<RCC>
+    <qresource prefix="/">
+        <file>icons/activity.svg</file>
+        <file>icons/fast-forward.svg</file>
+        <file>icons/folder.svg</file>
+        <file>icons/music.svg</file>
+        <file>icons/pause.svg</file>
+        <file>icons/play.svg</file>
+        <file>icons/repeat.svg</file>
+        <file>icons/rewind.svg</file>
+        <file>icons/save.svg</file>
+        <file>icons/shuffle.svg</file>
+        <file>icons/skip-back.svg</file>
+        <file>icons/skip-forward.svg</file>
+        <file>icons/square.svg</file>
+        <file>icons/volume-2.svg</file>
+        <file>icons/volume-x.svg</file>
+        <file>icons-white/folder.svg</file>
+        <file>icons-white/save.svg</file>
+        <file>icons/copy.svg</file>
+        <file>icons/settings.svg</file>
+        <file>icons/power.svg</file>
+        <file>icons/rss.svg</file>
+        <file>icons/target.svg</file>
+        <file>icons/hash.svg</file>
+        <file>icons/info.svg</file>
+        <file>icons/plus.svg</file>
+        <file>icons/eye.svg</file>
+        <file>icons/edit.svg</file>
+        <file>icons/refresh-cw.svg</file>
+        <file>favicon/android-chrome-512x512.png</file>
+    </qresource>
+</RCC>

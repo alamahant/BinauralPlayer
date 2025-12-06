@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>io.github.alamahant.BinauralPlayer</id>
+  <name>BinauralPlayer</name>
+  <summary>Full-featured media player with brainwave audio generation</summary>
+
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>GPL-3.0-or-later</project_license>
+
+  <description>
+    <p>
+      BinauralPlayer is a powerful media player that combines traditional media playback
+      with brainwave audio generation. Users can enjoy tabbed playlists, advanced playback
+      controls, and immersive brainwave sessions with binaural beats or isochronic tones.
+    </p>
+    <p>
+      Key Features:
+    </p>
+    <h2>Media Playback</h2>
+    <ul>
+      <li>Multi-format support: MP3, WAV, FLAC, OGG, M4A, MP4, M4V, AVI, MKV</li>
+      <li>Tabbed playlists: Create, rename, and manage multiple playlists</li>
+      <li>Advanced playback: Shuffle, repeat, seek, volume control with mute</li>
+      <li>Streaming support: Play audio directly from HTTP/HTTPS URLs</li>
+      <li>Time display: Track position/duration with seekable progress bar</li>
+    </ul>
+
+    <h2>Brainwave Audio Generation</h2>
+    <ul>
+      <li>Three modes: Binaural Beats (headphones required), Isochronic Tones, Audio Generator</li>
+      <li>Real-time dynamic engine: Immediate parameter changes; no pre-rendered buffers</li>
+      <li>Waveforms: Sine, Square, Triangle, Sawtooth</li>
+      <li>Frequency control: Left/right channels (20Hz–20kHz)</li>
+      <li>Auto-stop timer: With countdown visualization</li>
+    </ul>
+
+    <h2>Playlist Management</h2>
+    <ul>
+      <li>Tabbed interface: Multiple named playlists with closeable tabs</li>
+
+      <li>Search function: Filter tracks within any playlist</li>
+      <li>File operations: Save/load playlists in JSON</li>
+      <li>Track operations: Add, remove, clear with smart selection tracking</li>
+    </ul>
+
+    <h2>User Interface</h2>
+    <ul>
+      <li>Custom toolbars: Color-coded (Media: Blue, Binaural: Purple, Nature: Green)</li>
+      <li>Split status bar: Media playback (left), binaural engine status (right)</li>
+      <li>Icon set: 291 SVG icons</li>
+      <li>Responsive layout: Graceful resizing</li>
+      <li>Safety warnings: First-launch + brainwave activation warnings</li>
+    </ul>
+
+    
+
+  </description>
+
+  <screenshots>
+    <screenshot type="default">
+      <image>https://raw.githubusercontent.com/alamahant/BinauralPlayer/main/screenshots/BinauralPlayer-Main.png</image>
+      <caption>Main interface with media and brainwave controls</caption>
+    </screenshot>
+
+  </screenshots>
+
+  <launchable type="desktop-id">io.github.alamahant.BinauralPlayer.desktop</launchable>
+
+  <url type="homepage">https://github.com/alamahant/BinauralPlayer</url>
+  <url type="bugtracker">https://github.com/alamahant/BinauralPlayer/issues</url>
+
+  <developer_name>Alamahant</developer_name>
+
+  <categories>
+    <category>AudioVideo</category>
+    <category>Music</category>
+    <category>Utility</category>
+  </categories>
+
+  <keywords>
+    <keyword>media player</keyword>
+    <keyword>brainwave</keyword>
+    <keyword>binaural</keyword>
+    <keyword>isochronic</keyword>
+    <keyword>playlist</keyword>
+    <keyword>ambient</keyword>
+    <keyword>music</keyword>
+    <keyword>relaxation</keyword>
+    <keyword>focus</keyword>
+    <keyword>audio</keyword>
+  </keywords>
+
+  <content_rating type="oars-1.1">
+    <content_attribute id="social-info">mild</content_attribute>
+  </content_rating>
+
+  <releases>
+    <release version="1.0.0" date="2025-12-08">
+      <description>
+        <p>Initial release of BinauralPlayer</p>
+        <ul>
+          <li>Full-featured media player with tabbed playlists and session management</li>
+          <li>Binaural beat and isochronic tone generation with real-time controls</li>
+          <li>Multi-format media playback including MP3, WAV, FLAC, OGG, M4A, MP4, M4V, AVI, MKV</li>
+          <li>Tabbed playlists with search, and JSON save/load</li>
+          <li>Custom toolbars and responsive layout with safety warnings</li>
+        </ul>
+      </description>
+    </release>
+  </releases>
+
+  <provides>
+    <binary>BinauralPlayer</binary>
+  </provides>
+
+  <requires>
+    <display_length compare="ge">768</display_length>
+  </requires>
+
+  <recommends>
+    <control>keyboard</control>
+    <control>pointing</control>
+  </recommends>
+</component>
