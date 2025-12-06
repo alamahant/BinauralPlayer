@@ -2,8 +2,8 @@
 Version=1.0
 Type=Application
 Name=BinauralPlayer
-GenericName>Media & Brainwave Player
-Comment=Play audio, generate binaural/isochronic tones, and manage tabbed playlists
+GenericName=Media and Brainwave Player
+Comment=Play audio, generate binaural and isochronic tones, and manage tabbed playlists
 Icon=io.github.alamahant.BinauralPlayer
 Exec=BinauralPlayer
 Terminal=false
