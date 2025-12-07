@@ -319,6 +319,8 @@ private:
     QDialog *trackInfoDialog = nullptr;
     void createInfoDialog();
     QTextBrowser *metadataBrowser;
+    int m_playingTrackIndex = -1;  // Index of the track that's actually playing
+
 public slots:
     void handleMetaDataUpdated();
 

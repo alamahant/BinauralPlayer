@@ -1422,6 +1422,8 @@ void MainWindow::onPlaybackStateChanged(QMediaPlayer::PlaybackState state)
            m_playMusicButton->setEnabled(true);
            m_pauseMusicButton->setEnabled(true);
            m_stopMusicButton->setEnabled(true);
+           m_playingTrackIndex = m_currentTrackIndex;
+
            break;
 
        case QMediaPlayer::PausedState:
@@ -2012,6 +2014,7 @@ void MainWindow::onLoadMusicClicked()
     }
 }
 
+/*
 void MainWindow::onRemoveTrackClicked()
 {
     QListWidget *playlist = currentPlaylistWidget();
@@ -2042,6 +2045,59 @@ void MainWindow::onRemoveTrackClicked()
         statusBar()->showMessage("No track selected");
     }
 }
+*/
+
+void MainWindow::onRemoveTrackClicked()
+{
+    QListWidget *playlist = currentPlaylistWidget();
+    QString playlistName = currentPlaylistName();
+
+    if (!playlist || playlistName.isEmpty()) return;
+
+    // Store the currently playing track index
+    int playingIndex = m_playingTrackIndex;
+
+    int selectedRow = playlist->currentRow();
+    if (selectedRow >= 0 && selectedRow < m_playlistFiles[playlistName].size()) {
+
+        // Check if trying to remove the playing track
+        if (playlistName == m_currentPlaylistName &&
+            selectedRow == playingIndex) {
+            QMessageBox::warning(this, "Cannot Remove Track",
+                "Cannot remove the currently playing track. Stop playback first.");
+            return;
+        }
+
+        // Remove from UI
+        QListWidgetItem *item = playlist->takeItem(selectedRow);
+        delete item;
+
+        // Remove from data structure
+        m_playlistFiles[playlistName].removeAt(selectedRow);
+
+        // If in current playlist, adjust indices and select playing track
+        if (playlistName == m_currentPlaylistName) {
+            // Adjust playing index if removed track was before it
+            if (selectedRow < playingIndex) {
+                m_playingTrackIndex = playingIndex - 1;
+            }
+            // playingIndex stays same if removing after
+
+            // Update both indices to be the same
+            m_currentTrackIndex = m_playingTrackIndex;
+
+            // Select the playing track in UI (if valid)
+            if (m_playingTrackIndex >= 0) {
+                playlist->setCurrentRow(m_playingTrackIndex);
+            }
+        }
+
+        statusBar()->showMessage("Track removed from playlist");
+    } else {
+        statusBar()->showMessage("No track selected");
+    }
+}
+
 
 void MainWindow::onClearPlaylistClicked()
 {
