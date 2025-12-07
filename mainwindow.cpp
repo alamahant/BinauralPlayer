@@ -306,7 +306,7 @@ QToolBar *MainWindow::createBinauralToolbar()
 
     m_beatFreqLabel = new QLabel("7.83 Hz", toolbar);
 
-    m_beatFreqLabel->setMinimumWidth(70);
+    m_beatFreqLabel->setMinimumWidth(100);
     m_beatFreqLabel->setAlignment(Qt::AlignCenter);
     m_beatFreqLabel->setStyleSheet("background-color: #f0f0f0; padding: 2px; border: 1px solid #ccc;");
     m_beatFreqLabel->setToolTip("Binaural beat frequency (Right - Left)");
