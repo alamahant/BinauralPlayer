@@ -25,8 +25,8 @@
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
-    , m_binauralEngine(new BinauralEngine(this))
-    //, m_dynamicEngine(new BinauralEngine(this))
+    , m_binauralEngine(new DynamicEngine(this))
+    //, m_dynamicEngine(new DynamicEngine(this))
     , m_mediaPlayer(nullptr)
     , m_audioOutput(nullptr)
     , m_currentTrackIndex(-1)
@@ -86,6 +86,7 @@ MainWindow::MainWindow(QWidget *parent)
     addActions();
 
     setupMenus();
+    createInfoDialog();
     setupConnections();
     model = qobject_cast<QStandardItemModel*>(m_waveformCombo->model());
     squareWaveItem = model->item(1);
@@ -107,6 +108,8 @@ MainWindow::MainWindow(QWidget *parent)
 
     statusBar()->showMessage("Ready to play");
     showFirstLaunchWarning();
+    createInfoDialog();
+
 }
 
 MainWindow::~MainWindow()
@@ -306,8 +309,8 @@ QToolBar *MainWindow::createBinauralToolbar()
 
     m_beatFreqLabel = new QLabel("7.83 Hz", toolbar);
 
-    m_beatFreqLabel->setMinimumWidth(100);
-    m_beatFreqLabel->setAlignment(Qt::AlignCenter);
+    m_beatFreqLabel->setMinimumWidth(95);
+    m_beatFreqLabel->setAlignment(Qt::AlignLeft);
     m_beatFreqLabel->setStyleSheet("background-color: #f0f0f0; padding: 2px; border: 1px solid #ccc;");
     m_beatFreqLabel->setToolTip("Binaural beat frequency (Right - Left)");
     toolbar->addWidget(m_beatFreqLabel);
@@ -577,9 +580,9 @@ void MainWindow::setupLayout()
 
     // Playlist management buttons
     addPlaylistBtn = new QPushButton("New");
-    addPlaylistBtn->setIcon(QIcon(":/icons/plus.svg"));
+    //addPlaylistBtn->setIcon(QIcon(":/icons/plus.svg"));
     renamePlaylistBtn = new QPushButton("Rename");
-    renamePlaylistBtn->setIcon(QIcon(":/icons/hash.svg"));
+    //renamePlaylistBtn->setIcon(QIcon(":/icons/hash.svg"));
     renamePlaylistBtn->setToolTip("Rename Current Playlist");
     addPlaylistBtn->setMaximumWidth(80);
     addPlaylistBtn->setToolTip("Add New Playlist");
@@ -646,12 +649,30 @@ void MainWindow::setupLayout()
 
     // Playlist buttons (add/remove tracks)
     QHBoxLayout *playlistButtonLayout = new QHBoxLayout();
-    playlistButtonLayout->setSpacing(10);
+    playlistButtonLayout->setSpacing(5);
 
-    m_addFilesButton = new QPushButton("Add Files");
-    m_removeTrackButton = new QPushButton("Remove Selected");
-    m_clearPlaylistButton = new QPushButton("Clear Playlist");
+    m_addFilesButton = new QPushButton("Load Music", this);
+    m_addFilesButton->setMinimumWidth(80);
+    //m_addFilesButton->setIcon(QIcon(":/icons/plus.svg"));
+    m_addFilesButton->setToolTip("Load Music Files");
+    m_removeTrackButton = new QPushButton(this);
+    m_removeTrackButton->setMinimumWidth(60);
+    m_removeTrackButton->setIcon(QIcon(":/icons/file-minus.svg"));
 
+    m_removeTrackButton->setToolTip("Remove Selected Track");
+
+    m_clearPlaylistButton = new QPushButton(this);
+    m_clearPlaylistButton->setMinimumWidth(60);
+    m_clearPlaylistButton->setIcon(QIcon(":/icons/folder-minus.svg"));
+    m_clearPlaylistButton->setToolTip("Clear Playlist");
+
+    m_trackInfoButton  = new QPushButton(this);
+    m_trackInfoButton->setCheckable(true);
+    m_trackInfoButton->setChecked(false);
+    //m_trackInfoButton->setMinimumWidth(5);
+    //m_trackInfoButton->setMaximumWidth(20);
+    m_trackInfoButton->setIcon(QIcon(":/icons/info.svg"));
+    m_trackInfoButton->setToolTip("Display metadata on the current track");
     playlistButtonLayout->addWidget(m_addFilesButton);
     playlistButtonLayout->addWidget(m_removeTrackButton);
     playlistButtonLayout->addWidget(m_clearPlaylistButton);
@@ -664,7 +685,7 @@ void MainWindow::setupLayout()
     playlistButtonLayout->addWidget(m_seekSlider);
     playlistButtonLayout->addWidget(m_currentTimeLabel);
     playlistButtonLayout->addWidget(m_totalTimeLabel);
-
+    playlistButtonLayout->addWidget(m_trackInfoButton);
     mainLayout->addLayout(playlistButtonLayout);
 
     // Connect new playlist management signals
@@ -714,6 +735,9 @@ void MainWindow::setupConnections()
             this, &MainWindow::onSeekSliderMoved);
     //connect(volumeIcon, &QPushButton::clicked, this, &MainWindow::onMuteButtonClicked);
 
+    connect(m_mediaPlayer, &QMediaPlayer::metaDataChanged,
+            this, &MainWindow::handleMetaDataUpdated);
+
     // Binaural connections
     connect(m_binauralPowerButton, &QPushButton::toggled, this, &MainWindow::onBinauralPowerToggled);
     connect(m_leftFreqInput, QOverload<double>::of(&QDoubleSpinBox::valueChanged),
@@ -749,6 +773,15 @@ void MainWindow::setupConnections()
     connect(m_removeTrackButton, &QPushButton::clicked, this, &MainWindow::onRemoveTrackClicked);
     connect(m_clearPlaylistButton, &QPushButton::clicked, this, &MainWindow::onClearPlaylistClicked);
 
+    connect(m_trackInfoButton, &QPushButton::clicked, [this](bool checked){
+        if(checked){
+            //trackInfoDialog->exec();
+            trackInfoDialog->show();
+        }else{
+            trackInfoDialog->hide();
+        }
+    });
+
     // Connect new playlist management signals
     connect(addPlaylistBtn, &QPushButton::clicked, this, &MainWindow::onAddNewPlaylistClicked);
     connect(renamePlaylistBtn, &QPushButton::clicked, this, &MainWindow::onRenamePlaylistClicked);
@@ -756,11 +789,11 @@ void MainWindow::setupConnections()
     connect(m_playlistTabs, &QTabWidget::currentChanged, this, &MainWindow::onPlaylistTabChanged);
 
     // Binaural engine signal connections
-    connect(m_binauralEngine, &BinauralEngine::playbackStarted,
+    connect(m_binauralEngine, &DynamicEngine::playbackStarted,
             this, &MainWindow::onBinauralPlaybackStarted);
-    connect(m_binauralEngine, &BinauralEngine::playbackStopped,
+    connect(m_binauralEngine, &DynamicEngine::playbackStopped,
             this, &MainWindow::onBinauralPlaybackStopped);
-    connect(m_binauralEngine, &BinauralEngine::errorOccurred,
+    connect(m_binauralEngine, &DynamicEngine::errorOccurred,
             this, &MainWindow::onBinauralError);
 
     //save-load connections
@@ -1031,9 +1064,9 @@ void MainWindow::onRightFrequencyChanged(double value)
 
 void MainWindow::onWaveformChanged(int index)
 {
-    BinauralEngine::Waveform waveform = static_cast<BinauralEngine::Waveform>(index);
+    DynamicEngine::Waveform waveform = static_cast<DynamicEngine::Waveform>(index);
     m_binauralEngine->setWaveform(waveform);
-    //m_binauralStatusLabel->setText(waveform == BinauralEngine::SINE_WAVE ?
+    //m_binauralStatusLabel->setText(waveform == DynamicEngine::SINE_WAVE ?
       //                      "Waveform: Sine" : "Waveform: Square");
     m_binauralStatusLabel->setText(formatBinauralString());
 
@@ -1042,7 +1075,7 @@ void MainWindow::onWaveformChanged(int index)
 void MainWindow::onBinauralVolumeChanged(double value)
 {
     m_binauralEngine->setVolume(value / 100.0); // Convert percentage to 0.0-1.0
-    m_binauralStatusLabel->setText(QString("Binaural volume: %1%").arg(value));
+    //m_binauralStatusLabel->setText(QString("Binaural volume: %1%").arg(value));
 }
 
 void MainWindow::onBinauralPlayClicked()
@@ -1350,7 +1383,7 @@ void MainWindow::onMediaStatusChanged(QMediaPlayer::MediaStatus status)
             break;
     case QMediaPlayer::LoadedMedia:
            // Media is now loaded and ready to play
-
+            break;
     case QMediaPlayer::BufferedMedia:
            break;
     case QMediaPlayer::EndOfMedia:
@@ -1557,9 +1590,9 @@ void MainWindow::onPlaylistItemClicked(QListWidgetItem *item)
     m_currentTrackIndex = index;
     m_currentPlaylistName = playlistName;  // Track which playlist this selection belongs to
 
-    statusBar()->showMessage(QString("Selected track %1 in '%2'")
-                             .arg(index + 1)
-                             .arg(playlistName));
+    //statusBar()->showMessage(QString("Selected track %1 in '%2'")
+      //                       .arg(index + 1)
+        //                     .arg(playlistName));
 }
 
 
@@ -1711,7 +1744,7 @@ void MainWindow::onToneTypeComboIndexChanged(int index)
     case BINAURAL:
        // squareWaveItem->setEnabled(false);  // ✅ THIS actually enables it
         ConstantGlobals::currentToneType = 0;  // Set to 0
-        m_binauralEngine->forceBufferRegeneration();
+        //m_binauralEngine->forceBufferRegeneration();
         m_rightFreqInput->setEnabled(true);
         m_leftFreqInput->setValue(360.00);
         m_rightFreqInput->setValue(367.83);
@@ -1721,7 +1754,7 @@ void MainWindow::onToneTypeComboIndexChanged(int index)
     case ISOCHRONIC:
         //squareWaveItem->setEnabled(true);  // ✅ THIS actually enables it
         ConstantGlobals::currentToneType = 1;  // Set to 0
-        m_binauralEngine->forceBufferRegeneration();
+        //m_binauralEngine->forceBufferRegeneration();
         m_rightFreqInput->setDisabled(true);
         m_pulseFreqLabel->setEnabled(true);
         m_binauralStatusLabel->setText(formatBinauralString());
@@ -1732,7 +1765,7 @@ void MainWindow::onToneTypeComboIndexChanged(int index)
        // squareWaveItem->setEnabled(true);  // ✅ THIS actually enables it
         //item->setForeground(QBrush());  // Reset color
         ConstantGlobals::currentToneType = 2;  // Set to 0
-        m_binauralEngine->forceBufferRegeneration();
+        //m_binauralEngine->forceBufferRegeneration();
         m_rightFreqInput->setEnabled(true);
         m_pulseFreqLabel->setDisabled(true);
         m_binauralStatusLabel->setText(formatBinauralString());
@@ -2982,4 +3015,205 @@ void MainWindow::onFileOpened(const QString &filePath)
     m_playMusicButton->click();
     statusBar()->showMessage("Opened: " + fileName, 3000);
     qDebug() << "Successfully added file to playlist:" << filePath;
+}
+
+//metadata for playing track
+
+/*
+QString MainWindow::getTrackMetadata() {
+
+    metaData = m_mediaPlayer->metaData();
+    // Access specific tags using keys from QMediaMetaData::Key
+    QString title = metaData.stringValue(QMediaMetaData::Title);
+    QString album = metaData.stringValue(QMediaMetaData::AlbumTitle);
+    QStringList artists = metaData.value(QMediaMetaData::Author).toStringList(); // Note: Author for artists[citation:6]
+    int trackNumber = metaData.value(QMediaMetaData::TrackNumber).toInt();
+    qint64 duration = metaData.value(QMediaMetaData::Duration).toLongLong();
+
+    // Format duration from milliseconds to MM:SS
+       int totalSeconds = duration / 1000;
+       int minutes = totalSeconds / 60;
+       int seconds = totalSeconds % 60;
+       QString durationFormatted = QString("%1:%2")
+                                       .arg(minutes, 2, 10, QChar('0'))
+                                       .arg(seconds, 2, 10, QChar('0'));
+
+       // Build the formatted string for tooltip
+       QString displayMetaData;
+       if (!title.isEmpty()) {
+           displayMetaData += QString("<b>Title:</b> %1<br/>").arg(title);
+       }
+       if (!artists.isEmpty()) {
+           // Join multiple artists with comma
+           displayMetaData += QString("<b>Artist:</b> %1<br/>").arg(artists.join(", "));
+       }
+       if (!album.isEmpty()) {
+           displayMetaData += QString("<b>Album:</b> %1<br/>").arg(album);
+       }
+       if (trackNumber > 0) {
+           displayMetaData += QString("<b>Track:</b> %1<br/>").arg(trackNumber);
+       }
+       if (duration > 0) {
+           displayMetaData += QString("<b>Duration:</b> %1").arg(durationFormatted);
+       }
+
+    return displayMetaData;
+}
+*/
+QString MainWindow::getTrackMetadata() {
+    metaData = m_mediaPlayer->metaData();
+
+    QString displayMetaData = "Metadata:\n";
+
+    // List of ALL Qt metadata keys from the documentation
+    QList<QMediaMetaData::Key> allKeys = {
+        // Common attributes
+        QMediaMetaData::Title,
+        QMediaMetaData::Author,
+        QMediaMetaData::Genre,
+        QMediaMetaData::Date,
+        QMediaMetaData::Copyright,
+        QMediaMetaData::Comment,
+
+        // Music-specific attributes
+        QMediaMetaData::AlbumTitle,
+        QMediaMetaData::AlbumArtist,
+        QMediaMetaData::ContributingArtist,
+        QMediaMetaData::TrackNumber,
+        QMediaMetaData::Composer,
+        QMediaMetaData::CoverArtImage,
+
+        // Technical attributes
+        QMediaMetaData::Duration,
+        QMediaMetaData::AudioBitRate,
+        QMediaMetaData::AudioCodec,
+        QMediaMetaData::FileFormat
+    };
+
+    // Process each key - ONLY include if it has a valid, non-empty value
+    for (const auto &key : allKeys) {
+        QVariant value = metaData.value(key);
+
+        // Skip if value is invalid, null, or empty (depending on type)
+        if (!value.isValid() || value.isNull()) {
+            continue;
+        }
+
+        // Check for empty values based on type
+        if (value.typeId() == QMetaType::QString && value.toString().isEmpty()) {
+            continue;
+        }
+        if (value.typeId() == QMetaType::QStringList && value.toStringList().isEmpty()) {
+            continue;
+        }
+        if (value.typeId() == QMetaType::Int && value.toInt() == 0) {
+            continue; // Except for TrackNumber which could be 0
+        }
+
+        // Special handling for TrackNumber - 0 might be valid
+        if (key == QMediaMetaData::TrackNumber && value.toInt() == 0) {
+            continue;
+        }
+
+        // Get the key name and format it like FFmpeg
+        QString keyName = QMediaMetaData::metaDataKeyToString(key);
+        if (keyName.isEmpty()) {
+            keyName = QString("Key_%1").arg(static_cast<int>(key));
+        }
+
+        // Convert to uppercase like FFmpeg
+        QString formattedKeyName = keyName.toUpper();
+
+        // Pad with spaces for alignment (FFmpeg uses ~12-16 spaces)
+        while (formattedKeyName.length() < 16) {
+            formattedKeyName += " ";
+        }
+
+        // Format the value based on its type
+        QString valueStr;
+        if (value.typeId() == QMetaType::QStringList) {
+            valueStr = value.toStringList().join(", ");
+        } else if (value.typeId() == QMetaType::QDateTime) {
+            QDateTime dt = value.toDateTime();
+            if (dt.isValid()) {
+                valueStr = dt.toString("yyyy-MM-dd");
+            } else {
+                continue; // Skip invalid dates
+            }
+        } else if (value.typeId() == QMetaType::QImage) {
+            valueStr = "[Image]"; // Just indicate there's image data
+        } else if (value.typeId() == QMetaType::Int ||
+                  value.typeId() == QMetaType::LongLong) {
+            valueStr = value.toString();
+        } else if (value.typeId() == QMetaType::Bool) {
+            valueStr = value.toBool() ? "true" : "false";
+        } else {
+            // Default: convert to string
+            valueStr = value.toString();
+        }
+
+        // Add to output
+        displayMetaData += QString("    %1: %2\n").arg(formattedKeyName).arg(valueStr);
+    }
+
+    // Add duration in FFmpeg format (always show if available)
+    qint64 durationMs = metaData.value(QMediaMetaData::Duration).toLongLong();
+    if (durationMs > 0) {
+        int totalSeconds = durationMs / 1000;
+        int hours = totalSeconds / 3600;
+        int minutes = (totalSeconds % 3600) / 60;
+        int seconds = totalSeconds % 60;
+        int centiseconds = (durationMs % 1000) / 10;
+
+        displayMetaData += QString("\n  Duration: %1:%2:%3.%4")
+                               .arg(hours, 2, 10, QChar('0'))
+                               .arg(minutes, 2, 10, QChar('0'))
+                               .arg(seconds, 2, 10, QChar('0'))
+                               .arg(centiseconds, 2, 10, QChar('0'));
+    }
+
+    return displayMetaData.trimmed();
+}
+
+
+
+void MainWindow::handleMetaDataUpdated() {
+    // Metadata is now guaranteed to be available (or updated)
+    currentTrackMetadata = getTrackMetadata();
+    if (trackInfoDialog) {
+
+        metadataBrowser->setText(currentTrackMetadata);
+
+
+        // Update the dialog if it's currently visible
+        if (trackInfoDialog->isVisible()) {
+            trackInfoDialog->update(); // Force UI refresh
+        }
+    }
+    //updateTooltip(currentTrackMetadata);
+}
+
+void MainWindow::createInfoDialog() {
+
+    trackInfoDialog = new QDialog(this);
+    trackInfoDialog->setWindowTitle("Track Information");
+    trackInfoDialog->setWindowModality(Qt::NonModal);
+    trackInfoDialog->resize(500, 400);
+
+    // Create QTextBrowser and add to dialog
+    metadataBrowser = new QTextBrowser(trackInfoDialog);
+    metadataBrowser->setReadOnly(true);
+    metadataBrowser->setFont(QFont("Monospace", 10));
+
+    // Set layout
+    QVBoxLayout *layout = new QVBoxLayout(trackInfoDialog);
+    layout->addWidget(metadataBrowser);
+    trackInfoDialog->setLayout(layout);
+    connect(trackInfoDialog, &QDialog::finished, this, [this](int result) {
+        Q_UNUSED(result); // We don't care if it was accepted or rejected
+        if (m_trackInfoButton) {
+            m_trackInfoButton->setChecked(false);
+        }
+    });
+
 }

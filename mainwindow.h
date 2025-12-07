@@ -22,6 +22,9 @@
 #include <QJsonArray>
 #include <QJsonDocument>
 #include<QAction>
+#include<QMediaMetaData>
+#include<QDialog>
+#include<QTextBrowser>
 
 class MainWindow : public QMainWindow
 {
@@ -88,8 +91,8 @@ private:
     QPushButton *m_clearPlaylistButton;
 
     // =================== AUDIO ENGINES ===================
-    BinauralEngine *m_binauralEngine;
-    //DynamicEngine *m_binauralEngine;
+    //BinauralEngine *m_binauralEngine;
+    DynamicEngine *m_binauralEngine;
 
     // =================== PRIVATE METHODS ===================
     void setupConnections();
@@ -306,6 +309,18 @@ private slots:
     //open with functionality
 public slots:
     void onFileOpened(const QString &filePath);
+
+    //track metadata
+private:
+    QMediaMetaData metaData;
+    QString getTrackMetadata();
+    QString currentTrackMetadata;
+    QPushButton *m_trackInfoButton;
+    QDialog *trackInfoDialog = nullptr;
+    void createInfoDialog();
+    QTextBrowser *metadataBrowser;
+public slots:
+    void handleMetaDataUpdated();
 
 };
 #endif // MAINWINDOW_H

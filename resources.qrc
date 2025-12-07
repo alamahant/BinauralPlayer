@@ -29,5 +29,10 @@
         <file>icons/edit.svg</file>
         <file>icons/refresh-cw.svg</file>
         <file>favicon/android-chrome-512x512.png</file>
+        <file>icons/file-minus.svg</file>
+        <file>icons/folder-minus.svg</file>
+        <file>icons/folder-plus.svg</file>
+        <file>icons/minus.svg</file>
+        <file>icons/minus-square.svg</file>
     </qresource>
 </RCC>

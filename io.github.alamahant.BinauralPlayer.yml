@@ -10,6 +10,8 @@ finish-args:
   - --device=dri
   - --share=network
   - --socket=pulseaudio
+  - --filesystem=xdg-run/pipewire-0
+  - --filesystem=xdg-music:ro
   - --filesystem=xdg-documents/BinauralPlayer:create
 modules:
   - name: Binauralplayer
