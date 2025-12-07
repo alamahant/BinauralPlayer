@@ -12,8 +12,8 @@ BinauralEngine::BinauralEngine(QObject *parent)
     : QObject(parent)
     , m_audioOutput(nullptr)
     , m_audioBuffer(nullptr)
-    , m_leftFrequency(200.0)      // Default: 200Hz left
-    , m_rightFrequency(207.83)    // Default: 207.83Hz right (7.83Hz beat)
+    , m_leftFrequency(360.0)      // Default: 200Hz left
+    , m_rightFrequency(367.83)    // Default: 207.83Hz right (7.83Hz beat)
     , m_amplitude(DEFAULT_AMPLITUDE)
     , m_outputVolume(DEFAULT_VOLUME)
     , m_currentWaveform(SINE_WAVE)

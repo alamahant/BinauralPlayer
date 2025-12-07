@@ -22,7 +22,7 @@ DynamicEngine::DynamicEngine(QObject *parent)
     , m_parametersChanged(false)
     , m_sampleRate(44100)
     , m_bufferDurationMs(300000)
-    , m_pulseFrequency(10.0)
+    , m_pulseFrequency(7.83)
     , m_dynamicDevice(nullptr)
 {
     initializeAudioFormat();
