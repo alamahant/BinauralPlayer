@@ -77,7 +77,7 @@
         <ul>
           <li>Nature Ambient Sounds Toolbar – ambient sound mixer with 5 independent players</li>
           <li>Bottom-right info button for track metadata display</li>
-          <li>Removed permission pipewire-0 from the manifest as the application is functional without it</li>
+
           <li>Changed the default screenshot to reflect the current version of the application including the Nature Ambient Sound Toolbar</li>
           <li>Various code improvements and UI polish</li>
         </ul>
