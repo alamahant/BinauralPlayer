@@ -7,7 +7,7 @@
 - Bottom-right info button for track metadata display
 
 ### Changed
-- Removed permission   - --filesystem=xdg-run/pipewire-0:ro   as the application seems functional without it.
+- Removed permission   '- --filesystem=xdg-run/pipewire-0:ro'   as the application seems functional without it.
 - Changed the default screenshot to reflect the current version of the application including the Nature Ambient Sound Toolbar
 - Various code improvements and UI polish
 

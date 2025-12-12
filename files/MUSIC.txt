@@ -1,0 +1,8 @@
+Please place all your music files in this directory.
+
+Alternatively you may wish to create a symbolic link from 
+~/Music    to   ~/Documents/BinauralPlayer/music/Music
+
+If you wish to create this symbolic link please open a terminal and run 
+
+ln -s ~/Music ~/Documents/BinauralPlayer/music/Music
