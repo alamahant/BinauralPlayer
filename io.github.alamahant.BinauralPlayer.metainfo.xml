@@ -53,7 +53,7 @@
     <ul>
       <li>Custom toolbars: Media (Blue), Binaural (Purple), Nature (Green)</li>
       <li>Split status bar for media and brainwave engine status</li>
-      <li>Icon set with 291 SVG icons</li>
+
       <li>Responsive layout with graceful resizing</li>
       <li>Safety warnings on first launch and brainwave activation</li>
     </ul>
@@ -65,11 +65,24 @@
   <screenshots>
     <screenshot type="default">
       <caption>Main interface with media and brainwave controls</caption>
-      <image>https://raw.githubusercontent.com/alamahant/BinauralPlayer/master/screenshots/main.png</image>
+      <image>https://raw.githubusercontent.com/alamahant/BinauralPlayer/master/screenshots/full.png</image>
     </screenshot>
   </screenshots>
 
   <releases>
+
+<release version="1.1.0" date="2025-12-13">
+      <description>
+        <p>Release v1.1.0:</p>
+        <ul>
+          <li>Nature Ambient Sounds Toolbar – ambient sound mixer with 5 independent players</li>
+          <li>Bottom-right info button for track metadata display</li>
+          <li>Removed permission pipewire-0 from the manifest as the application seems functional without it</li>
+          <li>Changed the default screenshot to reflect the current version of the application including the Nature Ambient Sound Toolbar</li>
+          <li>Various code improvements and UI polish</li>
+        </ul>
+      </description>
+</release>
 
     <release version="1.0.0" date="2025-12-08">
       <description>
@@ -83,6 +96,8 @@
         </ul>
       </description>
     </release>
+
+
 
   </releases>
 
