@@ -789,8 +789,11 @@ void MainWindow::setupConnections()
     connect(m_mediaPlayer, &QMediaPlayer::positionChanged,
                this, &MainWindow::onPositionChanged);
     // Connect seek slider
-    connect(m_seekSlider, &QSlider::sliderMoved,
-            this, &MainWindow::onSeekSliderMoved);
+    //connect(m_seekSlider, &QSlider::sliderMoved,
+      //      this, &MainWindow::onSeekSliderMoved);
+    connect(m_seekSlider, &QSlider::sliderReleased,
+            this, &MainWindow::onSeekSliderReleased);
+
     //connect(volumeIcon, &QPushButton::clicked, this, &MainWindow::onMuteButtonClicked);
 
     connect(m_mediaPlayer, &QMediaPlayer::metaDataChanged,
@@ -1770,6 +1773,12 @@ void MainWindow::onSeekSliderMoved(int value)
             .arg(minutes, 2, 10, QChar('0'))
             .arg(seconds, 2, 10, QChar('0'))
     );
+}
+
+void MainWindow::onSeekSliderReleased()
+{
+    int value = m_seekSlider->value();
+    m_mediaPlayer->setPosition(value * 1000);
 }
 
 /*

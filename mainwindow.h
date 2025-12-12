@@ -338,7 +338,7 @@ private slots:
     void saveAmbientPreset(const QString& presetName);
     void loadAmbientPreset(const QString& presetName);
     void resetAllPlayersToDefaults();
-
+    void onSeekSliderReleased();
 private:
     QStringList getAvailablePresets() const;
     QPushButton *openAmbientPresetButton;
