@@ -12,12 +12,14 @@ int main(int argc, char *argv[])
     QDir().mkpath(ConstantGlobals::presetFilePath);
     QDir().mkpath(ConstantGlobals::playlistFilePath);
     QDir().mkpath(ConstantGlobals::musicFilePath);
+    QDir().mkpath(ConstantGlobals::ambientPresetFilePath);
 
     QApplication::setApplicationName("BinauralPlayer");
     QApplication::setOrganizationName("Alamahant");
-    QApplication::setApplicationVersion("1.0.0");
+    QApplication::setApplicationVersion("1.1.0");
     QApplication a(argc, argv);
     MainWindow w;
+
     w.show();
     //open with
     if (argc == 2) {

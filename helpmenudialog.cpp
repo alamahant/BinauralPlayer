@@ -204,7 +204,137 @@ QString HelpMenuDialog::getBestPracticesContent()
 
 QString HelpMenuDialog::getWhatsNewContent()
 {
-    return QString();  // TODO: Implement
+    return R"(
+        <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #2c3e50;">
+            <h1 style="color: #8e44ad; text-align: center; margin-bottom: 20px;">🌳 What's New - Nature Toolbar</h1>
+
+            <div style="background-color: #ecf0f1; padding: 15px; border-radius: 8px; margin-bottom: 25px;">
+                <h2 style="color: #2c3e50; margin-top: 0;">Introducing the Ambient Sound Control System</h2>
+                <p>A powerful new feature that lets you create and control layered nature soundscapes
+                for relaxation, focus, meditation, and atmospheric enhancement.</p>
+            </div>
+
+            <h2 style="color: #2E8B57; border-bottom: 2px solid #2E8B57; padding-bottom: 5px;">🌿 Nature Toolbar Features</h2>
+
+            <div style="margin: 20px 0;">
+                <h3 style="color: #2E8B57;">🎚️ 5-Channel Ambient Mixer</h3>
+                <p>Five independent sound players that can run simultaneously. Create complex sound environments
+                by mixing rain, forest, thunder, ocean, and more.</p>
+
+                <h3 style="color: #2E8B57;">🔘 Global Power Control</h3>
+                <p>Single power button to enable/disable all nature sounds at once. Perfect for quick mute
+                or instant atmosphere activation.</p>
+
+                <h3 style="color: #2E8B57;">⏯️ Master Transport Controls</h3>
+                <p>Play, pause, and stop ALL active nature sounds simultaneously. Color-coded buttons provide
+                clear visual feedback: green (play), orange (pause), red (stop).</p>
+
+                <h3 style="color: #2E8B57;">🎛️ Individual Player Buttons</h3>
+                <p>Each channel has its own button showing name, state, and status. Single-click toggles
+                play/pause. Color indicates status: green (playing), orange (paused), gray (disabled).</p>
+
+                <h3 style="color: #2E8B57;">📊 Master Volume Control</h3>
+                <p>Slider controls overall ambient sound level with perceptual volume curve for natural
+                human hearing response.</p>
+            </div>
+
+            <h2 style="color: #9b59b6; border-bottom: 2px solid #9b59b6; padding-bottom: 5px;">💾 Preset System</h2>
+
+            <div style="margin: 20px 0;">
+                <h3 style="color: #9b59b6;">💽 Save Configurations</h3>
+                <p>Store complete sound setups including audio files, volumes, names, and enabled states.</p>
+
+                <h3 style="color: #9b59b6;">📂 Load Presets</h3>
+                <p>Quickly switch between saved environments like "Rainy Forest", "Ocean Waves", or "Focus Study".</p>
+
+                <h3 style="color: #9b59b6;">🔄 Reset Function</h3>
+                <p>One-click restoration to default settings with confirmation dialog for safety.</p>
+            </div>
+
+            <h2 style="color: #e67e22; border-bottom: 2px solid #e67e22; padding-bottom: 5px;">🎵 Player Capabilities</h2>
+
+            <div style="margin: 20px 0;">
+                <h3 style="color: #e67e22;">🎧 Multi-Format Audio</h3>
+                <p>Supports MP3, WAV, OGG, FLAC, and M4A files with integrated file browser.</p>
+
+                <h3 style="color: #e67e22;">🔤 Custom Naming</h3>
+                <p>Give each channel descriptive names up to 10 characters (e.g., "Rain", "Birds", "Thunder").</p>
+
+                <h3 style="color: #e67e22;">🔁 Auto-Repeat</h3>
+                <p>Loop audio files seamlessly for continuous background ambience.</p>
+
+                <h3 style="color: #e67e22;">📏 Individual Volume</h3>
+                <p>Fine-tune each channel's volume independently (0-100%).</p>
+
+                <h3 style="color: #e67e22;">⏱️ Progress Tracking</h3>
+                <p>See playback progress with seek capability in detailed settings dialog.</p>
+            </div>
+
+            <h2 style="color: #3498db; border-bottom: 2px solid #3498db; padding-bottom: 5px;">🖥️ Interface Design</h2>
+
+            <div style="margin: 20px 0;">
+                <h3 style="color: #3498db;">🎨 Non-Destructive Dialogs</h3>
+                <p>Player settings dialogs hide instead of close, preserving your configuration state.</p>
+
+                <h3 style="color: #3498db;">👁️ Visual Status Indicators</h3>
+                <p>Buttons show real-time status with icons and colors for instant recognition.</p>
+
+                <h3 style="color: #3498db;">🔍 Tooltip Guidance</h3>
+                <p>All controls have descriptive tooltips explaining their function.</p>
+
+                <h3 style="color: #3498db;">📱 Responsive Layout</h3>
+                <p>Clean toolbar design that integrates seamlessly with existing interface.</p>
+            </div>
+
+            <h2 style="color: #1abc9c; border-bottom: 2px solid #1abc9c; padding-bottom: 5px;">🚀 Quick Start Guide</h2>
+
+            <div style="margin: 20px 0;">
+                <h3 style="color: #1abc9c;">⚡ Getting Started</h3>
+                <ol style="margin-left: 20px; padding-left: 0;">
+                    <li><strong>Power On</strong>: Click the ○ button to activate the system</li>
+                    <li><strong>Add Sounds</strong>: Click any player button (P1-P5) to open settings</li>
+                    <li><strong>Browse Files</strong>: Select nature sound files for each channel</li>
+                    <li><strong>Customize Names</strong>: Give descriptive names to each channel</li>
+                    <li><strong>Adjust Volumes</strong>: Set levels to create your perfect mix</li>
+                    <li><strong>Control Playback</strong>: Use master controls or click individual buttons</li>
+                </ol>
+
+
+ <h3 style="color: #1abc9c;">🎵 Download Nature Sounds</h3>
+                <p>Get high-quality, royalty-free ambient sounds from:</p>
+                <div style="background-color: #f0f9ff; padding: 15px; border-radius: 8px; border-left: 4px solid #3498db; margin: 15px 0;">
+                    <p><strong>🌐 Pixabay Sound Effects:</strong> <a href="https://pixabay.com/sound-effects/search/nature/" style="color: #3498db; text-decoration: none;">https://pixabay.com/sound-effects/search/nature/</a></p>
+                    <p>After downloading, place your audio files in:</p>
+                    <div style="background-color: #e8f4f8; padding: 10px; border-radius: 6px; font-family: monospace; margin: 10px 0;">
+                        ~/Documents/BinauralPlayer/ambient-tracks/
+                    </div>
+                    <p>Recommended downloads:</p>
+                    <ul style="margin-left: 20px; padding-left: 0;">
+                        <li>Rain & Thunderstorms</li>
+                        <li>Forest & Birds</li>
+                        <li>Ocean Waves</li>
+                        <li>Streams & Rivers</li>
+                        <li>Wind & Nature Ambience</li>
+                    </ul>
+                    <p style="font-style: italic; margin-top: 10px;">💡 <strong>Tip:</strong> The ambient player will automatically look for files in this directory when browsing!</p>
+                </div>
+
+                <h3 style="color: #1abc9c;">💡 Pro Tips</h3>
+                <ul style="margin-left: 20px; padding-left: 0;">
+                    <li>Start with 2-3 complementary sounds for best results</li>
+                    <li>Save your favorite mixes as presets for quick access</li>
+                    <li>Use the power button for instant silence during calls</li>
+                    <li>Combine with binaural beats for enhanced meditation</li>
+                </ul>
+            </div>
+
+            <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; text-align: center; margin-top: 30px;">
+                <h3 style="color: #2c3e50; margin-top: 0;">🌟 Transform Your Audio Environment</h3>
+                <p style="margin-bottom: 0;">The Nature Toolbar brings professional ambient sound control to your fingertips.
+                Create your perfect soundscape for relaxation, focus, or atmospheric enhancement in minutes!</p>
+            </div>
+        </div>
+    )";
 }
 
 QString HelpMenuDialog::getShortcutsContent()

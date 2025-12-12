@@ -42,6 +42,12 @@ MainWindow::MainWindow(QWidget *parent)
     , m_currentPlaylistName("")
     , m_isStream(false)
     , m_currentStreamUrl("")
+    , m_masterPlayButton(nullptr)
+    , m_masterPauseButton(nullptr)
+    , m_masterStopButton(nullptr)
+    , m_masterVolumeSlider(nullptr)
+    , m_masterVolumeLabel(nullptr)
+    , m_naturePowerButton(nullptr)
 {
     // Window properties
     setWindowTitle("Binaural Media Player");
@@ -51,12 +57,15 @@ MainWindow::MainWindow(QWidget *parent)
     // Initialize audio engines
     //initializeAudioEngines();
 
+    setupAmbientPlayers();
+
+
     // Create toolbars
     m_mediaToolbar = createMediaToolbar();
     m_binauralToolbar = createBinauralToolbar();
     m_binauralToolbarExt = createBinauralToolbarExt();
     m_natureToolbar = createNatureToolbar();
-    m_natureToolbar->setVisible(false);
+    //m_natureToolbar->setVisible(false);
     // Add toolbars to window
     addToolBar(Qt::TopToolBarArea, m_mediaToolbar);
     addToolBarBreak(Qt::TopToolBarArea);
@@ -65,6 +74,7 @@ MainWindow::MainWindow(QWidget *parent)
     addToolBar(Qt::TopToolBarArea, m_binauralToolbarExt);
     addToolBarBreak(Qt::TopToolBarArea);
     addToolBar(Qt::TopToolBarArea, m_natureToolbar);
+
 
     // Create central widget and layout
     setupLayout();
@@ -109,12 +119,12 @@ MainWindow::MainWindow(QWidget *parent)
     statusBar()->showMessage("Ready to play");
     showFirstLaunchWarning();
     createInfoDialog();
-
+    onNaturePowerToggled(false);
+    copyUserFiles();
 }
 
 MainWindow::~MainWindow()
 {
-    // Optional - but good practice to stop explicitly
        if(m_binauralEngine && m_binauralEngine->isPlaying()) {
            m_binauralEngine->stop();
        }
@@ -124,6 +134,12 @@ MainWindow::~MainWindow()
        if(m_mediaPlayer && m_mediaPlayer->isPlaying()) {
                m_mediaPlayer->stop();
            }
+       // Delete all dialogs
+           qDeleteAll(m_playerDialogs);
+           m_playerDialogs.clear();
+
+           // Delete all players (they're parented to MainWindow, auto-delete)
+           m_ambientPlayers.clear();
 }
 
 // =================== TOOLBAR CREATION METHODS ===================
@@ -243,8 +259,6 @@ QToolBar *MainWindow::createMediaToolbar()
     //toolbar->addWidget(m_totalTimeLabel);
     //toolbar->addSeparator();
 
-
-
     return toolbar;
 }
 
@@ -273,7 +287,7 @@ QToolBar *MainWindow::createBinauralToolbar()
     m_binauralPowerButton->setMaximumWidth(30);
     toolbar->addWidget(m_binauralPowerButton);
 
-    toolbar->addSeparator();
+    //toolbar->addSeparator();
 
     // Left frequency
     QLabel *leftLabel = new QLabel("L:", toolbar);
@@ -333,12 +347,12 @@ QToolBar *MainWindow::createBinauralToolbar()
     m_waveformCombo->addItem("Square");
     m_waveformCombo->addItem("Triangle");
     m_waveformCombo->addItem("Sawtooth");
-    m_waveformCombo->setMaximumWidth(80);
+    m_waveformCombo->setMaximumWidth(90);
     m_waveformCombo->setToolTip("Waveform type");
     m_waveformCombo->setEnabled(false);
     toolbar->addWidget(m_waveformCombo);
 
-    toolbar->addSeparator();
+    //toolbar->addSeparator();
 
     // Volume control
     QLabel *volLabel = new QLabel("Vol:", toolbar);
@@ -357,52 +371,6 @@ QToolBar *MainWindow::createBinauralToolbar()
 
     toolbar->addSeparator();
 
-    // Playback controls
-    /*
-    m_binauralPlayButton = new QPushButton(toolbar);
-    m_binauralPlayButton->setIcon(QIcon(":/icons/play.svg"));
-    m_binauralPlayButton->setMaximumWidth(30);
-    m_binauralPlayButton->setToolTip("Start binaural tones");
-    m_binauralPlayButton->setEnabled(false);
-    toolbar->addWidget(m_binauralPlayButton);
-
-    m_binauralStopButton = new QPushButton(toolbar);
-    m_binauralStopButton->setIcon(QIcon(":/icons/square.svg"));
-
-    m_binauralStopButton->setMaximumWidth(30);
-    m_binauralStopButton->setToolTip("Stop binaural tones");
-    m_binauralStopButton->setEnabled(false);
-    toolbar->addWidget(m_binauralStopButton);
-    //timer
-    toolbar->addSeparator();
-
-    // Duration label
-    QLabel *durationLabel = new QLabel("Timer:", toolbar);
-    durationLabel->setToolTip("Auto-stop after selected duration");
-    toolbar->addWidget(durationLabel);
-
-    // Duration selector
-    m_brainwaveDuration = new QSpinBox(toolbar);
-    m_brainwaveDuration->setRange(1, 45);
-    m_brainwaveDuration->setValue(45);
-    m_brainwaveDuration->setSuffix(" min");
-    m_brainwaveDuration->setMaximumWidth(70);
-    m_brainwaveDuration->setToolTip("Auto-stop brainwave audio after X minutes (1-45)");
-    m_brainwaveDuration->setEnabled(false); // Enabled when binaural power is on
-    toolbar->addWidget(m_brainwaveDuration);
-
-    // Countdown display (optional, shows remaining time)
-    m_countdownLabel = new QLabel("--:--", toolbar);
-    m_countdownLabel->setMinimumWidth(50);
-    m_countdownLabel->setAlignment(Qt::AlignCenter);
-    m_countdownLabel->setStyleSheet(
-        "background-color: #f0f0f0; padding: 3px; border: 1px solid #ccc; "
-        "border-radius: 3px; color: #7B68EE;"
-    );
-    m_countdownLabel->setToolTip("Time remaining until auto-stop");
-    m_countdownLabel->setVisible(true); // Only show when timer is active
-    toolbar->addWidget(m_countdownLabel);
-    */
 
     return toolbar;
 }
@@ -428,6 +396,36 @@ QToolBar *MainWindow::createBinauralToolbarExt()
 
     connect(tbarSavePresetButton, &QPushButton::clicked, this, &MainWindow::onSavePresetClicked);
     toolbar->addWidget(tbarSavePresetButton);
+
+    tbarResetBinauralSettingsButton = new QPushButton(toolbar);
+    tbarResetBinauralSettingsButton->setIcon(QIcon(":/icons/refresh-cw.svg"));
+    tbarResetBinauralSettingsButton->setToolTip("Reset Brainwave settings to default");
+    toolbar->addWidget(tbarResetBinauralSettingsButton);
+    connect(tbarResetBinauralSettingsButton, &QPushButton::clicked, this, [this]{
+        if (m_binauralEngine && m_binauralEngine->isPlaying()) {
+            QMessageBox::StandardButton reply;
+            reply = QMessageBox::question(this,
+                                          tr("Binaural Engine Active"),
+                                          tr("Binaural engine is playing.\nStop and proceed?"),
+                                          QMessageBox::Ok | QMessageBox::Cancel,
+                                          QMessageBox::Cancel);
+
+            if (reply == QMessageBox::Cancel) {
+                return; // User canceled, don't proceed
+            }
+
+            // User clicked OK, stop the engine
+            m_binauralEngine->stop();
+        }
+        toneTypeCombo->setCurrentIndex(0); // Binaural
+        m_leftFreqInput->setValue(360.0);
+        m_rightFreqInput->setValue(367.83);
+        m_waveformCombo->setCurrentIndex(0); // Sine
+        m_pulseFreqLabel->setValue(7.83);
+        m_binauralVolumeInput->setValue(15.0);
+        updateBinauralBeatDisplay();
+        statusBar()->showMessage("Brainwave settings reset to defaults", 3000);
+    });
     toolbar->addSeparator();
 
     // Playback controls
@@ -449,7 +447,7 @@ QToolBar *MainWindow::createBinauralToolbarExt()
     m_binauralStopButton->setEnabled(false);
     toolbar->addWidget(m_binauralStopButton);
     //timer
-    toolbar->addSeparator();
+    //toolbar->addSeparator();
 
     // Duration label
     QLabel *durationLabel = new QLabel("Timer:", toolbar);
@@ -482,77 +480,143 @@ QToolBar *MainWindow::createBinauralToolbarExt()
     return toolbar;
 }
 
-
-
 QToolBar *MainWindow::createNatureToolbar()
 {
     QToolBar *toolbar = new QToolBar("Nature Sounds", this);
     toolbar->setMovable(false);
     toolbar->setIconSize(QSize(24, 24));
-
-    // Label
-    QLabel *titleLabel = new QLabel("🌳 NATURE", toolbar);
+    //toolbar->setMinimumHeight(40);
+    // ----- SECTION 1: TITLE -----
+    QLabel *titleLabel = new QLabel("🌳 AMBIENCE", toolbar);
+    titleLabel->setStyleSheet("QLabel { font-weight: bold; color: #2E8B57; }");
     toolbar->addWidget(titleLabel);
     toolbar->addSeparator();
 
-    // Power toggle
-    m_naturePowerButton = new QPushButton("●", toolbar);
+    // ----- POWER BUTTON (ADD THIS SECTION) -----
+    m_naturePowerButton = new QPushButton("○", toolbar);  // Start OFF (○)
     m_naturePowerButton->setCheckable(true);
-    m_naturePowerButton->setToolTip("Enable/disable nature sounds");
+    m_naturePowerButton->setChecked(false);  // Start unchecked
+    m_naturePowerButton->setToolTip("Enable/disable ALL nature sounds");
     m_naturePowerButton->setMaximumWidth(30);
+    m_naturePowerButton->setStyleSheet("QPushButton { color: #888888; }");
     toolbar->addWidget(m_naturePowerButton);
+    toolbar->addSeparator();
+
+
+    //
+    openAmbientPresetButton = new QPushButton(toolbar);
+    openAmbientPresetButton->setToolTip("Load Preset");
+    openAmbientPresetButton->setIcon(QIcon(":/icons/folder.svg"));
+
+    connect(openAmbientPresetButton, &QPushButton::clicked, this, [this]{
+        loadAmbientPreset("");
+    });
+    toolbar->addWidget(openAmbientPresetButton);
+
+    saveAmbientPresetButton = new QPushButton(toolbar);
+    saveAmbientPresetButton->setToolTip("Save Preset");
+    saveAmbientPresetButton->setIcon(QIcon(":/icons/save.svg"));
+
+    connect(saveAmbientPresetButton, &QPushButton::clicked, this, [this]{
+        saveAmbientPreset("");
+    });
+    toolbar->addWidget(saveAmbientPresetButton);
+
+    resetPlayersButton = new QPushButton(toolbar);
+    resetPlayersButton->setToolTip("Reset all players to defaults");
+    resetPlayersButton->setIcon(QIcon(":/icons/refresh-cw.svg"));
+    resetPlayersButton->setEnabled(false);
+    connect(resetPlayersButton, &QPushButton::clicked, this, [this]{
+        // Confirm with user
+        QMessageBox::StandardButton reply = QMessageBox::question(
+            this,
+            "Reset All Players",
+            "Reset all ambient players to default settings?\n\n"
+            "This will clear all audio files and reset volumes.",
+            QMessageBox::Yes | QMessageBox::No
+        );
+
+        if (reply == QMessageBox::Yes) {
+            resetAllPlayersToDefaults();
+        }
+    });
+    toolbar->addWidget(resetPlayersButton);
+
+    toolbar->addSeparator();
+    //
+
+    // ----- SECTION 2: MASTER TRANSPORT CONTROLS -----
+    QLabel *masterLabel = new QLabel(toolbar);
+    //toolbar->addWidget(masterLabel);
+
+    m_masterPlayButton = new QPushButton("▶", toolbar);
+    m_masterPlayButton->setToolTip("Play all ON nature sounds");
+    m_masterPlayButton->setMaximumWidth(30);
+    m_masterPlayButton->setStyleSheet("QPushButton { font-weight: bold; color: #2E8B57; }");
+    m_masterPlayButton->setEnabled(false);
+    toolbar->addWidget(m_masterPlayButton);
+
+    m_masterPauseButton = new QPushButton("❚❚", toolbar);
+    m_masterPauseButton->setToolTip("Pause all ON nature sounds");
+    m_masterPauseButton->setMaximumWidth(30);
+    m_masterPauseButton->setStyleSheet("QPushButton { font-weight: bold; color: #FF8C00; }");
+    m_masterPauseButton->setEnabled(false);
+
+    toolbar->addWidget(m_masterPauseButton);
+
+    m_masterStopButton = new QPushButton("■", toolbar);
+    m_masterStopButton->setToolTip("Stop all ON nature sounds");
+    m_masterStopButton->setMaximumWidth(30);
+    m_masterStopButton->setStyleSheet("QPushButton { font-weight: bold; color: #DC143C; }");
+    m_masterStopButton->setEnabled(false);
+
+    toolbar->addWidget(m_masterStopButton);
 
     toolbar->addSeparator();
 
-    // Nature sound buttons
-    m_oceanButton = new QPushButton("Ocean", toolbar);
-    m_oceanButton->setToolTip("Ocean waves sound");
-    m_oceanButton->setEnabled(false);
-    toolbar->addWidget(m_oceanButton);
+    // ----- SECTION 3: AMBIENT PLAYER BUTTONS -----
+    QLabel *playersLabel = new QLabel(toolbar);
+    //toolbar->addWidget(playersLabel);
 
-    m_forestButton = new QPushButton("Forest", toolbar);
-    m_forestButton->setToolTip("Forest birds sound");
-    m_forestButton->setEnabled(false);
-    toolbar->addWidget(m_forestButton);
-
-    m_rainButton = new QPushButton("Rain", toolbar);
-    m_rainButton->setToolTip("Rain storm sound");
-    m_rainButton->setEnabled(false);
-    toolbar->addWidget(m_rainButton);
-
-    m_fireButton = new QPushButton("Fire", toolbar);
-    m_fireButton->setToolTip("Crackling fire sound");
-    m_fireButton->setEnabled(false);
-    toolbar->addWidget(m_fireButton);
-
-    m_streamButton = new QPushButton("Stream", toolbar);
-    m_streamButton->setToolTip("Mountain stream sound");
-    m_streamButton->setEnabled(false);
-    toolbar->addWidget(m_streamButton);
+    // Add all 5 ambient player buttons
+    if (!m_ambientPlayers.isEmpty()) {
+        QStringList playerOrder = {"player1", "player2", "player3", "player4", "player5"};
+        for (const QString& key : playerOrder) {
+            if (m_ambientPlayers.contains(key)) {
+                toolbar->addWidget(m_ambientPlayers[key]->button());
+            }
+        }
+    } else {
+        // Fallback: create placeholder buttons if map is empty
+        for (int i = 1; i <= 5; i++) {
+            QPushButton* placeholder = new QPushButton(QString("P%1").arg(i), toolbar);
+            placeholder->setEnabled(false);
+            placeholder->setStyleSheet("QPushButton { color: gray; }");
+            toolbar->addWidget(placeholder);
+        }
+    }
 
     toolbar->addSeparator();
 
-    // Volume control
-    QLabel *volLabel = new QLabel("Vol:", toolbar);
-    toolbar->addWidget(volLabel);
+    // ----- SECTION 4: MASTER VOLUME -----
+    QLabel *volumeLabel = new QLabel("VOL:", toolbar);
+    volumeLabel->setVisible(false);
+    toolbar->addWidget(volumeLabel);
 
-    m_natureVolumeInput = new QDoubleSpinBox(toolbar);
-    m_natureVolumeInput->setRange(0.0, 100.0);
-    m_natureVolumeInput->setValue(40.0);
-    m_natureVolumeInput->setDecimals(1);
-    m_natureVolumeInput->setSuffix("%");
-    m_natureVolumeInput->setMaximumWidth(70);
-    m_natureVolumeInput->setToolTip("Nature sounds volume (0-100%)");
-    m_natureVolumeInput->setEnabled(false);
-    toolbar->addWidget(m_natureVolumeInput);
+    m_masterVolumeSlider = new QSlider(Qt::Horizontal, toolbar);
+    m_masterVolumeSlider->setVisible(false);
 
-    toolbar->addSeparator();
+    m_masterVolumeSlider->setRange(0, 100);
+    m_masterVolumeSlider->setValue(100);
+    m_masterVolumeSlider->setMaximumWidth(100);
+    m_masterVolumeSlider->setToolTip("Master volume for all ON nature sounds (0-100%)");
+    toolbar->addWidget(m_masterVolumeSlider);
 
-    // Stop button
-    m_natureStopButton = new QPushButton("Stop", toolbar);
-    m_natureStopButton->setToolTip("Stop all nature sounds");
-    m_natureStopButton->setEnabled(false);
-    toolbar->addWidget(m_natureStopButton);
+    m_masterVolumeLabel = new QLabel("100%", toolbar);
+    m_masterVolumeLabel->setMinimumWidth(40);
+    m_masterVolumeLabel->setAlignment(Qt::AlignRight);
+    m_masterVolumeLabel->setVisible(false);
+    toolbar->addWidget(m_masterVolumeLabel);
 
     return toolbar;
 }
@@ -652,19 +716,19 @@ void MainWindow::setupLayout()
     playlistButtonLayout->setSpacing(5);
 
     m_addFilesButton = new QPushButton("Load Music", this);
-    m_addFilesButton->setMinimumWidth(80);
+    //m_addFilesButton->setMinimumWidth(80);
     //m_addFilesButton->setIcon(QIcon(":/icons/plus.svg"));
     m_addFilesButton->setToolTip("Load Music Files");
-    m_removeTrackButton = new QPushButton(this);
-    m_removeTrackButton->setMinimumWidth(60);
-    m_removeTrackButton->setIcon(QIcon(":/icons/file-minus.svg"));
+    m_removeTrackButton = new QPushButton("Remove Selected", this);
+    //m_removeTrackButton->setMinimumWidth(60);
+    //m_removeTrackButton->setIcon(QIcon(":/icons/file-minus.svg"));
 
     m_removeTrackButton->setToolTip("Remove Selected Track");
 
-    m_clearPlaylistButton = new QPushButton(this);
-    m_clearPlaylistButton->setMinimumWidth(60);
-    m_clearPlaylistButton->setIcon(QIcon(":/icons/folder-minus.svg"));
-    m_clearPlaylistButton->setToolTip("Clear Playlist");
+    m_clearPlaylistButton = new QPushButton("Clear Playlist", this);
+    //m_clearPlaylistButton->setMinimumWidth(60);
+    //m_clearPlaylistButton->setIcon(QIcon(":/icons/folder-minus.svg"));
+    m_clearPlaylistButton->setToolTip("Clear Currently Opened Playlist");
 
     m_trackInfoButton  = new QPushButton(this);
     m_trackInfoButton->setCheckable(true);
@@ -687,12 +751,6 @@ void MainWindow::setupLayout()
     playlistButtonLayout->addWidget(m_totalTimeLabel);
     playlistButtonLayout->addWidget(m_trackInfoButton);
     mainLayout->addLayout(playlistButtonLayout);
-
-    // Connect new playlist management signals
-    //connect(addPlaylistBtn, &QPushButton::clicked, this, &MainWindow::onAddNewPlaylistClicked);
-    //connect(renamePlaylistBtn, &QPushButton::clicked, this, &MainWindow::onRenamePlaylistClicked);
-    //connect(m_playlistTabs, &QTabWidget::tabCloseRequested, this, &MainWindow::onClosePlaylistTab);
-    //connect(m_playlistTabs, &QTabWidget::currentChanged, this, &MainWindow::onPlaylistTabChanged);
 }
 
 
@@ -757,16 +815,17 @@ void MainWindow::setupConnections()
         m_binauralEngine->setPulseFrequency(hz);
         m_binauralStatusLabel->setText(formatBinauralString());
     });
-    // Nature sounds connections
+
+    //nature toolbar connections
+    connect(m_masterPlayButton, &QPushButton::clicked,
+            this, &MainWindow::onMasterPlayClicked);
+    connect(m_masterPauseButton, &QPushButton::clicked,
+            this, &MainWindow::onMasterPauseClicked);
+    connect(m_masterStopButton, &QPushButton::clicked,
+            this, &MainWindow::onMasterStopClicked);
+    connect(m_masterVolumeSlider, &QSlider::valueChanged,
+            this, &MainWindow::onMasterVolumeChanged);
     connect(m_naturePowerButton, &QPushButton::toggled, this, &MainWindow::onNaturePowerToggled);
-    connect(m_oceanButton, &QPushButton::clicked, this, &MainWindow::onOceanClicked);
-    connect(m_forestButton, &QPushButton::clicked, this, &MainWindow::onForestClicked);
-    connect(m_rainButton, &QPushButton::clicked, this, &MainWindow::onRainClicked);
-    connect(m_fireButton, &QPushButton::clicked, this, &MainWindow::onFireClicked);
-    connect(m_streamButton, &QPushButton::clicked, this, &MainWindow::onStreamClicked);
-    connect(m_natureVolumeInput, QOverload<double>::of(&QDoubleSpinBox::valueChanged),
-            this, &MainWindow::onNatureVolumeChanged);
-    connect(m_natureStopButton, &QPushButton::clicked, this, &MainWindow::onNatureStopClicked);
 
     // Playlist connections
     connect(m_addFilesButton, &QPushButton::clicked, this, &MainWindow::onAddFilesClicked);
@@ -869,6 +928,9 @@ void MainWindow::updateBinauralPowerState(bool enabled)
     m_binauralStopButton->setEnabled(enabled);
     tbarOpenPresetButton->setEnabled(enabled);
     tbarSavePresetButton->setEnabled(enabled);
+    tbarOpenPresetButton->setEnabled(enabled);
+    tbarSavePresetButton->setEnabled(enabled);
+    tbarResetBinauralSettingsButton->setEnabled(enabled);
     // Update power button text
     m_binauralPowerButton->setText(enabled ? "●" : "○");
     m_binauralPowerButton->setStyleSheet(
@@ -885,21 +947,27 @@ void MainWindow::updateBinauralPowerState(bool enabled)
 
 void MainWindow::updateNaturePowerState(bool enabled)
 {
-    m_oceanButton->setEnabled(enabled);
-    m_forestButton->setEnabled(enabled);
-    m_rainButton->setEnabled(enabled);
-    m_fireButton->setEnabled(enabled);
-    m_streamButton->setEnabled(enabled);
-    m_natureVolumeInput->setEnabled(enabled);
-    m_natureStopButton->setEnabled(enabled);
 
-    // Update power button text
-    m_naturePowerButton->setText(enabled ? "●" : "○");
-    m_naturePowerButton->setStyleSheet(
-        enabled ? "color: #00FF00; font-weight: bold;" : "color: #888888;"
-    );
+    // 1. Update power button appearance
+    if (m_naturePowerButton) {
+        m_naturePowerButton->setText(enabled ? "●" : "○");
+        m_naturePowerButton->setStyleSheet(
+            enabled ? "QPushButton { color: #32CD32; font-weight: bold; }"
+                    : "QPushButton { color: #888888; }"
+        );
+    }
+
+    // 2. Enable/disable ALL ambient players
+    for (AmbientPlayer* player : std::as_const(m_ambientPlayers)) {
+        if (player) {
+            player->setEnabled(enabled);
+        }
+    }
+
+    // 3. Update player buttons in toolbar (they should auto-update via AmbientPlayer)
+    // No action needed - AmbientPlayer handles its own button updates
+
 }
-
 // =================== SLOT IMPLEMENTATIONS ===================
 
 // Media player slots
@@ -1116,30 +1184,65 @@ void MainWindow::onBinauralStopClicked()
 }
 
 // Nature sounds slots
+/*
 void MainWindow::onNaturePowerToggled(bool checked)
 {
+
+    // Update the power state
     updateNaturePowerState(checked);
+
+    // Update status bar
     statusBar()->showMessage(checked ? "Nature sounds enabled" : "Nature sounds disabled");
+
+    // If turning ON, also update master controls appearance
+    if (checked) {
+        // Force update of master control enabled states
+        bool hasEnabledPlayers = false;
+        for (AmbientPlayer* player : std::as_const(m_ambientPlayers)) {
+            if (player && player->isEnabled()) {
+                hasEnabledPlayers = true;
+                break;
+            }
+        }
+
+        // Enable master controls if any player is enabled
+        if (m_masterPlayButton) m_masterPlayButton->setEnabled(hasEnabledPlayers);
+        if (m_masterPauseButton) m_masterPauseButton->setEnabled(hasEnabledPlayers);
+        if (m_masterStopButton) m_masterStopButton->setEnabled(hasEnabledPlayers);
+        //if (m_masterVolumeSlider) m_masterVolumeSlider->setEnabled(hasEnabledPlayers);
+        //if (m_masterVolumeLabel) m_masterVolumeLabel->setEnabled(hasEnabledPlayers);
+    }
 }
+*/
 
-void MainWindow::onOceanClicked() { statusBar()->showMessage("Playing: Ocean waves"); }
-void MainWindow::onForestClicked() { statusBar()->showMessage("Playing: Forest birds"); }
-void MainWindow::onRainClicked() { statusBar()->showMessage("Playing: Rain storm"); }
-void MainWindow::onFireClicked() { statusBar()->showMessage("Playing: Crackling fire"); }
-void MainWindow::onStreamClicked() { statusBar()->showMessage("Playing: Mountain stream"); }
-
-void MainWindow::onNatureVolumeChanged(double value)
+void MainWindow::onNaturePowerToggled(bool checked)
 {
-    // TODO: Connect to nature sounds engine
-    statusBar()->showMessage(QString("Nature volume: %1%").arg(value));
+
+    // Update the power state
+    updateNaturePowerState(checked);
+
+    // Update status bar
+    statusBar()->showMessage(checked ? "Nature sounds enabled" : "Nature sounds disabled");
+
+    // Enable/disable all nature toolbar widgets based on power state
+    openAmbientPresetButton->setEnabled(checked);
+    saveAmbientPresetButton->setEnabled(checked);
+    resetPlayersButton->setEnabled(checked);
+    m_masterPlayButton->setEnabled(checked);
+    m_masterPauseButton->setEnabled(checked);
+    m_masterStopButton->setEnabled(checked);
+
+    // Enable/disable player buttons
+    // Since m_ambientPlayers is a QMap<QString, AmbientPlayer*>
+    for (auto it = m_ambientPlayers.begin(); it != m_ambientPlayers.end(); ++it) {
+        AmbientPlayer* player = it.value();
+        if (player && player->button()) {
+            player->button()->setEnabled(checked);
+        }
+    }
 }
 
-void MainWindow::onNatureStopClicked()
-{
-    // TODO: Stop all nature sounds
-    statusBar()->showMessage("Nature sounds stopped");
-}
-
+\
 // Playlist slots
 void MainWindow::onAddFilesClicked() { onLoadMusicClicked(); } // Reuse same functionality
 
@@ -1298,8 +1401,6 @@ void MainWindow::startAutoStopTimer() {
     updateCountdownDisplay();
 
     //m_binauralStatusLabel->setText(QString("Brainwave audio will auto-stop in %1 minutes").arg(m_brainwaveDuration->value()));
-
-
 }
 
 // Stop the auto-stop timer
@@ -1378,17 +1479,18 @@ void MainWindow::onBrainwaveDurationChanged(int minutes) {
 //mediaplayer
 void MainWindow::onMediaStatusChanged(QMediaPlayer::MediaStatus status)
 {
+
     switch (status) {
     case QMediaPlayer::LoadingMedia:
-            break;
+
+        break;
     case QMediaPlayer::LoadedMedia:
-           // Media is now loaded and ready to play
-            break;
+
+        break;
     case QMediaPlayer::BufferedMedia:
            break;
     case QMediaPlayer::EndOfMedia:
-        // Track finished - play next track
-        //QTimer::singleShot(100, this, &MainWindow::playNextTrack);
+
         if(!m_isRepeat){
             if(isShuffle){
                 playRandomTrack();
@@ -1423,15 +1525,13 @@ void MainWindow::onPlaybackStateChanged(QMediaPlayer::PlaybackState state)
            m_pauseMusicButton->setEnabled(true);
            m_stopMusicButton->setEnabled(true);
            m_playingTrackIndex = m_currentTrackIndex;
+            break;
 
-           break;
-
-       case QMediaPlayer::PausedState:
+    case QMediaPlayer::PausedState:
            // Paused: can play or stop
            m_playMusicButton->setEnabled(true);
            m_pauseMusicButton->setEnabled(false);
            m_stopMusicButton->setEnabled(true);
-
            // Store pause position for resume
            m_pausedPosition = m_mediaPlayer->position();
            break;
@@ -1441,7 +1541,6 @@ void MainWindow::onPlaybackStateChanged(QMediaPlayer::PlaybackState state)
            m_playMusicButton->setEnabled(true);
            m_pauseMusicButton->setEnabled(false);
            m_stopMusicButton->setEnabled(false);
-
 
            break;
        }
@@ -1479,13 +1578,13 @@ void MainWindow::playNextTrack()
     QFileInfo fileInfo(filePath);
     QString trackName = fileInfo.fileName();
 
+
     QTimer::singleShot(100, this, [this, trackName]() {
         m_mediaPlayer->play();
-        //statusBar()->showMessage("Playing: " + trackName);
         updatePlayerStatus(trackName);
+
     });
 }
-
 
 void MainWindow::onPlayMusicClicked()
 {
@@ -1673,6 +1772,7 @@ void MainWindow::onSeekSliderMoved(int value)
     );
 }
 
+/*
 void MainWindow::playPreviousTrack()
 {
     // Check current playlist
@@ -1705,6 +1805,7 @@ void MainWindow::playPreviousTrack()
         playlist->setCurrentRow(prevIndex);
     }
 
+
     // Use the same logic as Play button
     QString filePath = files.at(prevIndex);
     m_mediaPlayer->setSource(QUrl::fromLocalFile(filePath));
@@ -1717,6 +1818,36 @@ void MainWindow::playPreviousTrack()
     QTimer::singleShot(100, this, [this, trackName]() {
         m_mediaPlayer->play();
         //statusBar()->showMessage("Playing: " + trackName);
+        updatePlayerStatus(trackName);
+    });
+}
+*/
+
+void MainWindow::playPreviousTrack()
+{
+    QListWidget *playlist = currentPlaylistWidget();
+    QString playlistName = currentPlaylistName();
+
+    if (!playlist || playlistName.isEmpty() || m_playlistFiles[playlistName].isEmpty()) return;
+
+    int prevIndex = m_currentTrackIndex - 1;
+    if (prevIndex < 0) {
+        prevIndex = m_playlistFiles[playlistName].size() - 1;
+    }
+
+    m_currentPlaylistName = playlistName;
+    m_currentTrackIndex = prevIndex;
+    playlist->setCurrentRow(prevIndex);
+
+    QString filePath = m_playlistFiles[playlistName].at(prevIndex);
+    m_mediaPlayer->setSource(QUrl::fromLocalFile(filePath));
+
+    // Extract and display the track name
+    QFileInfo fileInfo(filePath);
+    QString trackName = fileInfo.fileName();
+
+    QTimer::singleShot(100, this, [this, trackName]() {
+        m_mediaPlayer->play();
         updatePlayerStatus(trackName);
     });
 }
@@ -1744,7 +1875,7 @@ void MainWindow::onToneTypeComboIndexChanged(int index)
     switch (toneValue) {
 
     case BINAURAL:
-       // squareWaveItem->setEnabled(false);  // ✅ THIS actually enables it
+       // squareWaveItem->setEnabled(false);
         ConstantGlobals::currentToneType = 0;  // Set to 0
         m_binauralEngine->forceBufferRegeneration();
         m_rightFreqInput->setEnabled(true);
@@ -1754,9 +1885,11 @@ void MainWindow::onToneTypeComboIndexChanged(int index)
         m_binauralStatusLabel->setText(formatBinauralString());
         break;
     case ISOCHRONIC:
-        //squareWaveItem->setEnabled(true);  // ✅ THIS actually enables it
+        //squareWaveItem->setEnabled(true);
         ConstantGlobals::currentToneType = 1;  // Set to 0
         m_binauralEngine->forceBufferRegeneration();
+        m_leftFreqInput->setValue(360.00);
+        m_pulseFreqLabel->setValue(7.83);
         m_rightFreqInput->setDisabled(true);
         m_pulseFreqLabel->setEnabled(true);
         m_binauralStatusLabel->setText(formatBinauralString());
@@ -1764,10 +1897,12 @@ void MainWindow::onToneTypeComboIndexChanged(int index)
         break;
 
     case GENERATOR:
-       // squareWaveItem->setEnabled(true);  // ✅ THIS actually enables it
+       // squareWaveItem->setEnabled(true);
         //item->setForeground(QBrush());  // Reset color
         ConstantGlobals::currentToneType = 2;  // Set to 0
         m_binauralEngine->forceBufferRegeneration();
+        m_leftFreqInput->setValue(360.00);
+        m_rightFreqInput->setValue(360.00);
         m_rightFreqInput->setEnabled(true);
         m_pulseFreqLabel->setDisabled(true);
         m_binauralStatusLabel->setText(formatBinauralString());
@@ -1782,6 +1917,13 @@ void MainWindow::onToneTypeComboIndexChanged(int index)
 void MainWindow::onMuteButtonClicked()
 {
     bool checked = volumeIcon->isChecked();
+
+    //mute all ambient players in playback state and the main media player
+    mutePlayingAmbientPlayers(checked);
+    m_audioOutput->setMuted(checked);
+    //m_masterStopButton->setDisabled(checked);
+    //m_stopMusicButton->setDisabled(true);
+
     QAudioSink* binauralOutput = m_binauralEngine ?
                                        m_binauralEngine->audioOutput() : nullptr;
     if(checked) {
@@ -1793,20 +1935,24 @@ void MainWindow::onMuteButtonClicked()
 
         }
         volumeIcon->setIcon(QIcon(":/icons/volume-x.svg"));
-        m_audioOutput->setMuted(checked);
+        //m_audioOutput->setMuted(checked);
         m_stopMusicButton->setDisabled(true);
+        m_masterStopButton->setDisabled(true);
+
     }else{
         volumeIcon->setIcon(QIcon(":/icons/volume-2.svg"));
-        m_audioOutput->setMuted(checked);
+        //m_audioOutput->setMuted(checked);
 
         m_stopMusicButton->setEnabled(true);
+        m_masterStopButton->setEnabled(true);
+
         if(binauralOutput){
             binauralOutput->setVolume(binEngineVolume);
             m_binauralStopButton->setEnabled(true);
 
         }
 
-        }
+    }
 
 }
 
@@ -1871,6 +2017,8 @@ QString MainWindow::currentPlaylistName() const {
 }
 
 void MainWindow::addNewPlaylist(const QString &name) {
+
+
     QListWidget *newPlaylist = new QListWidget();
     newPlaylist->setAlternatingRowColors(true);
     newPlaylist->setSelectionMode(QAbstractItemView::SingleSelection);
@@ -1909,6 +2057,7 @@ void MainWindow::onAddNewPlaylistClicked() {
                                         &ok);
     if (ok && !name.isEmpty()) {
         addNewPlaylist(name);
+        updatePlaylistButtonsState();
         statusBar()->showMessage("Created new playlist: " + name);
     }
 }
@@ -1971,6 +2120,7 @@ void MainWindow::onClosePlaylistTab(int index) {
     statusBar()->showMessage("Closed playlist: " + playlistName);
 }
 
+
 void MainWindow::onPlaylistTabChanged(int index) {
     updateCurrentPlaylistReference();
     //updatePlaylistButtonsState();
@@ -1990,6 +2140,8 @@ void MainWindow::onPlaylistTabChanged(int index) {
            );
        }
 }
+
+
 
 // In onLoadMusicClicked():
 void MainWindow::onLoadMusicClicked()
@@ -2014,38 +2166,6 @@ void MainWindow::onLoadMusicClicked()
     }
 }
 
-/*
-void MainWindow::onRemoveTrackClicked()
-{
-    QListWidget *playlist = currentPlaylistWidget();
-    QString playlistName = currentPlaylistName();
-
-    if (!playlist || playlistName.isEmpty()) return;
-
-    int selectedRow = playlist->currentRow();
-    if (selectedRow >= 0 && selectedRow < m_playlistFiles[playlistName].size()) {
-        // Remove from UI
-        QListWidgetItem *item = playlist->takeItem(selectedRow);
-        delete item;
-
-        // Remove from data structure
-        m_playlistFiles[playlistName].removeAt(selectedRow);
-
-        // Fix current track index if needed
-        if (playlistName == m_currentPlaylistName) {
-            if (selectedRow < m_currentTrackIndex) {
-                m_currentTrackIndex--;
-            } else if (selectedRow == m_currentTrackIndex) {
-                m_currentTrackIndex = -1;
-            }
-        }
-
-        statusBar()->showMessage("Track removed from playlist");
-    } else {
-        statusBar()->showMessage("No track selected");
-    }
-}
-*/
 
 void MainWindow::onRemoveTrackClicked()
 {
@@ -2097,7 +2217,6 @@ void MainWindow::onRemoveTrackClicked()
         statusBar()->showMessage("No track selected");
     }
 }
-
 
 void MainWindow::onClearPlaylistClicked()
 {
@@ -2156,6 +2275,7 @@ void MainWindow::onPlaylistItemDoubleClicked(QListWidgetItem *item)
 }
 
 void MainWindow::updatePlaylistButtonsState() {
+    return;
     QListWidget *playlist = currentPlaylistWidget();
     //bool hasSelection = playlist && playlist->currentItem();
     bool hasSelection = playlist && !playlist->selectedItems().isEmpty();
@@ -2783,6 +2903,7 @@ void MainWindow::setupMenus()
 
     // =========== View Menu ============
     QMenu *viewMenu = menuBar()->addMenu("&View");
+
     QAction *hideBinauralToolbarAction = new QAction("Hide Binaural Toolbar",viewMenu);
     //hideBinauralToolbarAction->setIcon(QIcon(":/icons/eye.svg"));
     hideBinauralToolbarAction->setCheckable(true);
@@ -2797,6 +2918,23 @@ void MainWindow::setupMenus()
        settings.setValue("UI/BinauralToolbarHidden", checked);
     });
     viewMenu->addAction(hideBinauralToolbarAction);
+    viewMenu->addSeparator();
+
+    //
+    QAction *hideNatureToolbarAction = new QAction("Hide Nature Toolbar", viewMenu);
+    // hideNatureToolbarAction->setIcon(QIcon(":/icons/eye.svg")); // Optional
+    hideNatureToolbarAction->setCheckable(true);
+    bool isNatureToolbarHidden = settings.value("UI/NatureToolbarHidden", false).toBool();
+    hideNatureToolbarAction->setChecked(isNatureToolbarHidden);
+    m_natureToolbar->setVisible(!isNatureToolbarHidden);
+    // Connect the action
+    connect(hideNatureToolbarAction, &QAction::triggered, [this](bool checked) {
+        m_natureToolbar->setVisible(!checked);
+        settings.setValue("UI/NatureToolbarHidden", checked);
+    });
+    viewMenu->addAction(hideNatureToolbarAction);
+    //
+
     // ========== Settings Menu =========
     QMenu *settingsMenu= menuBar()->addMenu("&Settings");
     QAction *factoryResetAction = new QAction("Factory Reset", settingsMenu);
@@ -2842,6 +2980,21 @@ void MainWindow::setupMenus()
     resetPresetsAction->setStatusTip("Reset brainwave settings to defaults");
     resetPresetsAction->setIcon(QIcon(":/icons/target.svg"));
     connect(resetPresetsAction, &QAction::triggered, this, [this]() {
+        if (m_binauralEngine && m_binauralEngine->isPlaying()) {
+            QMessageBox::StandardButton reply;
+            reply = QMessageBox::question(this,
+                                          tr("Binaural Engine Active"),
+                                          tr("Binaural engine is playing.\nStop and proceed?"),
+                                          QMessageBox::Ok | QMessageBox::Cancel,
+                                          QMessageBox::Cancel);
+
+            if (reply == QMessageBox::Cancel) {
+                return; // User canceled, don't proceed
+            }
+
+            // User clicked OK, stop the engine
+            m_binauralEngine->stop();
+        }
         toneTypeCombo->setCurrentIndex(0); // Binaural
         m_leftFreqInput->setValue(360.0);
         m_rightFreqInput->setValue(367.83);
@@ -2882,6 +3035,14 @@ void MainWindow::setupMenus()
         HelpMenuDialog dialog(HelpType::BestPractices, this);
         dialog.exec();
     });
+
+    //whatsnew
+    QAction *whatsNewAction = helpMenu->addAction("What's New");
+    connect(whatsNewAction, &QAction::triggered, [this]() {
+        HelpMenuDialog dialog(HelpType::WhatsNew, this);
+        dialog.exec();
+    });
+
     QAction* supportusAction = helpMenu->addAction("Support Us");
     connect(supportusAction, &QAction::triggered, [this]() {
             DonationDialog dialog(this);
@@ -2985,11 +3146,10 @@ void MainWindow::onStreamFromUrl()
 void MainWindow::playRemoteStream(const QString &urlString)
 {
     if (!m_mediaPlayer) {
-        // Initialize if needed (use your existing setup)
         m_mediaPlayer = new QMediaPlayer(this);
         m_audioOutput = new QAudioOutput(this);
         m_mediaPlayer->setAudioOutput(m_audioOutput);
-       // setupMediaPlayerConnections(); // Your existing connections
+       // setupMediaPlayerConnections();
     }
 
     QUrl audioUrl(urlString);
@@ -3035,7 +3195,6 @@ void MainWindow::onFileOpened(const QString &filePath)
     // 1. Check if file exists
     QFileInfo fileInfo(filePath);
     if (!fileInfo.exists() || !fileInfo.isFile()) {
-        qDebug() << "File does not exist or is not a regular file:" << filePath;
         return;
     }
 
@@ -3044,12 +3203,10 @@ void MainWindow::onFileOpened(const QString &filePath)
     QStringList supportedExtensions = {"mp3", "wav", "flac", "ogg", "m4a", "mp4", "m4v", "avi", "mkv"};
 
     if (!supportedExtensions.contains(suffix)) {
-        qDebug() << "Unsupported file extension:" << suffix;
         statusBar()->showMessage("Unsupported file format: ." + suffix, 3000);
         return;
     }
 
-    // 3. Use your existing playlist logic
     QString playlistName = currentPlaylistName();
     QString fileName = fileInfo.fileName();
 
@@ -3060,62 +3217,18 @@ void MainWindow::onFileOpened(const QString &filePath)
     m_playlistFiles[playlistName].append(filePath);
 
     // 4. Optional: Auto-start playback if playlist was empty
-    // This part depends on your player's structure
     // Example:
     // if (m_player && m_player->state() != QMediaPlayer::PlayingState) {
-    //     // You might need to load the playlist into your QMediaPlayer here
+    //
     //     m_player->play();
     // }
 
     // 5. Update status
     m_playMusicButton->click();
     statusBar()->showMessage("Opened: " + fileName, 3000);
-    qDebug() << "Successfully added file to playlist:" << filePath;
 }
 
 //metadata for playing track
-
-/*
-QString MainWindow::getTrackMetadata() {
-
-    metaData = m_mediaPlayer->metaData();
-    // Access specific tags using keys from QMediaMetaData::Key
-    QString title = metaData.stringValue(QMediaMetaData::Title);
-    QString album = metaData.stringValue(QMediaMetaData::AlbumTitle);
-    QStringList artists = metaData.value(QMediaMetaData::Author).toStringList(); // Note: Author for artists[citation:6]
-    int trackNumber = metaData.value(QMediaMetaData::TrackNumber).toInt();
-    qint64 duration = metaData.value(QMediaMetaData::Duration).toLongLong();
-
-    // Format duration from milliseconds to MM:SS
-       int totalSeconds = duration / 1000;
-       int minutes = totalSeconds / 60;
-       int seconds = totalSeconds % 60;
-       QString durationFormatted = QString("%1:%2")
-                                       .arg(minutes, 2, 10, QChar('0'))
-                                       .arg(seconds, 2, 10, QChar('0'));
-
-       // Build the formatted string for tooltip
-       QString displayMetaData;
-       if (!title.isEmpty()) {
-           displayMetaData += QString("<b>Title:</b> %1<br/>").arg(title);
-       }
-       if (!artists.isEmpty()) {
-           // Join multiple artists with comma
-           displayMetaData += QString("<b>Artist:</b> %1<br/>").arg(artists.join(", "));
-       }
-       if (!album.isEmpty()) {
-           displayMetaData += QString("<b>Album:</b> %1<br/>").arg(album);
-       }
-       if (trackNumber > 0) {
-           displayMetaData += QString("<b>Track:</b> %1<br/>").arg(trackNumber);
-       }
-       if (duration > 0) {
-           displayMetaData += QString("<b>Duration:</b> %1").arg(durationFormatted);
-       }
-
-    return displayMetaData;
-}
-*/
 QString MainWindow::getTrackMetadata() {
     metaData = m_mediaPlayer->metaData();
 
@@ -3272,4 +3385,500 @@ void MainWindow::createInfoDialog() {
         }
     });
 
+}
+
+////////   ambience
+
+void MainWindow::setupAmbientPlayers()
+{
+    // Create 5 ambient players
+    for (int i = 1; i <= 5; i++) {
+        QString key = QString("player%1").arg(i);
+
+        // Create the player
+        AmbientPlayer* player = new AmbientPlayer(this);
+        player->setName(QString("Player %1").arg(i));
+
+        // Store in map
+        m_ambientPlayers[key] = player;
+        // Create dialog FOR THIS PLAYER
+               AmbientPlayerDialog* dialog = new AmbientPlayerDialog(player, this);
+               dialog->setWindowTitle(QString("Ambient Player %1").arg(i));
+               dialog->hide();  // Start hidden
+               m_playerDialogs[key] = dialog;
+
+               // Connect button to show ITS dialog
+               connect(player->button(), &QPushButton::clicked, this, [this, key]() {
+                   if (m_playerDialogs.contains(key)) {
+                       m_playerDialogs[key]->show();
+                       m_playerDialogs[key]->raise();
+                       m_playerDialogs[key]->activateWindow();
+                   }
+               });
+        // Set player key as property on the button for identification
+        player->button()->setProperty("playerKey", key);
+
+
+    }
+}
+
+
+void MainWindow::onAmbientButtonClicked()
+{
+    QPushButton* clickedButton = qobject_cast<QPushButton*>(sender());
+    if (!clickedButton) return;
+
+    QString playerKey = clickedButton->property("playerKey").toString();
+
+    if (m_playerDialogs.contains(playerKey)) {
+        // Get the dialog FOR THIS SPECIFIC PLAYER
+        AmbientPlayerDialog* dialog = m_playerDialogs[playerKey];
+
+        // Show it - it's already configured for this player
+        dialog->show();
+        dialog->raise();
+        dialog->activateWindow();
+    }
+}
+
+/*
+void MainWindow::onMasterPlayClicked()
+{
+    for (AmbientPlayer* player : std::as_const(m_ambientPlayers)) {
+        if (player->isEnabled()) {
+            player->play();
+        }
+
+    }
+}
+*/
+
+void MainWindow::onMasterPlayClicked()
+{
+    for (const QString& key : m_ambientPlayers.keys()) {
+        AmbientPlayer* player = m_ambientPlayers[key];
+        if (!player->isEnabled()) continue;
+
+        // Play the internal media player
+        QMediaPlayer* mediaPlayer = player->mediaPlayer();
+        if (mediaPlayer && mediaPlayer->playbackState() != QMediaPlayer::PlayingState) {
+            mediaPlayer->play();  // ensure actual playback
+        }
+
+        // Update the corresponding dialog's state variable
+        if (m_playerDialogs.contains(key)) {
+            AmbientPlayerDialog* dlg = m_playerDialogs[key];
+            dlg->state = mediaPlayer->playbackState();  // sync dialog state
+            //dlg->updateUI();                             // refresh buttons/slider
+        }
+    }
+}
+
+/*
+void MainWindow::onMasterPauseClicked()
+{
+    for (AmbientPlayer* player : std::as_const(m_ambientPlayers)) {
+        if (player->isEnabled()) {
+            player->pause();
+        }
+    }
+}
+*/
+
+void MainWindow::onMasterPauseClicked()
+{
+    for (const QString& key : m_ambientPlayers.keys()) {
+        AmbientPlayer* player = m_ambientPlayers[key];
+        if (!player->isEnabled()) continue;
+
+        // Pause the internal media player
+        QMediaPlayer* mediaPlayer = player->mediaPlayer();
+        if (mediaPlayer && mediaPlayer->playbackState() == QMediaPlayer::PlayingState) {
+            mediaPlayer->pause();  // pause actual playback
+        }
+
+        // Update corresponding dialog's state variable
+        if (m_playerDialogs.contains(key)) {
+            AmbientPlayerDialog* dlg = m_playerDialogs[key];
+            dlg->state = mediaPlayer->playbackState();  // should be PausedState now
+            //dlg->updateUI();                             // refresh buttons, slider, etc.
+        }
+    }
+}
+
+/*
+void MainWindow::onMasterStopClicked()
+{
+    for (AmbientPlayer* player : std::as_const(m_ambientPlayers)) {
+        if (player->isEnabled()) {
+            player->stop();
+        }
+    }
+}
+*/
+
+
+void MainWindow::onMasterStopClicked()
+{
+    for (const QString& key : m_ambientPlayers.keys()) {
+        AmbientPlayer* player = m_ambientPlayers[key];
+        if (!player->isEnabled()) continue;
+
+        // Stop the internal media player
+        QMediaPlayer* mediaPlayer = player->mediaPlayer();
+        if (mediaPlayer && mediaPlayer->playbackState() != QMediaPlayer::StoppedState) {
+            mediaPlayer->stop();  // stop actual playback
+        }
+
+        // Update corresponding dialog's state variable
+        if (m_playerDialogs.contains(key)) {
+            AmbientPlayerDialog* dlg = m_playerDialogs[key];
+            dlg->state = mediaPlayer->playbackState();  // should be StoppedState now
+            //dlg->updateUI();                             // refresh buttons, slider, etc.
+        }
+    }
+}
+
+void MainWindow::onMasterVolumeChanged(int value)
+{
+    return;
+    float masterRatio = value / 100.0f;
+    for (AmbientPlayer* player : std::as_const(m_ambientPlayers)) {
+        if (player->isEnabled()) {
+            int actualVolume = player->volume() * masterRatio;  // ⚠️ BUG!
+            player->setVolume(actualVolume);  // Overwrites base volume!
+        }
+    }
+    m_masterVolumeLabel->setText(QString("%1%").arg(value));
+}
+
+
+void MainWindow::saveAmbientPreset(const QString& presetName)
+{
+    // Get the preset directory path
+
+    QString presetDir = ConstantGlobals::ambientPresetFilePath;
+
+    // Create default filename
+    QString defaultFileName = presetName.isEmpty() ?
+                              "ambient_preset.json" :
+                              QString("ambient_%1.json").arg(presetName);
+    QString defaultFilePath = QDir(presetDir).filePath(defaultFileName);
+
+    // Use QFileDialog to get save location
+    QString fileName = QFileDialog::getSaveFileName(
+        this,
+        "Save Ambient Preset",
+        defaultFilePath,
+        "JSON Files (*.json);;All Files (*)"
+    );
+
+    // If user cancelled, return
+    if (fileName.isEmpty()) {
+        return;
+    }
+
+    // Extract preset name from filename if not provided
+    QString finalPresetName = presetName;
+    if (finalPresetName.isEmpty()) {
+        finalPresetName = QFileInfo(fileName).baseName();
+        // Remove "ambient_" prefix if present
+        if (finalPresetName.startsWith("ambient_")) {
+            finalPresetName = finalPresetName.mid(8);
+        }
+    }
+
+    // Create JSON object
+    QJsonObject presetObject;
+    presetObject["presetName"] = finalPresetName;
+    presetObject["saveTime"] = QDateTime::currentDateTime().toString(Qt::ISODate);
+
+    // Create players array
+    QJsonArray playersArray;
+
+    for (auto it = m_ambientPlayers.begin(); it != m_ambientPlayers.end(); ++it) {
+        AmbientPlayer* player = it.value();
+
+        QJsonObject playerObj;
+        playerObj["key"] = it.key();
+        playerObj["name"] = player->name();
+        playerObj["filePath"] = player->filePath();
+        playerObj["volume"] = player->volume();
+        playerObj["enabled"] = player->isEnabled();
+        playerObj["autoRepeat"] = player->autoRepeat();
+        playerObj["playState"] = static_cast<int>(player->playbackState());
+
+        playersArray.append(playerObj);
+    }
+
+    presetObject["players"] = playersArray;
+
+    // Save to file
+    QFile file(fileName);
+    if (file.open(QIODevice::WriteOnly)) {
+        file.write(QJsonDocument(presetObject).toJson());
+        file.close();
+    } else {
+        qWarning() << "Failed to save preset:" << file.errorString();
+    }
+}
+
+void MainWindow::loadAmbientPreset(const QString& presetName)
+{
+    QString fileName;
+    QString presetPath = ConstantGlobals::ambientPresetFilePath;
+
+    // If presetName is provided, construct the filename
+    if (!presetName.isEmpty()) {
+        fileName = QDir(presetPath)
+                   .filePath(QString("ambient_%1.json").arg(presetName));
+    } else {
+        // Use QFileDialog to let user select a file
+        fileName = QFileDialog::getOpenFileName(
+            this,
+            "Load Ambient Preset",
+            ConstantGlobals::ambientPresetFilePath,
+            "JSON Files (*.json);;All Files (*)"
+        );
+
+        // If user cancelled, return
+        if (fileName.isEmpty()) {
+            return;
+        }
+    }
+
+    QFile file(fileName);
+
+    if (!file.open(QIODevice::ReadOnly)) {
+        qWarning() << "Preset not found:" << fileName;
+        return;
+    }
+
+    QJsonDocument doc = QJsonDocument::fromJson(file.readAll());
+    file.close();
+
+    if (doc.isNull()) {
+        qWarning() << "Invalid JSON in preset:" << fileName;
+        return;
+    }
+
+    QJsonObject presetObject = doc.object();
+    QJsonArray playersArray = presetObject["players"].toArray();
+
+    // Stop all players first
+    for (AmbientPlayer* player : m_ambientPlayers) {
+        player->stop();
+    }
+
+    // Load each player
+    for (const QJsonValue& playerValue : playersArray) {
+        QJsonObject playerObj = playerValue.toObject();
+        QString key = playerObj["key"].toString();
+
+        if (m_ambientPlayers.contains(key)) {
+            AmbientPlayer* player = m_ambientPlayers[key];
+
+            player->setName(playerObj["name"].toString());
+            player->setFilePath(playerObj["filePath"].toString());
+            player->setVolume(playerObj["volume"].toInt());
+            player->setEnabled(playerObj["enabled"].toBool());
+            player->setAutoRepeat(playerObj["autoRepeat"].toBool());
+
+            // UPDATE THE DIALOG UI IF IT EXISTS
+            if (m_playerDialogs.contains(key)) {
+                AmbientPlayerDialog* dialog = m_playerDialogs[key];
+                dialog->loadPlayerData();  // This refreshes the dialog UI
+            }
+
+            // Optional: Restore play state
+            //QMediaPlayer::PlaybackState savedState =
+              //  static_cast<QMediaPlayer::PlaybackState>(playerObj["playState"].toInt());
+
+          //  if (savedState == QMediaPlayer::PlayingState && player->isEnabled()) {
+            //    QTimer::singleShot(100, player, &AmbientPlayer::play);
+            //}
+        }
+    }
+
+}
+
+void MainWindow::resetAllPlayersToDefaults()
+{
+    for (auto it = m_ambientPlayers.begin(); it != m_ambientPlayers.end(); ++it) {
+        AmbientPlayer* player = it.value();
+
+        // Reset to defaults
+        player->setFilePath("");                    // Clear audio file
+        player->setName(it.key());                  // Reset name to default (player1, player2, etc.)
+        player->setVolume(50);                      // Default volume
+        player->setEnabled(false);                  // Enabled: OFF by default
+        player->setAutoRepeat(true);                // Auto-repeat: ON by default
+        player->stop();                             // Stop playback
+
+        // Update dialog UI if open
+        if (m_playerDialogs.contains(it.key())) {
+            m_playerDialogs[it.key()]->loadPlayerData();
+        }
+    }
+
+    // Update master controls state
+
+}
+
+void MainWindow::saveAmbientPlayersSettings()
+{
+    return;
+    settings.beginGroup("AmbientPlayers");
+
+    // Clear old settings
+    settings.remove("");  // Remove all in this group
+
+    // Save each player
+    for (auto it = m_ambientPlayers.begin(); it != m_ambientPlayers.end(); ++it) {
+        QString key = it.key();  // "player1", "player2", etc.
+        AmbientPlayer* player = it.value();
+
+        settings.beginGroup(key);
+        settings.setValue("name", player->name());
+        settings.setValue("filePath", player->filePath());
+        settings.setValue("volume", player->volume());
+        settings.setValue("enabled", player->isEnabled());
+        settings.setValue("autoRepeat", player->autoRepeat());
+        settings.endGroup();
+    }
+
+    settings.endGroup();
+    settings.sync();  // Force write to disk
+}
+
+void MainWindow::loadAmbientPlayersSettings()
+{
+    return;
+    settings.beginGroup("AmbientPlayers");
+
+    QStringList playerKeys = settings.childGroups();  // ["player1", "player2", ...]
+
+    for (const QString& key : playerKeys) {
+        if (m_ambientPlayers.contains(key)) {
+            AmbientPlayer* player = m_ambientPlayers[key];
+
+            settings.beginGroup(key);
+
+            // Load saved values
+            player->setName(settings.value("name", player->name()).toString());
+
+            // Load file path - use empty string as default, not player's current path
+            QString filePath = settings.value("filePath", "").toString();
+            player->setFilePath(filePath);
+
+            player->setVolume(settings.value("volume", 50).toInt());
+            player->setEnabled(settings.value("enabled", true).toBool());  // Changed from false to true
+            player->setAutoRepeat(settings.value("autoRepeat", true).toBool());
+
+            settings.endGroup();
+
+            // Update the dialog UI if it exists for this player
+            if (m_playerDialogs.contains(key)) {
+                AmbientPlayerDialog* dialog = m_playerDialogs[key];
+                dialog->loadPlayerData();  // This will refresh the dialog UI
+            }
+
+        }
+    }
+
+    settings.endGroup();
+}
+
+QStringList MainWindow::getAvailablePresets() const
+{
+    QStringList presets;
+    QString presetPath = ConstantGlobals::ambientPresetFilePath;
+    QDir presetDir(presetPath);
+
+    if (presetDir.exists()) {
+        QStringList filters = {"ambient_*.json"};
+        QStringList files = presetDir.entryList(filters, QDir::Files);
+
+        for (const QString& file : files) {
+            // Extract preset name: "ambient_forest.json" → "forest"
+            QString name = file.mid(8, file.length() - 13);  // Remove "ambient_" and ".json"
+            presets << name;
+        }
+    }
+
+    return presets;
+}
+
+
+
+void MainWindow::closeEvent(QCloseEvent *event)
+{
+    //saveAmbientPlayersSettings();
+    QMainWindow::closeEvent(event);
+}
+
+
+
+void MainWindow::copyUserFiles()
+{
+
+       // Check if files have already been copied
+       bool filesCopied = settings.value("userFilesCopied", false).toBool();
+       if (filesCopied) {
+           return; // Exit early if already done
+       }
+
+    // Helper lambda function for cleaner code
+    auto copyFileWithPerms = [](const QString& resourcePath, const QString& destPath) {
+        if (!QFile::exists(destPath)) {
+            if (QFile::copy(resourcePath, destPath)) {
+                QFile(destPath).setPermissions(QFile::ReadOwner | QFile::WriteOwner |
+                                              QFile::ReadGroup | QFile::ReadOther);
+                return true;
+            }
+        }
+        return false;
+    };
+
+    // Copy AmbientNatureSounds.txt
+    copyFileWithPerms(":/files/AmbientNatureSounds.txt",
+                     ConstantGlobals::ambientFilePath + "/AmbientNatureSounds.txt");
+
+    // Copy FrequencyList.txt
+    copyFileWithPerms(":/files/FrequencyList.txt",
+                     ConstantGlobals::presetFilePath + "/FrequencyList.txt");
+
+    // Copy README.txt to both locations
+    copyFileWithPerms(":/files/README.txt",
+                     ConstantGlobals::ambientFilePath + "/README.txt");
+
+    copyFileWithPerms(":/files/README.txt",
+                     ConstantGlobals::presetFilePath + "/README.txt");
+
+    // Copy MUSIC.txt to music directory
+    copyFileWithPerms(":/files/MUSIC.txt",
+                     ConstantGlobals::musicFilePath + "/MUSIC.txt");
+
+    //set their bool status created = true
+    settings.setValue("userFilesCopied", true);
+}
+
+//mute all ambient players
+void MainWindow::mutePlayingAmbientPlayers(bool needMute)
+{
+    for (auto it = m_ambientPlayers.begin(); it != m_ambientPlayers.end(); ++it) {
+        AmbientPlayer* ambientPlayer = it.value();
+
+        if (ambientPlayer && ambientPlayer->mediaPlayer()) {
+            QMediaPlayer* mediaPlayer = ambientPlayer->mediaPlayer();
+
+            // Check if the player is in playing state
+            if (mediaPlayer->playbackState() == QMediaPlayer::PlayingState) {
+                // Mute the player
+                mediaPlayer->audioOutput()->setMuted(needMute);
+                // Optional: Store original volume to restore later
+                // ambientPlayer->setOriginalVolume(mediaPlayer->volume());
+            }
+        }
+    }
 }

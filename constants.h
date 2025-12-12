@@ -10,6 +10,8 @@ extern const QString ambientFilePath;
 extern const QString presetFilePath;
 extern const QString playlistFilePath;
 extern const QString musicFilePath;
+extern const QString ambientPresetFilePath;
+
 extern int currentToneType;
 }
 

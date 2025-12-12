@@ -34,5 +34,9 @@
         <file>icons/folder-plus.svg</file>
         <file>icons/minus.svg</file>
         <file>icons/minus-square.svg</file>
+        <file>files/AmbientNatureSounds.txt</file>
+        <file>files/FrequencyList.txt</file>
+        <file>files/README.txt</file>
+        <file>files/MUSIC.txt</file>
     </qresource>
 </RCC>

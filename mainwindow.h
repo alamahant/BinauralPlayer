@@ -25,6 +25,9 @@
 #include<QMediaMetaData>
 #include<QDialog>
 #include<QTextBrowser>
+#include"ambientplayerdialog.h"
+#include"ambientplayer.h"
+
 
 class MainWindow : public QMainWindow
 {
@@ -33,7 +36,8 @@ class MainWindow : public QMainWindow
 public:
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
-
+protected:
+    void closeEvent(QCloseEvent *event) override;
 private:
     enum ToneType {
 
@@ -76,13 +80,7 @@ private:
     // Nature Sounds Toolbar widgets
     QToolBar *m_natureToolbar;
     QPushButton *m_naturePowerButton;
-    QPushButton *m_oceanButton;
-    QPushButton *m_forestButton;
-    QPushButton *m_rainButton;
-    QPushButton *m_fireButton;
-    QPushButton *m_streamButton;
-    QDoubleSpinBox *m_natureVolumeInput;
-    QPushButton *m_natureStopButton;
+
 
     // =================== MAIN AREA WIDGETS ===================
     //QListWidget *m_playlistWidget;
@@ -123,14 +121,7 @@ private slots:
     void onBinauralPlayClicked();
     void onBinauralStopClicked();
 
-    // Nature sounds slots
-    void onOceanClicked();
-    void onForestClicked();
-    void onRainClicked();
-    void onFireClicked();
-    void onStreamClicked();
-    void onNatureVolumeChanged(double value);
-    void onNatureStopClicked();
+
 
     // Playlist slots
     void onAddFilesClicked();
@@ -320,9 +311,43 @@ private:
     void createInfoDialog();
     QTextBrowser *metadataBrowser;
     int m_playingTrackIndex = -1;  // Index of the track that's actually playing
-
 public slots:
     void handleMetaDataUpdated();
+
+    ////////////////// ambience
+private:
+    QMap<QString, AmbientPlayer*> m_ambientPlayers;
+
+    // Master controls for the toolbar
+    QPushButton* m_masterPlayButton;
+    QPushButton* m_masterPauseButton;
+    QPushButton* m_masterStopButton;
+    QSlider* m_masterVolumeSlider;
+    QLabel* m_masterVolumeLabel;
+    // Track which player is being edited
+    QMap<QString, AmbientPlayerDialog*> m_playerDialogs;  // player1 → Dialog*
+private slots:
+    void onAmbientButtonClicked();
+    void onMasterPlayClicked();
+    void onMasterPauseClicked();
+    void onMasterStopClicked();
+    void onMasterVolumeChanged(int value);
+    void setupAmbientPlayers();
+    void saveAmbientPlayersSettings();
+    void loadAmbientPlayersSettings();
+    void saveAmbientPreset(const QString& presetName);
+    void loadAmbientPreset(const QString& presetName);
+    void resetAllPlayersToDefaults();
+
+private:
+    QStringList getAvailablePresets() const;
+    QPushButton *openAmbientPresetButton;
+    QPushButton *saveAmbientPresetButton;
+    QPushButton *resetPlayersButton;
+
+    void copyUserFiles();
+    QPushButton *tbarResetBinauralSettingsButton;
+    void mutePlayingAmbientPlayers(bool needMute);
 
 };
 #endif // MAINWINDOW_H

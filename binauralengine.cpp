@@ -653,7 +653,6 @@ void BinauralEngine::handleAudioStateChanged(QAudio::State state)
 //ISOCHRONIC METHODS
 
 void BinauralEngine::generateIsochronicBuffer(int durationMs) {
-    // STOP playback if active (EXACTLY like your binaural version)
     bool wasPlaying = m_isPlaying;
     if (wasPlaying && m_audioOutput) {
         m_audioOutput->stop();
@@ -714,7 +713,6 @@ void BinauralEngine::generateIsochronicBuffer(int durationMs) {
     // Apply same fade as binaural
     applyLoopFade(audioData, durationMs);
 
-    // Clean up old buffer (EXACTLY like your binaural version)
     if (m_audioBuffer) {
         if (m_audioBuffer->isOpen()) {
             m_audioBuffer->close();
@@ -723,7 +721,6 @@ void BinauralEngine::generateIsochronicBuffer(int durationMs) {
         m_audioBuffer = nullptr;
     }
 
-    // Create new buffer (EXACTLY like your binaural version)
     m_audioBuffer = new QBuffer(this);
     m_audioBuffer->setData(audioData);
 }

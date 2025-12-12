@@ -1,0 +1,25 @@
+# Changelog
+
+## [2025-12-13] - Release v1.1.0
+
+### Added
+- Nature Ambient Sounds Toolbar - ambient sound mixer with 5 independent players
+- Bottom-right info button for track metadata display
+
+### Changed
+- Various code improvements and UI polish
+
+---
+
+## [Initial Release - 2025-12-08] - v1.0.0
+
+Binaural Media Player - A Qt-based application for multimedia playback and brainwave audio generation.
+
+**Features:**
+- Multi-format audio/video playback (MP3, WAV, FLAC, OGG, M4A, MP4, etc.)
+- Real-time binaural and isochronic tone generation
+- Tabbed playlist management with search
+- Streaming from HTTP/HTTPS URLs
+- Brainwave entrainment with session timer
+- Customizable interface with color-coded toolbars
+- JSON-based preset and playlist storage
