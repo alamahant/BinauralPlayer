@@ -1,5 +1,7 @@
 # Binaural Media Player
 
+![BinauralPlayer Screenshot](screenshots/full.png)
+
 A sophisticated desktop application for multimedia playback, binaural/isochronic tone generation, and brainwave entrainment, built with **Qt 6** and **C++17**.
 
 ![Qt](https://img.shields.io/badge/Qt-6.0%2B-green)
