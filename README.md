@@ -80,7 +80,7 @@ A sophisticated desktop application for multimedia playback, binaural/isochronic
 ### Build (CMake)
 
 ```bash
-git clone http://localhost:3000/dharma/BinauralPlayer.git
+git clone https://github.com/alamahant/BinauralPlayer.git
 cd BinauralPlayer
 mkdir build && cd build
 cmake -DCMAKE_PREFIX_PATH=/path/to/qt6 ..
