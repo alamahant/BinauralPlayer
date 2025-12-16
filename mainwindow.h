@@ -89,8 +89,8 @@ private:
     QPushButton *m_clearPlaylistButton;
 
     // =================== AUDIO ENGINES ===================
-    BinauralEngine *m_binauralEngine;
-    //DynamicEngine *m_binauralEngine;
+    //BinauralEngine *m_binauralEngine;
+    DynamicEngine *m_binauralEngine;
 
     // =================== PRIVATE METHODS ===================
     void setupConnections();

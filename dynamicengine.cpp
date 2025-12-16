@@ -22,7 +22,7 @@ DynamicEngine::DynamicEngine(QObject *parent)
     , m_parametersChanged(false)
     , m_sampleRate(44100)
     , m_bufferDurationMs(300000)
-    , m_pulseFrequency(10.0)
+    , m_pulseFrequency(7.83)
     , m_dynamicDevice(nullptr)
 {
     initializeAudioFormat();
@@ -96,6 +96,13 @@ bool DynamicEngine::startDynamicPlayback()
             : m_engine(engine), m_phaseLeft(0.0), m_phaseRight(0.0) {
             setOpenMode(QIODevice::ReadOnly);
         }
+
+        bool isSequential() const override { return true; }
+
+          qint64 bytesAvailable() const override
+          {
+              return 4096 + QIODevice::bytesAvailable();
+          }
         
     protected:
         qint64 readData(char* data, qint64 maxlen) override {
@@ -522,10 +529,14 @@ void DynamicEngine::handleAudioStateChanged(QAudio::State state)
             break;
             
         case QAudio::IdleState:
+
+        /*
             // For dynamic: restart the device
             if (m_isPlaying && m_dynamicDevice) {
-                m_audioOutput->start(m_dynamicDevice);
+                //m_audioOutput->start(m_dynamicDevice);
             }
+            */
+
             break;
             
         default:

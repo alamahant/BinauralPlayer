@@ -25,8 +25,8 @@
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
-    , m_binauralEngine(new BinauralEngine(this))
-    //, m_dynamicEngine(new BinauralEngine(this))
+    , m_binauralEngine(new DynamicEngine(this))
+    //, m_dynamicEngine(new DynamicEngine(this))
     , m_mediaPlayer(nullptr)
     , m_audioOutput(nullptr)
     , m_currentTrackIndex(-1)
@@ -851,11 +851,11 @@ void MainWindow::setupConnections()
     connect(m_playlistTabs, &QTabWidget::currentChanged, this, &MainWindow::onPlaylistTabChanged);
 
     // Binaural engine signal connections
-    connect(m_binauralEngine, &BinauralEngine::playbackStarted,
+    connect(m_binauralEngine, &DynamicEngine::playbackStarted,
             this, &MainWindow::onBinauralPlaybackStarted);
-    connect(m_binauralEngine, &BinauralEngine::playbackStopped,
+    connect(m_binauralEngine, &DynamicEngine::playbackStopped,
             this, &MainWindow::onBinauralPlaybackStopped);
-    connect(m_binauralEngine, &BinauralEngine::errorOccurred,
+    connect(m_binauralEngine, &DynamicEngine::errorOccurred,
             this, &MainWindow::onBinauralError);
 
     //save-load connections
@@ -1135,9 +1135,9 @@ void MainWindow::onRightFrequencyChanged(double value)
 
 void MainWindow::onWaveformChanged(int index)
 {
-    BinauralEngine::Waveform waveform = static_cast<BinauralEngine::Waveform>(index);
+    DynamicEngine::Waveform waveform = static_cast<DynamicEngine::Waveform>(index);
     m_binauralEngine->setWaveform(waveform);
-    //m_binauralStatusLabel->setText(waveform == BinauralEngine::SINE_WAVE ?
+    //m_binauralStatusLabel->setText(waveform == DynamicEngine::SINE_WAVE ?
       //                      "Waveform: Sine" : "Waveform: Square");
     m_binauralStatusLabel->setText(formatBinauralString());
 
@@ -1886,7 +1886,7 @@ void MainWindow::onToneTypeComboIndexChanged(int index)
     case BINAURAL:
        // squareWaveItem->setEnabled(false);
         ConstantGlobals::currentToneType = 0;  // Set to 0
-        m_binauralEngine->forceBufferRegeneration();
+        //m_binauralEngine->forceBufferRegeneration();
         m_rightFreqInput->setEnabled(true);
         m_leftFreqInput->setValue(360.00);
         m_rightFreqInput->setValue(367.83);
@@ -1896,7 +1896,7 @@ void MainWindow::onToneTypeComboIndexChanged(int index)
     case ISOCHRONIC:
         //squareWaveItem->setEnabled(true);
         ConstantGlobals::currentToneType = 1;  // Set to 0
-        m_binauralEngine->forceBufferRegeneration();
+        //m_binauralEngine->forceBufferRegeneration();
         m_leftFreqInput->setValue(360.00);
         m_pulseFreqLabel->setValue(7.83);
         m_rightFreqInput->setDisabled(true);
@@ -1909,7 +1909,7 @@ void MainWindow::onToneTypeComboIndexChanged(int index)
        // squareWaveItem->setEnabled(true);
         //item->setForeground(QBrush());  // Reset color
         ConstantGlobals::currentToneType = 2;  // Set to 0
-        m_binauralEngine->forceBufferRegeneration();
+        //m_binauralEngine->forceBufferRegeneration();
         m_leftFreqInput->setValue(360.00);
         m_rightFreqInput->setValue(360.00);
         m_rightFreqInput->setEnabled(true);
