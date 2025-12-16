@@ -206,10 +206,26 @@ QString HelpMenuDialog::getWhatsNewContent()
 {
     return R"(
         <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #2c3e50;">
-            <h1 style="color: #8e44ad; text-align: center; margin-bottom: 20px;">🌳 What's New - Nature Toolbar</h1>
+            <h1 style="color: #8e44ad; text-align: center; margin-bottom: 20px;">🌳 What's New - Dynamic Audio Engine</h1>
+
+	<div style="background-color: #f0f0f5; padding: 15px; border-radius: 8px; margin-bottom: 25px;">
+    <h2 style="color: #8e44ad; margin-top: 0;">⚡ BinauralPlayer Goes Fully Dynamic - Version 1.2.0</h2>
+    <p>Tone generation has been switched to a real-time dynamic engine.</p>
+    <ul>
+        <li>Buffered tone generation removed entirely.</li>
+        <li>No delays or gaps when increasing or decreasing frequencies — changes are applied instantly.</li>
+    </ul>
+    <p>This milestone opens the road to new features:</p>
+    <ul>
+        <li>Programmable multi-stage sessions</li>
+        <li>Per-stage frequency changes</li>
+        <li>Support for binaural beats and isochronic pulses within complex session flows</li>
+    </ul>
+</div>
+
 
             <div style="background-color: #ecf0f1; padding: 15px; border-radius: 8px; margin-bottom: 25px;">
-                <h2 style="color: #2c3e50; margin-top: 0;">Introducing the Ambient Sound Control System</h2>
+                <h2 style="color: #2c3e50; margin-top: 0;">Introducing the Ambient Sound Control System - Version 1.1.0</h2>
                 <p>A powerful new feature that lets you create and control layered nature soundscapes
                 for relaxation, focus, meditation, and atmospheric enhancement.</p>
             </div>

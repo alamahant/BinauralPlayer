@@ -1,5 +1,21 @@
 # Changelog
 
+## [2025-12-16] - Release v1.2.0
+
+### Changed
+- **BinauralPlayer goes fully dynamic**: switched tone generation to a real-time dynamic engine.
+- Removed buffered tone generation entirely.
+- No delays or gaps when increasing or decreasing frequencies — changes are applied instantly.
+
+### Notes
+This is a major milestone that opens the road to new and exciting features, such as:
+- Programmable multi-stage sessions with smooth transitions between stages
+- Per-stage frequency changes
+- Support for binaural beats and isochronic pulses within complex session flows
+
+---
+
+
 ## [2025-12-13] - Release v1.1.0
 
 ### Added
