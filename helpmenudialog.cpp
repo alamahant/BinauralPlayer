@@ -201,7 +201,7 @@ QString HelpMenuDialog::getBestPracticesContent()
     )";
 }
 
-
+/*
 QString HelpMenuDialog::getWhatsNewContent()
 {
     return R"(
@@ -352,6 +352,225 @@ QString HelpMenuDialog::getWhatsNewContent()
         </div>
     )";
 }
+*/
+
+QString HelpMenuDialog::getWhatsNewContent()
+{
+    return R"(
+        <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #2c3e50;">
+            <h1 style="color: #8e44ad; text-align: center; margin-bottom: 20px;">🌳 What's New - Dynamic Audio Engine & Enhanced Features</h1>
+
+            <div style="background-color: #f0f0f5; padding: 15px; border-radius: 8px; margin-bottom: 25px;">
+                <h2 style="color: #8e44ad; margin-top: 0;">⚡ Major Feature Additions - Version 1.3.0</h2>
+
+                <div style="background-color: #e8f4f8; padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #3498db;">
+                    <h3 style="color: #3498db; margin-top: 0;">🎵 Multi-Stage Session Manager</h3>
+                    <p>A sophisticated system for creating and executing timed sequences of audio tones. Users define multiple stages with parameters (binaural/isochronic tones, frequencies, waveforms, duration, volume) that play sequentially.</p>
+                    <ul>
+                        <li><strong>Text-based stage definition</strong> using simple colon-separated format</li>
+                        <li><strong>Three tone types</strong>: Binaural (beat frequencies), Isochronic (pulsed), Generator (mono)</li>
+                        <li><strong>Full session control</strong>: Play, pause, stop, save/load sessions</li>
+                        <li><strong>Real-time visual feedback</strong>: Current stage highlighting, time remaining display</li>
+                        <li><strong>Auto-transitions</strong> between stages with volume fading</li>
+                        <li><strong>File support</strong>: Save/load sessions as .txt or .bsession files</li>
+                        <li><strong>Parameter validation</strong> with error messages</li>
+                        <li><strong>Timer synchronization</strong> between stage and total session time</li>
+                    </ul>
+                    <p><strong>User Workflow:</strong> Enter stages → Parse/validate → Save → Play → Monitor progress with visual highlighting</p>
+                </div>
+
+                <div style="background-color: #f0f8ff; padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #9b59b6;">
+                    <h3 style="color: #9b59b6; margin-top: 0;">📀 CUE Sheet Import Feature</h3>
+                    <p>A tool for importing and navigating audio tracks defined in CUE sheet files. Parses standard CUE files to extract track information and enables direct playback of individual tracks within long audio files.</p>
+                    <ul>
+                        <li><strong>Load standard CUE files</strong> (.cue format) with associated audio files</li>
+                        <li><strong>Track list display</strong> showing track numbers, titles, performers, and start times</li>
+                        <li><strong>Direct track access</strong> via double-click or play button</li>
+                        <li><strong>Navigation controls</strong>: Previous/Next track buttons</li>
+                        <li><strong>Relative path handling</strong> automatically resolves audio file locations</li>
+                        <li><strong>User confirmation dialog</strong> before loading parsed tracks</li>
+                        <li><strong>Integration with audio player</strong> - sends exact start positions to main application</li>
+                    </ul>
+                    <p><strong>User Workflow:</strong> Load CUE file → View track list → Select track → Play from precise start position</p>
+                </div>
+
+                <div style="background-color: #fff8e1; padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #e67e22;">
+                    <h3 style="color: #e67e22; margin-top: 0;">⏱️ Digital Seek Widget</h3>
+                    <p>A precision navigation tool allowing users to jump to specific time positions within audio tracks.</p>
+                    <ul>
+                        <li>Enter exact time values in minutes:seconds format</li>
+                        <li>Instantly seek to precise positions in the current track</li>
+                        <li>Fine-grained control over playback location</li>
+                        <li>Quick navigation without manual scrolling</li>
+                    </ul>
+                </div>
+
+                <div style="background-color: #f0fff0; padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #2E8B57;">
+                    <h3 style="color: #2E8B57; margin-top: 0;">📂 Drag-and-Drop File Import</h3>
+                    <p>Streamlined file import functionality for enhanced workflow efficiency.</p>
+                    <ul>
+                        <li>Drag music files directly from your file system into the application</li>
+                        <li>Supports various audio formats</li>
+                        <li>Quick loading without traditional file dialogs</li>
+                        <li>Intuitive file management</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div style="background-color: #ecf0f1; padding: 15px; border-radius: 8px; margin-bottom: 25px;">
+                <h2 style="color: #2c3e50; margin-top: 0;">⚡ BinauralPlayer Goes Fully Dynamic - Version 1.2.0</h2>
+                <p>Tone generation has been switched to a real-time dynamic engine.</p>
+                <ul>
+                    <li>Buffered tone generation removed entirely.</li>
+                    <li>No delays or gaps when increasing or decreasing frequencies — changes are applied instantly.</li>
+                </ul>
+                <p>This milestone opens the road to new features:</p>
+                <ul>
+                    <li>Programmable multi-stage sessions</li>
+                    <li>Per-stage frequency changes</li>
+                    <li>Support for binaural beats and isochronic pulses within complex session flows</li>
+                </ul>
+            </div>
+
+            <div style="background-color: #ecf0f1; padding: 15px; border-radius: 8px; margin-bottom: 25px;">
+                <h2 style="color: #2c3e50; margin-top: 0;">Introducing the Ambient Sound Control System - Version 1.1.0</h2>
+                <p>A powerful new feature that lets you create and control layered nature soundscapes
+                for relaxation, focus, meditation, and atmospheric enhancement.</p>
+            </div>
+
+            <h2 style="color: #2E8B57; border-bottom: 2px solid #2E8B57; padding-bottom: 5px;">🌿 Nature Toolbar Features</h2>
+
+            <div style="margin: 20px 0;">
+                <h3 style="color: #2E8B57;">🎚️ 5-Channel Ambient Mixer</h3>
+                <p>Five independent sound players that can run simultaneously. Create complex sound environments
+                by mixing rain, forest, thunder, ocean, and more.</p>
+
+                <h3 style="color: #2E8B57;">🔘 Global Power Control</h3>
+                <p>Single power button to enable/disable all nature sounds at once. Perfect for quick mute
+                or instant atmosphere activation.</p>
+
+                <h3 style="color: #2E8B57;">⏯️ Master Transport Controls</h3>
+                <p>Play, pause, and stop ALL active nature sounds simultaneously. Color-coded buttons provide
+                clear visual feedback: green (play), orange (pause), red (stop).</p>
+
+                <h3 style="color: #2E8B57;">🎛️ Individual Player Buttons</h3>
+                <p>Each channel has its own button showing name, state, and status. Single-click toggles
+                play/pause. Color indicates status: green (playing), orange (paused), gray (disabled).</p>
+
+                <h3 style="color: #2E8B57;">📊 Master Volume Control</h3>
+                <p>Slider controls overall ambient sound level with perceptual volume curve for natural
+                human hearing response.</p>
+            </div>
+
+            <h2 style="color: #9b59b6; border-bottom: 2px solid #9b59b6; padding-bottom: 5px;">💾 Preset System</h2>
+
+            <div style="margin: 20px 0;">
+                <h3 style="color: #9b59b6;">💽 Save Configurations</h3>
+                <p>Store complete sound setups including audio files, volumes, names, and enabled states.</p>
+
+                <h3 style="color: #9b59b6;">📂 Load Presets</h3>
+                <p>Quickly switch between saved environments like "Rainy Forest", "Ocean Waves", or "Focus Study".</p>
+
+                <h3 style="color: #9b59b6;">🔄 Reset Function</h3>
+                <p>One-click restoration to default settings with confirmation dialog for safety.</p>
+            </div>
+
+            <h2 style="color: #e67e22; border-bottom: 2px solid #e67e22; padding-bottom: 5px;">🎵 Player Capabilities</h2>
+
+            <div style="margin: 20px 0;">
+                <h3 style="color: #e67e22;">🎧 Multi-Format Audio</h3>
+                <p>Supports MP3, WAV, OGG, FLAC, and M4A files with integrated file browser.</p>
+
+                <h3 style="color: #e67e22;">🔤 Custom Naming</h3>
+                <p>Give each channel descriptive names up to 10 characters (e.g., "Rain", "Birds", "Thunder").</p>
+
+                <h3 style="color: #e67e22;">🔁 Auto-Repeat</h3>
+                <p>Loop audio files seamlessly for continuous background ambience.</p>
+
+                <h3 style="color: #e67e22;">📏 Individual Volume</h3>
+                <p>Fine-tune each channel's volume independently (0-100%).</p>
+
+                <h3 style="color: #e67e22;">⏱️ Progress Tracking</h3>
+                <p>See playback progress with seek capability in detailed settings dialog.</p>
+            </div>
+
+            <h2 style="color: #3498db; border-bottom: 2px solid #3498db; padding-bottom: 5px;">🖥️ Interface Design</h2>
+
+            <div style="margin: 20px 0;">
+                <h3 style="color: #3498db;">🎨 Non-Destructive Dialogs</h3>
+                <p>Player settings dialogs hide instead of close, preserving your configuration state.</p>
+
+                <h3 style="color: #3498db;">👁️ Visual Status Indicators</h3>
+                <p>Buttons show real-time status with icons and colors for instant recognition.</p>
+
+                <h3 style="color: #3498db;">🔍 Tooltip Guidance</h3>
+                <p>All controls have descriptive tooltips explaining their function.</p>
+
+                <h3 style="color: #3498db;">📱 Responsive Layout</h3>
+                <p>Clean toolbar design that integrates seamlessly with existing interface.</p>
+            </div>
+
+            <h2 style="color: #1abc9c; border-bottom: 2px solid #1abc9c; padding-bottom: 5px;">🚀 Quick Start Guide</h2>
+
+            <div style="margin: 20px 0;">
+                <h3 style="color: #1abc9c;">🎯 Enhanced Workflow Integration</h3>
+                <p>Combine all new features for powerful audio experiences:</p>
+                <ol style="margin-left: 20px; padding-left: 0;">
+                    <li><strong>Drag-and-drop</strong> music files directly into the application</li>
+                    <li><strong>Load CUE sheets</strong> for structured album navigation</li>
+                    <li><strong>Use digital seek</strong> for precise time jumping within tracks</li>
+                    <li><strong>Create multi-stage sessions</strong> for programmable tone sequences</li>
+                    <li><strong>Mix with ambient sounds</strong> for layered audio environments</li>
+                </ol>
+
+                <h3 style="color: #1abc9c;">⚡ Getting Started</h3>
+                <ol style="margin-left: 20px; padding-left: 0;">
+                    <li><strong>Power On</strong>: Click the ○ button to activate the system</li>
+                    <li><strong>Add Sounds</strong>: Click any player button (P1-P5) to open settings</li>
+                    <li><strong>Browse Files</strong>: Select nature sound files for each channel</li>
+                    <li><strong>Customize Names</strong>: Give descriptive names to each channel</li>
+                    <li><strong>Adjust Volumes</strong>: Set levels to create your perfect mix</li>
+                    <li><strong>Control Playback</strong>: Use master controls or click individual buttons</li>
+                </ol>
+
+                <h3 style="color: #1abc9c;">🎵 Download Nature Sounds</h3>
+                <p>Get high-quality, royalty-free ambient sounds from:</p>
+                <div style="background-color: #f0f9ff; padding: 15px; border-radius: 8px; border-left: 4px solid #3498db; margin: 15px 0;">
+                    <p><strong>🌐 Pixabay Sound Effects:</strong> <a href="https://pixabay.com/sound-effects/search/nature/" style="color: #3498db; text-decoration: none;">https://pixabay.com/sound-effects/search/nature/</a></p>
+                    <p>After downloading, place your audio files in:</p>
+                    <div style="background-color: #e8f4f8; padding: 10px; border-radius: 6px; font-family: monospace; margin: 10px 0;">
+                        ~/Documents/BinauralPlayer/ambient-tracks/
+                    </div>
+                    <p>Recommended downloads:</p>
+                    <ul style="margin-left: 20px; padding-left: 0;">
+                        <li>Rain & Thunderstorms</li>
+                        <li>Forest & Birds</li>
+                        <li>Ocean Waves</li>
+                        <li>Streams & Rivers</li>
+                        <li>Wind & Nature Ambience</li>
+                    </ul>
+                    <p style="font-style: italic; margin-top: 10px;">💡 <strong>Tip:</strong> The ambient player will automatically look for files in this directory when browsing!</p>
+                </div>
+
+                <h3 style="color: #1abc9c;">💡 Pro Tips</h3>
+                <ul style="margin-left: 20px; padding-left: 0;">
+                    <li>Start with 2-3 complementary sounds for best results</li>
+                    <li>Save your favorite mixes as presets for quick access</li>
+                    <li>Use the power button for instant silence during calls</li>
+                    <li>Combine binaural beats with ambient sounds for enhanced meditation</li>
+                    <li>Create multi-stage sessions for guided audio therapy sequences</li>
+                    <li>Use CUE sheets for seamless album or long-track navigation</li>
+                </ul>
+            </div>
+
+            <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; text-align: center; margin-top: 30px;">
+                <h3 style="color: #2c3e50; margin-top: 0;">🌟 Transform Your Audio Environment</h3>
+                <p style="margin-bottom: 0;">BinauralPlayer now offers comprehensive audio control: from dynamic tone generation and programmable multi-stage sessions to ambient sound mixing and precise file navigation. Create your perfect audio environment for relaxation, focus, meditation, or therapeutic purposes with our complete toolkit!</p>
+            </div>
+        </div>
+    )";
+}
+
 
 QString HelpMenuDialog::getShortcutsContent()
 {
@@ -517,7 +736,7 @@ QString HelpMenuDialog::getFeaturesContent()
     )";
 }
 
-
+/*
 QString HelpMenuDialog::getInstructionsContent()
 {
     return R"(
@@ -599,6 +818,128 @@ QString HelpMenuDialog::getInstructionsContent()
         <h3 style=\"color: #495057; margin-top: 0;\">🌟 Enjoy Responsibly</h3>
         <p style=\"margin-bottom: 0;\">BinauralPlayer makes it easy to explore powerful audio-based mental states.
         Keep volumes safe, stay aware of your body, and relax into the experience.</p>
+    </div>
+</div>
+    )";
+}
+*/
+
+QString HelpMenuDialog::getInstructionsContent()
+{
+    return R"(
+<div style=\"font-family: Arial, sans-serif; line-height: 1.6; color: #2c3e50;\">
+    <h1 style=\"color: #3498db; text-align: center; margin-bottom: 20px;\">🎧 How to Use BinauralPlayer</h1>
+
+    <div style=\"background-color: #ecf0f1; padding: 15px; border-radius: 8px; margin-bottom: 25px;\">
+        <h2 style=\"color: #2c3e50; margin-top: 0;\">🔊 Step 1: Choose Audio Type</h2>
+        <p>BinauralPlayer supports two forms of brainwave audio stimulation:</p>
+        <ul style=\"padding-left: 20px;\">
+            <li><strong>Binaural Beats</strong> — requires headphones</li>
+            <li><strong>Isochronic Tones</strong> — headphones optional</li>
+        </ul>
+        <p>Choose the mode from the interface before setting frequencies.</p>
+    </div>
+
+    <h2 style=\"color: #9b59b6; border-bottom: 2px solid #9b59b6; padding-bottom: 5px;\">🎧 Step 2: Using Binaural Beats</h2>
+
+    <div style=\"background-color: #fff3cd; padding: 15px; border-radius: 8px; margin: 15px 0;\">
+        <h3 style=\"color: #856404; margin-top: 0;\">How Binaural Beats Work</h3>
+        <p>Binaural beats are created when the left and right ears receive two <strong>slightly different</strong> frequencies. The brain perceives the difference as the beat.</p>
+        <p><strong>Example:</strong> Left = 200 Hz, Right = 208 Hz → Beat = 8 Hz</p>
+    </div>
+
+    <h3 style=\"color: #e67e22;\">Setting Up Binaural Beats:</h3>
+    <ol style=\"padding-left: 25px;\">
+        <li>Set <strong>Left Carrier Frequency</strong> (e.g., 200 Hz)</li>
+        <li>Set <strong>Right Carrier Frequency</strong> to create the desired beat (e.g., 208 Hz → 8 Hz beat)</li>
+        <li>Press <strong>Play</strong> to start the session</li>
+    </ol>
+
+    <p><strong>Tip:</strong> Binaural beats work best with high-quality headphones.</p>
+    <p>You can safely use beats outside the 0–30 Hz range, such as 40–100 Hz for stimulation.</p>
+
+    <h2 style=\"color: #1abc9c; border-bottom: 2px solid #1abc9c; padding-bottom: 5px;\">🔵 Step 3: Using Isochronic Tones</h2>
+
+    <div style=\"background-color: #e8f8f5; padding: 15px; border-radius: 8px; margin: 15px 0;\">
+        <h3 style=\"color: #117a65; margin-top: 0;\">How Isochronic Tones Work</h3>
+        <p>Isochronic tones use a <strong>single frequency</strong> that pulses on and off rapidly at the chosen beat frequency.</p>
+    </div>
+
+    <h3 style=\"color: #e67e22;\">Setting Up Isochronic Tones:</h3>
+    <ol style=\"padding-left: 25px;\">
+        <li>Set the <strong>Left Frequency</strong> (this will automatically copy to the right when you press Play)</li>
+        <li>Enter the <strong>Isochronic Pulse Frequency</strong> (0–100 Hz)</li>
+        <li>Press <strong>Play</strong> to generate pulses</li>
+    </ol>
+
+    <p><strong>Recommended:</strong> 0–30 Hz is best for brainwave entrainment.
+    Headphones are optional for ISO — speakers often work great.</p>
+
+    <h2 style=\"color: #8e44ad; border-bottom: 2px solid #8e44ad; padding-bottom: 5px;\">🎛️ Step 4: Advanced Features</h2>
+
+    <div style=\"background-color: #f5eef8; padding: 15px; border-radius: 8px; margin: 15px 0;\">
+        <h3 style=\"color: #8e44ad; margin-top: 0;\">📀 CUE Sheet Import</h3>
+        <p>Load structured audio tracks from CUE files for albums, long meditation tracks, or audio books:</p>
+        <ol style=\"padding-left: 20px;\">
+            <li>Click <strong>Load CUE File</strong> to import .cue sheet</li>
+            <li>View track list with titles, performers, and start times</li>
+            <li>Double-click any track to play from its exact start position</li>
+            <li>Use Previous/Next buttons to navigate between tracks</li>
+        </ol>
+        <p><strong>Tip:</strong> Great for navigating long audio files with multiple sections.</p>
+    </div>
+
+    <div style=\"background-color: #e8f6f3; padding: 15px; border-radius: 8px; margin: 15px 0;\">
+        <h3 style=\"color: #1abc9c; margin-top: 0;\">🔄 Multi-Stage Session Manager</h3>
+        <p>Create programmable sequences of audio stages for guided therapy sessions:</p>
+        <ol style=\"padding-left: 20px;\">
+            <li>Enter stages in text format: <code>TYPE:LEFT:RIGHT:WAVE:DUR(min):VOL(%)</code></li>
+            <li>Click <strong>Parse Stages</strong> to validate your session</li>
+            <li>Save session as .txt or .bsession file for reuse</li>
+            <li>Press <strong>Play</strong> to run the complete sequence</li>
+            <li>Monitor progress with highlighted current stage and time displays</li>
+        </ol>
+        <p><strong>Example:</strong> <code>binaural:200:208:sine:10:15</code> creates a 10-minute binaural session with 8Hz beat</p>
+    </div>
+
+    <div style=\"background-color: #fff8e1; padding: 15px; border-radius: 8px; margin: 15px 0;\">
+        <h3 style=\"color: #e67e22; margin-top: 0;\">⏱️ Digital Seek & Drag-and-Drop</h3>
+        <ul style=\"padding-left: 20px;\">
+            <li><strong>Digital Seek:</strong> Enter exact time (MM:SS) to jump to any position in the track</li>
+            <li><strong>Drag-and-Drop:</strong> Simply drag audio files from your computer directly into the application</li>
+            <li><strong>Quick Import:</strong> No file dialogs needed for fast loading of music files</li>
+        </ul>
+    </div>
+
+    <h2 style=\"color: #e74c3c; border-bottom: 2px solid #e74c3c; padding-bottom: 5px;\">⚠️ Safety & Responsibility</h2>
+
+    <div style=\"background-color: #ffebee; border: 2px solid #f44336; padding: 20px; border-radius: 8px; margin-bottom: 25px;\">
+        <h3 style=\"color: #c62828; text-align: center; margin-top: 0;\">Important Notice</h3>
+        <p style=\"font-weight: bold; text-align: center; color: #b71c1c;\">
+            Brainwave entrainment affects your mental state.<br>
+            Use responsibly and discontinue immediately if you feel discomfort.
+        </p>
+        <ul style=\"padding-left: 20px; color: #b71c1c;\">
+            <li>Always start at a <strong>low or comfortable volume</strong></li>
+            <li>Do NOT use while driving, operating machinery, or in unsafe environments</li>
+            <li>If you have epilepsy or neurological conditions, consult a doctor first</li>
+            <li>These audios may induce relaxation, drowsiness, or altered consciousness</li>
+        </ul>
+    </div>
+
+    <h2 style=\"color: #f39c12; border-bottom: 2px solid #f39c12; padding-bottom: 5px;\">🎯 Recommended Beat Ranges</h2>
+
+    <ul style=\"padding-left: 20px;\">
+        <li><strong>0.5–4 Hz (Delta):</strong> Deep sleep</li>
+        <li><strong>4–8 Hz (Theta):</strong> Meditation & trance</li>
+        <li><strong>8–14 Hz (Alpha):</strong> Relaxation & creativity</li>
+        <li><strong>14–30 Hz (Beta):</strong> Focus & alertness</li>
+        <li><strong>30–60+ Hz (Gamma):</strong> High cognition (binaural only)</li>
+    </ul>
+
+    <div style=\"text-align: center; margin: 30px 0; padding: 20px; background-color: #f8f9fa; border-radius: 8px;\">
+        <h3 style=\"color: #495057; margin-top: 0;\">🌟 Complete Audio Toolkit</h3>
+        <p style=\"margin-bottom: 0;\">BinauralPlayer offers everything from basic binaural beats to advanced multi-stage sessions and structured audio navigation. Combine features for powerful meditation, focus, or therapeutic audio experiences. Always use responsibly and enjoy your journey into audio-based brainwave entrainment.</p>
     </div>
 </div>
     )";

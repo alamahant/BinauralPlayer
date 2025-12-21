@@ -1,5 +1,22 @@
 # Changelog
 
+## [2025-12-21] - Release v1.3.0
+
+### Added
+- **Multi-Stage Session Manager**: Create programmable sequences of audio tones with timed stages
+- **CUE Sheet Import**: Load and navigate structured audio tracks from CUE files
+- **Digital Seek Widget**: Jump to precise time positions within tracks
+- **Drag-and-Drop Import**: Import audio files by dragging directly into the application
+
+### Notes
+Transforms the application from a simple tone generator into a complete audio toolkit with:
+- Programmable therapy and meditation sessions
+- Structured navigation of long audio files
+- Enhanced file management and workflow
+
+---
+
+
 ## [2025-12-16] - Release v1.2.0
 
 ### Changed

@@ -27,7 +27,9 @@
 #include<QTextBrowser>
 #include"ambientplayerdialog.h"
 #include"ambientplayer.h"
-
+#include"sessiondialog.h"
+#include<QTimer>
+#include"cuesheetdialog.h"
 
 class MainWindow : public QMainWindow
 {
@@ -38,6 +40,8 @@ public:
     ~MainWindow();
 protected:
     void closeEvent(QCloseEvent *event) override;
+    void dragEnterEvent(QDragEnterEvent* event) override;
+    void dropEvent(QDropEvent* event) override;
 private:
     enum ToneType {
 
@@ -119,6 +123,7 @@ private slots:
     void onWaveformChanged(int index);
     void onBinauralVolumeChanged(double value);
     void onBinauralPlayClicked();
+    void onBinauralPauseClicked();
     void onBinauralStopClicked();
 
 
@@ -348,6 +353,47 @@ private:
     void copyUserFiles();
     QPushButton *tbarResetBinauralSettingsButton;
     void mutePlayingAmbientPlayers(bool needMute);
+    QPushButton *m_binauralPauseButton;
+    bool m_engineIsPaused = false;
+    QAction *unlimitedDurationAction;
+    //session manager
+    QPushButton *m_openSessionManagerButton;
+    SessionDialog *m_sessionManagerDialog = nullptr;
+private slots:
+    void onSessionStageChanged(int toneType, double leftFreq, double rightFreq,
+                                  int waveform, double pulseFreq, double volume);
+    void onSessionStarted(int totalSeconds);
+    void onSessionEnded();
+    //fader
+private:
+    QTimer m_fadeTimer;
+    double m_fadeStartVolume;
+    double m_fadeTargetVolume;
+    int m_fadeSteps;
+    double targetVolume = 0.0;
+    QLabel *durationLabel;
+    int currentStageIndex;
+    int totalRemainigTime;
 
+    //time edit seeker
+    QLineEdit *timeEdit;
+    QPushButton *timeEditButton;
+    qint64 parseTimeStringToMs(const QString &timeStr);
+private slots:
+    void onSeekTrack();
+    // cue importer
+private:
+    CueSheetDialog *m_cueDialog = nullptr;
+    QPushButton *openCueButton;
+private slots:
+    void onCueTrackSelected(const QString &audioFile, qint64 startMs);
+    void onCuePositionChanged(qint64 positionMs);
+    //dragdrop
+    void processDroppedFiles(const QStringList& filePaths);
+private:
+
+    QPushButton *tbarOpenPlaylistButton;
+    QPushButton *tbarSavePlaylistButton;
+    QPushButton *tbarSaveAllPlaylistsButton;
 };
 #endif // MAINWINDOW_H

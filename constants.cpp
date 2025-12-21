@@ -8,6 +8,8 @@ const QString presetFilePath = appDirPath + "/brainwave-presets";
 const QString playlistFilePath = appDirPath + "/playlists";
 const QString musicFilePath = appDirPath + "/music";
 const QString ambientPresetFilePath = appDirPath + "/ambient-presets";
-
 int currentToneType = 0;
+QMediaPlayer::PlaybackState playbackState = QMediaPlayer::StoppedState;
+QString lastMusicDirPath;
+
 }

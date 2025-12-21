@@ -15,8 +15,6 @@
         <file>icons/square.svg</file>
         <file>icons/volume-2.svg</file>
         <file>icons/volume-x.svg</file>
-        <file>icons-white/folder.svg</file>
-        <file>icons-white/save.svg</file>
         <file>icons/copy.svg</file>
         <file>icons/settings.svg</file>
         <file>icons/power.svg</file>
@@ -28,15 +26,18 @@
         <file>icons/eye.svg</file>
         <file>icons/edit.svg</file>
         <file>icons/refresh-cw.svg</file>
-        <file>favicon/android-chrome-512x512.png</file>
         <file>icons/file-minus.svg</file>
         <file>icons/folder-minus.svg</file>
         <file>icons/folder-plus.svg</file>
         <file>icons/minus.svg</file>
         <file>icons/minus-square.svg</file>
+        <file>icons/layers.svg</file>
+
+        <file>favicon/android-chrome-512x512.png</file>
         <file>files/AmbientNatureSounds.txt</file>
         <file>files/FrequencyList.txt</file>
         <file>files/README.txt</file>
         <file>files/MUSIC.txt</file>
+        
     </qresource>
 </RCC>

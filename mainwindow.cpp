@@ -22,6 +22,10 @@
 #include<QApplication>
 #include"helpmenudialog.h"
 #include"donationdialog.h"
+#include<QRegularExpression>
+#include<QMimeData>
+#include<QFileInfo>
+#include<QUrl>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -48,12 +52,14 @@ MainWindow::MainWindow(QWidget *parent)
     , m_masterVolumeSlider(nullptr)
     , m_masterVolumeLabel(nullptr)
     , m_naturePowerButton(nullptr)
+    , m_sessionManagerDialog(new SessionDialog(this))
+    , m_cueDialog(new CueSheetDialog(this))
 {
     // Window properties
     setWindowTitle("Binaural Media Player");
     setMinimumSize(900, 700);
     setWindowIcon(QIcon(":/favicon/android-chrome-512x512.png"));
-
+    setAcceptDrops(true);  // ENABLE DRAG & DROP
     // Initialize audio engines
     //initializeAudioEngines();
 
@@ -121,6 +127,9 @@ MainWindow::MainWindow(QWidget *parent)
     createInfoDialog();
     onNaturePowerToggled(false);
     copyUserFiles();
+    bool unlimited = settings.value("binaural/unlimitedDuration", false).toBool();
+    m_sessionManagerDialog->setUnlimitedDuration(unlimited);
+    m_fadeTimer.setInterval(50);
 }
 
 MainWindow::~MainWindow()
@@ -162,20 +171,20 @@ QToolBar *MainWindow::createMediaToolbar()
     m_loadMusicButton->setToolTip("Load music files");
     toolbar->addWidget(m_loadMusicButton);
 
-    QPushButton *tbarOpenPlaylistButton = new QPushButton(toolbar);
+    tbarOpenPlaylistButton = new QPushButton(toolbar);
     tbarOpenPlaylistButton->setIcon(QIcon(":/icons/folder.svg"));
     tbarOpenPlaylistButton->setToolTip("Load Playlist");
     connect(tbarOpenPlaylistButton, &QPushButton::clicked, this, &MainWindow::onOpenPlaylistClicked);
     toolbar->addWidget(tbarOpenPlaylistButton);
 
-    QPushButton *tbarSavePlaylistButton = new QPushButton(toolbar);
+    tbarSavePlaylistButton = new QPushButton(toolbar);
     tbarSavePlaylistButton->setToolTip("Save Playlist As");
     tbarSavePlaylistButton->setIcon(QIcon(":/icons/save.svg"));
 
     connect(tbarSavePlaylistButton, &QPushButton::clicked, this, &MainWindow::onSaveCurrentPlaylistAsClicked);
     toolbar->addWidget(tbarSavePlaylistButton);
 
-    QPushButton *tbarSaveAllPlaylistsButton = new QPushButton(toolbar);
+    tbarSaveAllPlaylistsButton = new QPushButton(toolbar);
     tbarSaveAllPlaylistsButton->setToolTip("Save All Playlists");
     tbarSaveAllPlaylistsButton->setIcon(QIcon(":/icons/copy.svg"));
 
@@ -258,6 +267,33 @@ QToolBar *MainWindow::createMediaToolbar()
     //toolbar->addWidget(m_currentTimeLabel);
     //toolbar->addWidget(m_totalTimeLabel);
     //toolbar->addSeparator();
+
+    //timeedit seeker
+    timeEditButton = new QPushButton(toolbar);
+    timeEditButton->setToolTip("Seek");
+    timeEditButton->setMaximumWidth(25);
+    timeEditButton->setIcon(QIcon(":/icons/edit.svg"));
+    timeEditButton->setCheckable(true);
+    timeEditButton->setChecked(false);
+    timeEdit = new QLineEdit(toolbar);
+    timeEdit->setMaximumWidth(75);
+    timeEdit->setDisabled(true);
+    timeEdit->setPlaceholderText("hh:mm:ss");
+    timeEdit->setToolTip("Format: hh:mm:ss or mm:ss");
+    QRegularExpression timeRegex("^([0-9]{1,2}:)?[0-5]?[0-9]:[0-5][0-9]$");
+    QRegularExpressionValidator *validator = new QRegularExpressionValidator(timeRegex, timeEdit);
+    timeEdit->setValidator(validator);
+    toolbar->addWidget(timeEditButton);
+    toolbar->addWidget(timeEdit);
+
+    // cue importer
+    openCueButton = new QPushButton("Cue", toolbar);
+    openCueButton->setMaximumWidth(32);
+    openCueButton->setToolTip("Open Cue file importer");
+    openCueButton->setCheckable(true);
+    openCueButton->setChecked(false);
+    toolbar->addWidget(openCueButton);
+
 
     return toolbar;
 }
@@ -437,6 +473,14 @@ QToolBar *MainWindow::createBinauralToolbarExt()
     m_binauralPlayButton->setEnabled(false);
     toolbar->addWidget(m_binauralPlayButton);
 
+    //pause
+    m_binauralPauseButton = new QPushButton(toolbar);
+    m_binauralPauseButton->setMinimumWidth(50);
+    m_binauralPauseButton->setIcon(QIcon(":/icons/pause.svg"));
+    m_binauralPauseButton->setToolTip("Pause binaural tones");
+    m_binauralPauseButton->setEnabled(false);
+    toolbar->addWidget(m_binauralPauseButton);
+
     m_binauralStopButton = new QPushButton(toolbar);
     m_binauralStopButton->setIcon(QIcon(":/icons/square.svg"));
 
@@ -450,16 +494,22 @@ QToolBar *MainWindow::createBinauralToolbarExt()
     //toolbar->addSeparator();
 
     // Duration label
-    QLabel *durationLabel = new QLabel("Timer:", toolbar);
+    durationLabel = new QLabel("Timer:", toolbar);
     durationLabel->setToolTip("Auto-stop after selected duration");
     toolbar->addWidget(durationLabel);
 
     // Duration selector
     m_brainwaveDuration = new QSpinBox(toolbar);
-    m_brainwaveDuration->setRange(1, 45);
+    bool unlimited = settings.value("binaural/unlimitedDuration", false).toBool();
+    if(unlimited){
+    m_brainwaveDuration->setRange(1, 360);
+    }else{
+        m_brainwaveDuration->setRange(1, 45);
+
+    }
     m_brainwaveDuration->setValue(45);
     m_brainwaveDuration->setSuffix(" min");
-    m_brainwaveDuration->setMaximumWidth(70);
+    m_brainwaveDuration->setMaximumWidth(75);
     m_brainwaveDuration->setToolTip("Auto-stop brainwave audio after X minutes (1-45)");
     m_brainwaveDuration->setEnabled(false); // Enabled when binaural power is on
     toolbar->addWidget(m_brainwaveDuration);
@@ -476,6 +526,16 @@ QToolBar *MainWindow::createBinauralToolbarExt()
     m_countdownLabel->setVisible(true); // Only show when timer is active
     toolbar->addWidget(m_countdownLabel);
 
+    //sssion management
+    toolbar->addSeparator();
+    m_openSessionManagerButton = new QPushButton(" Sessions", toolbar);
+    m_openSessionManagerButton->setCheckable(true);
+    m_openSessionManagerButton->setChecked(false);
+    m_openSessionManagerButton->setEnabled(false);
+    m_openSessionManagerButton->setIcon(QIcon(":/icons/layers.svg"));
+    m_openSessionManagerButton->setToolTip("Open Session Manager");
+
+    toolbar->addWidget(m_openSessionManagerButton);
 
     return toolbar;
 }
@@ -719,13 +779,13 @@ void MainWindow::setupLayout()
     //m_addFilesButton->setMinimumWidth(80);
     //m_addFilesButton->setIcon(QIcon(":/icons/plus.svg"));
     m_addFilesButton->setToolTip("Load Music Files");
-    m_removeTrackButton = new QPushButton("Remove Selected", this);
+    m_removeTrackButton = new QPushButton("Remove", this);
     //m_removeTrackButton->setMinimumWidth(60);
     //m_removeTrackButton->setIcon(QIcon(":/icons/file-minus.svg"));
 
     m_removeTrackButton->setToolTip("Remove Selected Track");
 
-    m_clearPlaylistButton = new QPushButton("Clear Playlist", this);
+    m_clearPlaylistButton = new QPushButton("Clear", this);
     //m_clearPlaylistButton->setMinimumWidth(60);
     //m_clearPlaylistButton->setIcon(QIcon(":/icons/folder-minus.svg"));
     m_clearPlaylistButton->setToolTip("Clear Currently Opened Playlist");
@@ -794,11 +854,34 @@ void MainWindow::setupConnections()
     connect(m_seekSlider, &QSlider::sliderReleased,
             this, &MainWindow::onSeekSliderReleased);
 
+    //cue importer
+    connect(openCueButton, &QPushButton::clicked, this, [this](bool checked){
+        if(checked){
+            m_cueDialog->show();
+        }else{
+            m_cueDialog->hide();
+        }
+    });
+    connect(m_cueDialog, &CueSheetDialog::hideRequested, this ,[this]{
+        openCueButton->setChecked(false);
+    });
+
+    connect(m_cueDialog, &CueSheetDialog::trackSelected,
+            this, &MainWindow::onCueTrackSelected);
+
+    connect(m_cueDialog, &CueSheetDialog::trackPositionChanged,
+            this, &MainWindow::onCuePositionChanged);
+
     //connect(volumeIcon, &QPushButton::clicked, this, &MainWindow::onMuteButtonClicked);
 
     connect(m_mediaPlayer, &QMediaPlayer::metaDataChanged,
             this, &MainWindow::handleMetaDataUpdated);
 
+    connect(timeEditButton, &QPushButton::clicked, this, [this](bool checked){
+            timeEdit->setEnabled(checked);
+            if (checked) timeEdit->clear();
+    });
+    connect(timeEdit, &QLineEdit::returnPressed, this, &MainWindow::onSeekTrack);
     // Binaural connections
     connect(m_binauralPowerButton, &QPushButton::toggled, this, &MainWindow::onBinauralPowerToggled);
     connect(m_leftFreqInput, QOverload<double>::of(&QDoubleSpinBox::valueChanged),
@@ -810,6 +893,8 @@ void MainWindow::setupConnections()
     connect(m_binauralVolumeInput, QOverload<double>::of(&QDoubleSpinBox::valueChanged),
             this, &MainWindow::onBinauralVolumeChanged);
     connect(m_binauralPlayButton, &QPushButton::clicked, this, &MainWindow::onBinauralPlayClicked);
+    connect(m_binauralPauseButton, &QPushButton::clicked, this, &MainWindow::onBinauralPauseClicked);
+
     connect(m_binauralStopButton, &QPushButton::clicked, this, &MainWindow::onBinauralStopClicked);
 
     connect(toneTypeCombo, &QComboBox::currentIndexChanged, this, &MainWindow::onToneTypeComboIndexChanged);
@@ -818,6 +903,26 @@ void MainWindow::setupConnections()
         m_binauralEngine->setPulseFrequency(hz);
         m_binauralStatusLabel->setText(formatBinauralString());
     });
+    // sessions
+    connect(m_openSessionManagerButton, &QPushButton::clicked, this, [this](bool checked){
+        if(checked){
+            m_sessionManagerDialog->show();
+        }else{
+            m_sessionManagerDialog->hide();
+        }
+    });
+    connect(m_sessionManagerDialog, &SessionDialog::dialogHidden, this, [this]{
+        m_openSessionManagerButton->setChecked(false);
+    });
+
+    connect(m_sessionManagerDialog, &SessionDialog::stageChanged,
+            this, &MainWindow::onSessionStageChanged);
+
+    connect(m_sessionManagerDialog, &SessionDialog::sessionStarted,
+            this, &MainWindow::onSessionStarted);
+
+    connect(m_sessionManagerDialog, &SessionDialog::sessionEnded,
+            this, &MainWindow::onSessionEnded);
 
     //nature toolbar connections
     connect(m_masterPlayButton, &QPushButton::clicked,
@@ -869,6 +974,86 @@ void MainWindow::setupConnections()
     connect(saveAllPlaylistsAction, &QAction::triggered, this, &MainWindow::onSaveAllPlaylistsClicked);
     connect(quitAction, &QAction::triggered, [this]{
         qApp->quit();
+    });
+
+    connect(unlimitedDurationAction, &QAction::triggered, [this](bool checked){
+
+        if(checked){
+            QMessageBox::warning(this,
+                "Prolonged Exposure Warning",
+                "Prolonged exposure to binaural audio may cause fatigue or discomfort.\nUse responsibly.");
+            m_brainwaveDuration->setRange(1, 360);
+            settings.setValue("binaural/unlimitedDuration", true);
+        }else{
+            m_brainwaveDuration->setRange(1, 45);
+            settings.setValue("binaural/unlimitedDuration", false);
+
+        }
+        m_sessionManagerDialog->setUnlimitedDuration(checked);
+
+    });
+    //fade
+
+    connect(&m_fadeTimer, &QTimer::timeout, this, [this]() {
+        if (m_sessionManagerDialog) {
+            m_sessionManagerDialog->pauseButton()->setDisabled(true);
+            m_sessionManagerDialog->stopButton()->setDisabled(true);
+           }
+
+        m_fadeSteps++;
+
+        double progress = m_fadeSteps / 100.0;
+        double vol = m_fadeStartVolume + (m_fadeTargetVolume - m_fadeStartVolume) * progress;
+        m_binauralVolumeInput->setValue(vol);
+
+        if (m_fadeSteps >= 100) {
+            m_fadeTimer.stop();
+            m_binauralVolumeInput->setValue(m_fadeTargetVolume);
+            if (m_sessionManagerDialog) {
+                m_sessionManagerDialog->pauseButton()->setEnabled(true);
+                m_sessionManagerDialog->stopButton()->setEnabled(true);
+
+            }
+        }
+
+    });
+
+    connect(m_sessionManagerDialog, &SessionDialog::fadeRequested, this, [this](double targetVolume){
+
+        m_fadeStartVolume = m_binauralEngine->getVolume() * 100;
+
+        if (m_fadeStartVolume == targetVolume) return;
+
+        m_fadeTargetVolume = targetVolume;
+        m_fadeSteps = 0;
+        m_fadeTimer.start();
+
+    });
+
+    connect(m_sessionManagerDialog, &SessionDialog::pauseRequested, this, [this]{
+        m_binauralPauseButton->setEnabled(true);
+        m_binauralPauseButton->click();
+        m_binauralPauseButton->setDisabled(true);
+
+    });
+    connect(m_sessionManagerDialog, &SessionDialog::resumeRequested, this, [this]{
+        m_binauralPlayButton->setEnabled(true);
+        m_binauralPlayButton->click();
+        m_binauralPlayButton->setDisabled(true);
+
+    });
+    connect(m_sessionManagerDialog, &SessionDialog::syncTimersRequested, this, [this](int currentIndex, int remainingTime){
+
+        /*
+        int minutes = remainingTime / 60;
+        int seconds = remainingTime % 60;
+        m_countdownLabel->setText(QString("%1:%2")
+            .arg(minutes, 2, 10, QLatin1Char('0'))
+            .arg(seconds, 2, 10, QLatin1Char('0')));
+        */
+        currentStageIndex = currentIndex;
+        totalRemainigTime = remainingTime;
+
     });
 }
 
@@ -928,11 +1113,13 @@ void MainWindow::updateBinauralPowerState(bool enabled)
     m_waveformCombo->setEnabled(enabled);
     m_binauralVolumeInput->setEnabled(enabled);
     m_binauralPlayButton->setEnabled(enabled);
+    m_binauralPauseButton->setEnabled(enabled);
     m_binauralStopButton->setEnabled(enabled);
     tbarOpenPresetButton->setEnabled(enabled);
     tbarSavePresetButton->setEnabled(enabled);
     tbarOpenPresetButton->setEnabled(enabled);
     tbarSavePresetButton->setEnabled(enabled);
+    m_openSessionManagerButton->setEnabled(enabled);
     tbarResetBinauralSettingsButton->setEnabled(enabled);
     // Update power button text
     m_binauralPowerButton->setText(enabled ? "●" : "○");
@@ -1166,24 +1353,56 @@ void MainWindow::onBinauralPlayClicked()
         }
         m_binauralStatusLabel->setText(formatBinauralString());
         startAutoStopTimer();
+        m_engineIsPaused = false;
         //m_leftFreqInput->setDisabled(true);
         //m_rightFreqInput->setDisabled(true);
         m_brainwaveDuration->setDisabled(true);
+        m_binauralPauseButton->setToolTip("Pause binaural tones");
+        m_binauralPlayButton->setToolTip("Play binaural tones");
+        unlimitedDurationAction->setDisabled(true);
+    }
+}
+
+void MainWindow::onBinauralPauseClicked()
+{
+    if(!m_binauralEngine->isPlaying()) return;
+
+    if (!m_engineIsPaused) {
+        // Pause
+        m_binauralEngine->stop();   // stop audio
+        stopAutoStopTimer();        // stop timer, but do NOT reset remaining seconds
+        m_engineIsPaused = true;
+        m_binauralPauseButton->setToolTip("Paused");
+        m_binauralPlayButton->setToolTip("Resume");
+
+        m_binauralStatusLabel->setText("Binaural tones paused");
     }
 }
 
 void MainWindow::onBinauralStopClicked()
 {
     m_binauralEngine->stop();
+
+    m_binauralPauseButton->setToolTip("Pause binaural tones");
+    m_binauralPlayButton->setToolTip("Play binaural tones");
+
+
     stopAutoStopTimer();
+    m_remainingSeconds = 0;
+
+    m_engineIsPaused = false;
+
     m_leftFreqInput->setEnabled(true);
     m_rightFreqInput->setEnabled(true);
 
     m_brainwaveDuration->setEnabled(true);
+    m_countdownLabel->setText(m_brainwaveDuration->text());
     if(ConstantGlobals::currentToneType == 1) {
        m_rightFreqInput->setDisabled(true);
     }
     m_binauralStatusLabel->setText("Binaural tones stopped");
+    unlimitedDurationAction->setEnabled(true);
+
 }
 
 // Nature sounds slots
@@ -1389,8 +1608,13 @@ void MainWindow::startAutoStopTimer() {
     // Stop any existing timer
     stopAutoStopTimer();
 
+    // Only reset duration if NOT resuming from pause
+        if (!m_engineIsPaused) {
+            m_remainingSeconds = m_brainwaveDuration->value() * 60;
+        }
+
     // Calculate seconds from selected minutes
-    m_remainingSeconds = m_brainwaveDuration->value() * 60;
+    //m_remainingSeconds = m_brainwaveDuration->value() * 60;
 
     // Create and start timer
     m_autoStopTimer = new QTimer(this);
@@ -1416,7 +1640,7 @@ void MainWindow::stopAutoStopTimer() {
 
     // Hide countdown display
     m_countdownLabel->setVisible(false);
-    m_remainingSeconds = 0;
+   // m_remainingSeconds = 0;
 }
 
 // Update countdown display
@@ -1528,6 +1752,7 @@ void MainWindow::onPlaybackStateChanged(QMediaPlayer::PlaybackState state)
            m_pauseMusicButton->setEnabled(true);
            m_stopMusicButton->setEnabled(true);
            m_playingTrackIndex = m_currentTrackIndex;
+           ConstantGlobals::playbackState = QMediaPlayer::PlayingState;
             break;
 
     case QMediaPlayer::PausedState:
@@ -1537,6 +1762,8 @@ void MainWindow::onPlaybackStateChanged(QMediaPlayer::PlaybackState state)
            m_stopMusicButton->setEnabled(true);
            // Store pause position for resume
            m_pausedPosition = m_mediaPlayer->position();
+           ConstantGlobals::playbackState = QMediaPlayer::PausedState;
+
            break;
 
        case QMediaPlayer::StoppedState:
@@ -1544,6 +1771,7 @@ void MainWindow::onPlaybackStateChanged(QMediaPlayer::PlaybackState state)
            m_playMusicButton->setEnabled(true);
            m_pauseMusicButton->setEnabled(false);
            m_stopMusicButton->setEnabled(false);
+           ConstantGlobals::playbackState = QMediaPlayer::StoppedState;
 
            break;
        }
@@ -1747,7 +1975,8 @@ void MainWindow::onPositionChanged(qint64 positionMs)
 
     // Format current position
     int currentSeconds = positionMs / 1000;
-    int minutes = (currentSeconds / 60) % 60;
+    //int minutes = (currentSeconds / 60) % 60;
+    int minutes = currentSeconds / 60;
     int seconds = currentSeconds % 60;
 
     m_currentTimeLabel->setText(
@@ -1780,6 +2009,8 @@ void MainWindow::onSeekSliderReleased()
     int value = m_seekSlider->value();
     m_mediaPlayer->setPosition(value * 1000);
 }
+
+
 
 /*
 void MainWindow::playPreviousTrack()
@@ -1876,7 +2107,7 @@ void MainWindow::onRepeatClicked()
 
 void MainWindow::onToneTypeComboIndexChanged(int index)
 {
-    if(m_binauralEngine) m_binauralEngine->stop();
+    //if(m_binauralEngine) m_binauralEngine->stop();
 
 
     int toneValue = toneTypeCombo->itemData(index).toInt();
@@ -2165,6 +2396,7 @@ void MainWindow::onLoadMusicClicked()
         //"Audio Files (*.mp3 *.wav *.flac *.ogg *.m4a)");
         filter);
     if (!files.isEmpty()) {
+        ConstantGlobals::lastMusicDirPath = QFileInfo(files.first()).absolutePath();
         QString playlistName = currentPlaylistName();
         foreach (const QString &file, files) {
             QString fileName = QFileInfo(file).fileName();
@@ -2240,6 +2472,9 @@ void MainWindow::onClearPlaylistClicked()
                                  QMessageBox::Yes | QMessageBox::No);
 
     if (reply == QMessageBox::Yes) {
+        if(m_mediaPlayer && m_mediaPlayer->playbackState() == QMediaPlayer::PlayingState) {
+            m_mediaPlayer->stop();
+        }
         playlist->clear();
         m_playlistFiles[playlistName].clear();
 
@@ -2971,6 +3206,17 @@ void MainWindow::setupMenus()
         }
     });
     settingsMenu->addAction(factoryResetAction);
+    //unliited time
+    settingsMenu->addSeparator();
+
+    unlimitedDurationAction = new QAction("Unlimited Duration", settingsMenu);
+    unlimitedDurationAction->setCheckable(true);
+    //unlimitedDurationAction->setIcon(QIcon(":/icons/infinity.svg"));
+
+    bool unlimited = settings.value("binaural/unlimitedDuration", false).toBool();
+    unlimitedDurationAction->setChecked(unlimited);
+
+    settingsMenu->addAction(unlimitedDurationAction);
 
     // ========== PRESETS MENU ==========
     QMenu *presetsMenu = menuBar()->addMenu("&Presets");
@@ -3891,3 +4137,335 @@ void MainWindow::mutePlayingAmbientPlayers(bool needMute)
         }
     }
 }
+
+
+//sessions
+
+void MainWindow::onSessionStageChanged(int toneType, double leftFreq, double rightFreq,
+                                       int waveform, double pulseFreq, double volume)
+{
+    targetVolume = volume;
+    // Update UI displays ONCE
+    toneTypeCombo->setCurrentIndex(toneType);
+    m_waveformCombo->setCurrentIndex(waveform);
+    //m_binauralVolumeInput->setValue(volume);
+
+    if (toneType == 1) { // ISOCHRONIC
+        // For ISO: left shows carrier, right shows pulse for clarity
+        m_leftFreqInput->setValue(leftFreq);      // Carrier frequency
+        m_rightFreqInput->setValue(leftFreq);    // Pulse frequency (for display)
+        m_pulseFreqLabel->setValue(pulseFreq);    // Pulse in pulse field
+
+        // Beat field not used for ISO
+        m_beatFreqLabel->setText("__.__");
+
+    } else { // BINAURAL or GENERATOR
+        // Normal display
+        m_leftFreqInput->setValue(leftFreq);
+        m_rightFreqInput->setValue(rightFreq);
+
+        // Calculate and show beat
+        double beatFreq = qAbs(rightFreq - leftFreq);
+        m_beatFreqLabel->setText(QString("%1 Hz").arg(beatFreq, 0, 'f', 2));
+
+        // Pulse field not used
+        m_pulseFreqLabel->setValue(7.83);
+    }
+}
+
+void MainWindow::onSessionStarted(int totalSeconds)
+{
+    //it is handled by the fader timer
+    m_binauralVolumeInput->setValue(0.0);
+
+    // Enable session button now that we have a session
+    //m_openSessionManagerButton->setEnabled(true);
+
+    // Update toolbar timers
+    int totalMinutes = totalSeconds / 60;
+    m_brainwaveDuration->setValue(totalMinutes);
+
+    // Format time as MM:SS
+    int minutes = totalSeconds / 60;
+    int seconds = totalSeconds % 60;
+    m_countdownLabel->setText(QString("%1:%2")
+        .arg(minutes, 2, 10, QLatin1Char('0'))
+        .arg(seconds, 2, 10, QLatin1Char('0')));
+
+    // Disable regular controls to prevent conflicts
+    //m_binauralPowerButton->setEnabled(false);
+    //m_leftFreqInput->setEnabled(false);
+    //m_rightFreqInput->setEnabled(false);
+    //m_waveformCombo->setEnabled(false);
+    //m_binauralVolumeInput->setEnabled(false);
+    //m_brainwaveDuration->setEnabled(false);
+
+    // Enable/disable playback buttons appropriately
+
+    m_binauralPlayButton->click();
+
+
+    m_binauralPlayButton->setEnabled(false);  // Session controls playback
+    m_binauralStopButton->setEnabled(false); // Allow emergency stop
+    m_binauralPauseButton->setEnabled(false);
+
+    statusBar()->showMessage("Session started", 3000);
+}
+
+void MainWindow::onSessionEnded()
+{
+    // Re-enable all regular controls
+    //m_binauralPowerButton->setEnabled(true);
+    //m_leftFreqInput->setEnabled(true);
+    //m_rightFreqInput->setEnabled(true);
+    //m_waveformCombo->setEnabled(true);
+    //m_binauralVolumeInput->setEnabled(true);
+    //m_brainwaveDuration->setEnabled(true);
+
+    // Reset playback buttons to default state
+    //m_binauralPlayButton->setEnabled(true);
+    //m_binauralStopButton->setEnabled(false);
+
+    // Reset timer displays
+    //m_countdownLabel->setText("--:--");
+
+    m_binauralPlayButton->setEnabled(true);  // Session controls playback
+    m_binauralStopButton->setEnabled(true); // Allow emergency stop
+    m_binauralPauseButton->setEnabled(true);
+    m_binauralStopButton->click();
+
+
+
+    if (m_sessionManagerDialog->isSessionActive()){
+        m_sessionManagerDialog->stopSession();
+    }
+    m_sessionManagerDialog->stopSession();
+    m_brainwaveDuration->setValue(45);
+    m_countdownLabel->setText("--:--");
+    statusBar()->showMessage("Session ended", 3000);
+    QTimer::singleShot(5000, this, [this]() {
+        m_binauralVolumeInput->setValue(15.0);
+    });
+}
+
+void MainWindow::onSeekTrack()
+{
+    if (!timeEdit || !m_mediaPlayer) return;
+
+    //if (!m_mediaPlayer->isPlaying()){
+    //}
+
+    QString input = timeEdit->text().trimmed();
+
+    // Parse the time string to milliseconds
+    qint64 totalMs = parseTimeStringToMs(input);
+    qint64 duration = m_mediaPlayer->duration();
+
+    if (totalMs < 0 || totalMs > duration) {
+        // Invalid input - reset to current position and clear
+       // updateTimeFromPlayer(m_mediaPlayer->position());
+        timeEdit->clear();
+        return;
+    }
+
+    m_mediaPlayer->setPosition(totalMs);
+
+    // Update slider
+    if (m_seekSlider) {
+        m_seekSlider->setValue(totalMs);
+    }
+
+    //timeEdit->clearFocus();
+
+}
+
+qint64 MainWindow::parseTimeStringToMs(const QString &timeStr)
+{
+    if (timeStr.isEmpty()) {
+        return 0; // Empty string = seek to beginning
+    }
+
+    QString cleanStr = timeStr.trimmed();
+    QStringList parts = cleanStr.split(':');
+
+    // Handle mm:ss (2 parts)
+    if (parts.size() == 2) {
+        bool minutesOk, secondsOk;
+        int minutes = parts[0].toInt(&minutesOk);
+        int seconds = parts[1].toInt(&secondsOk);
+
+        if (minutesOk && secondsOk &&
+            minutes >= 0 && minutes < 60 &&
+            seconds >= 0 && seconds < 60) {
+            return (minutes * 60000) + (seconds * 1000);
+        }
+    }
+
+    // Handle hh:mm:ss (3 parts)
+    else if (parts.size() == 3) {
+        bool hoursOk, minutesOk, secondsOk;
+        int hours = parts[0].toInt(&hoursOk);
+        int minutes = parts[1].toInt(&minutesOk);
+        int seconds = parts[2].toInt(&secondsOk);
+
+        if (hoursOk && minutesOk && secondsOk &&
+            hours >= 0 && minutes >= 0 && minutes < 60 &&
+            seconds >= 0 && seconds < 60) {
+            return (hours * 3600000) + (minutes * 60000) + (seconds * 1000);
+        }
+    }
+
+    // Invalid format
+    return -1;
+}
+
+// cue importer
+/*
+void MainWindow::onCueTrackSelected(const QString &audioFile, qint64 startMs)
+{
+    if (!m_mediaPlayer) return;
+
+    // Check if we need to load a new file
+    if (m_mediaPlayer->source().toLocalFile() != audioFile) {
+        // Load and immediately play
+        m_mediaPlayer->setSource(QUrl::fromLocalFile(audioFile));
+        m_mediaPlayer->play();
+
+        // Use a one-time connection to seek when playback starts
+        QObject::connect(m_mediaPlayer, &QMediaPlayer::positionChanged, this,
+            [this, startMs](qint64 pos) {
+                // Disconnect after first position change
+                QObject::disconnect(m_mediaPlayer, &QMediaPlayer::positionChanged,
+                                    this, nullptr);
+                // Seek to the cue position
+                m_mediaPlayer->setPosition(startMs);
+            });
+    } else {
+        // Same file - seek immediately
+        m_mediaPlayer->setPosition(startMs);
+        if (m_mediaPlayer->playbackState() != QMediaPlayer::PlayingState) {
+            m_mediaPlayer->play();
+        }
+    }
+}
+*/
+
+void MainWindow::onCuePositionChanged(qint64 positionMs)
+{
+    if (!m_seekSlider) return;
+
+    // Update slider WITHOUT triggering seek
+    m_seekSlider->blockSignals(true);
+    m_seekSlider->setValue(positionMs);
+    m_seekSlider->blockSignals(false);
+
+    // Optional: Update time display
+    if (m_currentTimeLabel) {
+        //QTime currentTime = QTime(0, 0, 0).addMSecs(positionMs);
+        //m_currentTimeLabel->setText(currentTime.toString("hh:mm:ss"));
+    }
+
+    qDebug() << "CUE dialog updated slider to:" << positionMs << "ms";
+}
+
+
+void MainWindow::onCueTrackSelected(const QString &audioFile, qint64 startSeconds)  // Now seconds!
+{
+    if (!m_mediaPlayer) return;
+
+    // Convert back to ms for player
+    qint64 startMs = startSeconds * 1000;
+
+    // Check if we need to load a new file
+    if (m_mediaPlayer->source().toLocalFile() != audioFile) {
+        m_mediaPlayer->setPosition(startMs);
+    } else {
+        // Same file - seek immediately
+        m_mediaPlayer->setPosition(startMs);
+
+        // Slider will update via onPositionChanged
+        // which converts positionMs to seconds automatically
+    }
+}
+
+//drag n drop
+
+void MainWindow::dragEnterEvent(QDragEnterEvent* event)
+{
+    if (event->mimeData()->hasUrls()) {
+        QList<QUrl> urls = event->mimeData()->urls();
+
+        // Check if ALL dragged files are supported media
+        bool allSupported = true;
+        for (const QUrl &url : urls) {
+            QString filePath = url.toLocalFile();
+            QString suffix = QFileInfo(filePath).suffix().toLower();
+
+            if (!(suffix == "mp3" || suffix == "wav" || suffix == "flac" ||
+                  suffix == "ogg" || suffix == "m4a" || suffix == "mp4" ||
+                  suffix == "m4v" || suffix == "avi" || suffix == "mkv")) {
+                allSupported = false;
+                break;
+            }
+        }
+
+        if (allSupported && !urls.isEmpty()) {
+            event->acceptProposedAction();
+        }
+    }
+}
+
+void MainWindow::dropEvent(QDropEvent* event)
+{
+    QList<QUrl> urls = event->mimeData()->urls();
+    if (!urls.isEmpty()) {
+        QStringList filePaths;
+
+        // Convert all URLs to local file paths
+        for (const QUrl &url : urls) {
+            filePaths.append(url.toLocalFile());
+        }
+
+        // Process all dropped files
+        processDroppedFiles(filePaths);
+    }
+    event->acceptProposedAction();
+}
+
+void MainWindow::processDroppedFiles(const QStringList& filePaths)
+{
+    if (filePaths.isEmpty()) return;
+
+    // Update last music directory with first file's directory
+    ConstantGlobals::lastMusicDirPath = QFileInfo(filePaths.first()).absolutePath();
+
+    QString playlistName = currentPlaylistName();
+    int addedCount = 0;
+
+    foreach (const QString &filePath, filePaths) {
+        QString fileName = QFileInfo(filePath).fileName();
+
+        // Add to playlist widget
+        currentPlaylistWidget()->addItem(fileName);
+
+        // Add to playlist files map
+        m_playlistFiles[playlistName].append(filePath);
+
+        addedCount++;
+    }
+
+    statusBar()->showMessage(QString("Added %1 file(s) to '%2' via drag & drop")
+                             .arg(addedCount)
+                             .arg(playlistName));
+
+    // Optional: Auto-play first dropped file
+    if (m_mediaPlayer && m_mediaPlayer->playbackState() != QMediaPlayer::PlayingState) {
+        if (!filePaths.isEmpty()) {
+            m_mediaPlayer->setSource(QUrl::fromLocalFile(filePaths.first()));
+            m_mediaPlayer->play();
+        }
+    }
+}
+
+
+

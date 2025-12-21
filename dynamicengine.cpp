@@ -392,6 +392,9 @@ QAudioSink *DynamicEngine::audioOutput() const
 
 void DynamicEngine::setPulseFrequency(double hz)
 {
+    if (ConstantGlobals::currentToneType != 1) {
+            return; // Don't set pulse for non-ISO tones
+        }
     if (hz < 0.5 || hz > 100.0) {
         emit errorOccurred(QString("Invalid pulse frequency: %1 Hz").arg(hz));
         return;

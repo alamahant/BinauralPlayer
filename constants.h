@@ -3,6 +3,7 @@
 #include<QString>
 #include<QStandardPaths>
 #include<QDir>
+#include<QMediaPlayer>
 
 namespace ConstantGlobals {
 extern const QString appDirPath;
@@ -11,8 +12,9 @@ extern const QString presetFilePath;
 extern const QString playlistFilePath;
 extern const QString musicFilePath;
 extern const QString ambientPresetFilePath;
-
 extern int currentToneType;
+extern QMediaPlayer::PlaybackState playbackState;
+extern QString lastMusicDirPath;
 }
 
 
