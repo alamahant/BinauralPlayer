@@ -1,78 +1,67 @@
 #include "mainwindow.h"
 
-#include <QVBoxLayout>
-#include <QHBoxLayout>
-#include <QWidget>
+#include "constants.h"
+#include "donationdialog.h"
+#include "helpmenudialog.h"
+#include <QApplication>
+#include <QAudioOutput>
+#include <QAudioSink>
+#include <QCheckBox>
+#include <QDesktopServices>
 #include <QFileDialog>
-#include <QMessageBox>
-#include <QStatusBar>
+#include <QFileInfo>
+#include <QHBoxLayout>
 #include <QHeaderView>
+#include <QInputDialog>
+#include <QMenu>
+#include <QMenuBar>
+#include <QMessageBox>
+#include <QMimeData>
+#include <QRandomGenerator>
+#include <QRegularExpression>
+#include <QStandardItemModel>
+#include <QStatusBar>
 #include <QTableWidget>
-#include<QCheckBox>
-#include<QTimer>
-#include<QAudioOutput>
-#include<QStandardItemModel>
-#include<QAudioSink>
-#include"constants.h"
-#include<QRandomGenerator>
-#include<QInputDialog>
-#include<QDesktopServices>
-#include<QMenu>
-#include<QMenuBar>
-#include<QApplication>
-#include"helpmenudialog.h"
-#include"donationdialog.h"
-#include<QRegularExpression>
-#include<QMimeData>
-#include<QFileInfo>
-#include<QUrl>
+#include <QTimer>
+#include <QUrl>
+#include <QVBoxLayout>
+#include <QVideoWidget>
+#include <QWidget>
 
 MainWindow::MainWindow(QWidget *parent)
-    : QMainWindow(parent)
-    , m_binauralEngine(new DynamicEngine(this))
+    : QMainWindow(parent), m_binauralEngine(new DynamicEngine(this))
     //, m_dynamicEngine(new DynamicEngine(this))
-    , m_mediaPlayer(nullptr)
-    , m_audioOutput(nullptr)
-    , m_currentTrackIndex(-1)
-    , m_isShuffle(false)
-    , m_isRepeat(false)
-    , m_autoStopTimer(nullptr)
-    , m_remainingSeconds(0)
-    , m_seekSlider(new QSlider(Qt::Horizontal, this))
-    , m_currentTimeLabel(new QLabel("00:00", this))
-    , m_totalTimeLabel(new QLabel("00:00", this))
-    , m_playlistTabs(nullptr)
-    , m_currentPlaylistWidget(nullptr)
-    , m_currentPlaylistName("")
-    , m_isStream(false)
-    , m_currentStreamUrl("")
-    , m_masterPlayButton(nullptr)
-    , m_masterPauseButton(nullptr)
-    , m_masterStopButton(nullptr)
-    , m_masterVolumeSlider(nullptr)
-    , m_masterVolumeLabel(nullptr)
-    , m_naturePowerButton(nullptr)
-    , m_sessionManagerDialog(new SessionDialog(this))
-    , m_cueDialog(new CueSheetDialog(this))
-{
+    ,
+      m_mediaPlayer(nullptr), m_audioOutput(nullptr), m_currentTrackIndex(-1),
+      m_isShuffle(false), m_isRepeat(false), m_autoStopTimer(nullptr),
+      m_remainingSeconds(0), m_seekSlider(new QSlider(Qt::Horizontal, this)),
+      m_currentTimeLabel(new QLabel("00:00", this)),
+      m_totalTimeLabel(new QLabel("00:00", this)), m_playlistTabs(nullptr),
+      m_currentPlaylistWidget(nullptr), m_currentPlaylistName(""),
+      m_isStream(false), m_currentStreamUrl(""), m_masterPlayButton(nullptr),
+      m_masterPauseButton(nullptr), m_masterStopButton(nullptr),
+      m_masterVolumeSlider(nullptr), m_masterVolumeLabel(nullptr),
+      m_naturePowerButton(nullptr),
+      m_sessionManagerDialog(new SessionDialog(this)),
+      m_cueDialog(new CueSheetDialog(this)),
+      videoWidget(new QVideoWidget(this)) {
     // Window properties
     setWindowTitle("Binaural Media Player");
     setMinimumSize(900, 700);
     setWindowIcon(QIcon(":/favicon/android-chrome-512x512.png"));
-    setAcceptDrops(true);  // ENABLE DRAG & DROP
+    setAcceptDrops(true); // ENABLE DRAG & DROP
     // Initialize audio engines
-    //initializeAudioEngines();
+    // initializeAudioEngines();
 
     setupAmbientPlayers();
-
 
     // Create toolbars
     m_mediaToolbar = createMediaToolbar();
     m_binauralToolbar = createBinauralToolbar();
     m_binauralToolbarExt = createBinauralToolbarExt();
     m_natureToolbar = createNatureToolbar();
-    //m_natureToolbar->setVisible(false);
-    // Add toolbars to window
+    // m_natureToolbar->setVisible(false);
+    //  Add toolbars to window
     addToolBar(Qt::TopToolBarArea, m_mediaToolbar);
     addToolBarBreak(Qt::TopToolBarArea);
     addToolBar(Qt::TopToolBarArea, m_binauralToolbar);
@@ -81,18 +70,17 @@ MainWindow::MainWindow(QWidget *parent)
     addToolBarBreak(Qt::TopToolBarArea);
     addToolBar(Qt::TopToolBarArea, m_natureToolbar);
 
-
     // Create central widget and layout
     setupLayout();
 
     // Connect all signals and slots
-    //setupConnections();
+    // setupConnections();
 
     // Apply styling
-    styleToolbar(m_mediaToolbar, "#4A90E2");      // Blue
-    styleToolbar(m_binauralToolbar, "#7B68EE");   // Purple
-    styleToolbar(m_binauralToolbarExt, "#7B68EE");   // Purple
-    styleToolbar(m_natureToolbar, "#32CD32");     // Green
+    styleToolbar(m_mediaToolbar, "#4A90E2");       // Blue
+    styleToolbar(m_binauralToolbar, "#7B68EE");    // Purple
+    styleToolbar(m_binauralToolbarExt, "#7B68EE"); // Purple
+    styleToolbar(m_natureToolbar, "#32CD32");      // Green
 
     // Set initial states
     updateBinauralPowerState(false);
@@ -104,11 +92,12 @@ MainWindow::MainWindow(QWidget *parent)
     setupMenus();
     createInfoDialog();
     setupConnections();
-    model = qobject_cast<QStandardItemModel*>(m_waveformCombo->model());
+    model = qobject_cast<QStandardItemModel *>(m_waveformCombo->model());
     squareWaveItem = model->item(1);
 
     // Status bar
-    connect(volumeIcon, &QPushButton::clicked, this, &MainWindow::onMuteButtonClicked);
+    connect(volumeIcon, &QPushButton::clicked, this,
+            &MainWindow::onMuteButtonClicked);
 
     // Create permanent widgets for right side (binaural messages)
     m_binauralStatusLabel = new QLabel(this);
@@ -116,7 +105,8 @@ MainWindow::MainWindow(QWidget *parent)
     m_binauralStatusLabel->setMinimumWidth(150); // Adjust as needed
     m_binauralStatusLabel->setMaximumWidth(250); // Adjust as needed
 
-    //m_binauralStatusLabel->setStyleSheet("QLabel { padding: 0 5px; color: #555; }");
+    // m_binauralStatusLabel->setStyleSheet("QLabel { padding: 0 5px; color: #555;
+    // }");
     m_binauralStatusLabel->setText("Binaural engine disabled");
 
     // Add to status bar
@@ -130,31 +120,31 @@ MainWindow::MainWindow(QWidget *parent)
     bool unlimited = settings.value("binaural/unlimitedDuration", false).toBool();
     m_sessionManagerDialog->setUnlimitedDuration(unlimited);
     m_fadeTimer.setInterval(50);
+
+    setupVideoPlayer();
 }
 
-MainWindow::~MainWindow()
-{
-       if(m_binauralEngine && m_binauralEngine->isPlaying()) {
-           m_binauralEngine->stop();
-       }
-      // if(m_dynamicEngine && m_dynamicEngine->isPlaying()) {
-        //   m_dynamicEngine->stop();
-       //}
-       if(m_mediaPlayer && m_mediaPlayer->isPlaying()) {
-               m_mediaPlayer->stop();
-           }
-       // Delete all dialogs
-           qDeleteAll(m_playerDialogs);
-           m_playerDialogs.clear();
+MainWindow::~MainWindow() {
+    if (m_binauralEngine && m_binauralEngine->isPlaying()) {
+        m_binauralEngine->stop();
+    }
+    // if(m_dynamicEngine && m_dynamicEngine->isPlaying()) {
+    //   m_dynamicEngine->stop();
+    //}
+    if (m_mediaPlayer && m_mediaPlayer->isPlaying()) {
+        m_mediaPlayer->stop();
+    }
+    // Delete all dialogs
+    qDeleteAll(m_playerDialogs);
+    m_playerDialogs.clear();
 
-           // Delete all players (they're parented to MainWindow, auto-delete)
-           m_ambientPlayers.clear();
+    // Delete all players (they're parented to MainWindow, auto-delete)
+    m_ambientPlayers.clear();
 }
 
 // =================== TOOLBAR CREATION METHODS ===================
 
-QToolBar *MainWindow::createMediaToolbar()
-{
+QToolBar *MainWindow::createMediaToolbar() {
     QToolBar *toolbar = new QToolBar("Media Player", this);
     toolbar->setMovable(false);
     toolbar->setIconSize(QSize(24, 24));
@@ -174,26 +164,28 @@ QToolBar *MainWindow::createMediaToolbar()
     tbarOpenPlaylistButton = new QPushButton(toolbar);
     tbarOpenPlaylistButton->setIcon(QIcon(":/icons/folder.svg"));
     tbarOpenPlaylistButton->setToolTip("Load Playlist");
-    connect(tbarOpenPlaylistButton, &QPushButton::clicked, this, &MainWindow::onOpenPlaylistClicked);
+    connect(tbarOpenPlaylistButton, &QPushButton::clicked, this,
+            &MainWindow::onOpenPlaylistClicked);
     toolbar->addWidget(tbarOpenPlaylistButton);
 
     tbarSavePlaylistButton = new QPushButton(toolbar);
     tbarSavePlaylistButton->setToolTip("Save Playlist As");
     tbarSavePlaylistButton->setIcon(QIcon(":/icons/save.svg"));
 
-    connect(tbarSavePlaylistButton, &QPushButton::clicked, this, &MainWindow::onSaveCurrentPlaylistAsClicked);
+    connect(tbarSavePlaylistButton, &QPushButton::clicked, this,
+            &MainWindow::onSaveCurrentPlaylistAsClicked);
     toolbar->addWidget(tbarSavePlaylistButton);
 
     tbarSaveAllPlaylistsButton = new QPushButton(toolbar);
     tbarSaveAllPlaylistsButton->setToolTip("Save All Playlists");
     tbarSaveAllPlaylistsButton->setIcon(QIcon(":/icons/copy.svg"));
 
-    connect(tbarSaveAllPlaylistsButton, &QPushButton::clicked, this, &MainWindow::onSaveAllPlaylistsClicked);
+    connect(tbarSaveAllPlaylistsButton, &QPushButton::clicked, this,
+            &MainWindow::onSaveAllPlaylistsClicked);
     toolbar->addWidget(tbarSaveAllPlaylistsButton);
 
-
     toolbar->addSeparator();
-    //previous track
+    // previous track
     m_previousButton = new QPushButton(toolbar);
     m_previousButton->setIcon(QIcon(":icons/skip-back.svg"));
     m_previousButton->setToolTip("Previous Track");
@@ -249,26 +241,26 @@ QToolBar *MainWindow::createMediaToolbar()
     volumeIcon = new QPushButton(toolbar);
     volumeIcon->setCheckable(true);
     volumeIcon->setIcon(QIcon(":/icons/volume-2.svg"));
-    //toolbar->addWidget(volumeIcon);
+    // toolbar->addWidget(volumeIcon);
 
     m_musicVolumeSlider = new QSlider(Qt::Horizontal, toolbar);
     m_musicVolumeSlider->setRange(0, 100);
     m_musicVolumeSlider->setValue(70);
     m_musicVolumeSlider->setMaximumWidth(150);
     m_musicVolumeSlider->setToolTip("Music volume");
-    //toolbar->addWidget(m_musicVolumeSlider);
+    // toolbar->addWidget(m_musicVolumeSlider);
 
     m_musicVolumeLabel = new QLabel(toolbar);
-    //m_musicVolumeLabel->setIcon(QIcon(":/icons/volume-2.svg"));
+    // m_musicVolumeLabel->setIcon(QIcon(":/icons/volume-2.svg"));
     m_musicVolumeLabel->setMinimumWidth(40);
     m_musicVolumeLabel->setText(QString("70%"));
-    //duration slider
-    //toolbar->addWidget(m_seekSlider);
-    //toolbar->addWidget(m_currentTimeLabel);
-    //toolbar->addWidget(m_totalTimeLabel);
-    //toolbar->addSeparator();
+    // duration slider
+    // toolbar->addWidget(m_seekSlider);
+    // toolbar->addWidget(m_currentTimeLabel);
+    // toolbar->addWidget(m_totalTimeLabel);
+    // toolbar->addSeparator();
 
-    //timeedit seeker
+    // timeedit seeker
     timeEditButton = new QPushButton(toolbar);
     timeEditButton->setToolTip("Seek");
     timeEditButton->setMaximumWidth(25);
@@ -281,7 +273,8 @@ QToolBar *MainWindow::createMediaToolbar()
     timeEdit->setPlaceholderText("hh:mm:ss");
     timeEdit->setToolTip("Format: hh:mm:ss or mm:ss");
     QRegularExpression timeRegex("^([0-9]{1,2}:)?[0-5]?[0-9]:[0-5][0-9]$");
-    QRegularExpressionValidator *validator = new QRegularExpressionValidator(timeRegex, timeEdit);
+    QRegularExpressionValidator *validator =
+            new QRegularExpressionValidator(timeRegex, timeEdit);
     timeEdit->setValidator(validator);
     toolbar->addWidget(timeEditButton);
     toolbar->addWidget(timeEdit);
@@ -294,18 +287,23 @@ QToolBar *MainWindow::createMediaToolbar()
     openCueButton->setChecked(false);
     toolbar->addWidget(openCueButton);
 
+    // video button
+    toolbar->addSeparator();
+    openVideoButton = new QPushButton("Video", toolbar);
+    openVideoButton->setCheckable(true);
+    openVideoButton->setChecked(false);
+    toolbar->addWidget(openVideoButton);
 
     return toolbar;
 }
 
-QToolBar *MainWindow::createBinauralToolbar()
-{
+QToolBar *MainWindow::createBinauralToolbar() {
     QToolBar *toolbar = new QToolBar("Binaural Generator", this);
     toolbar->setMovable(false);
     toolbar->setIconSize(QSize(24, 24));
 
     // Label
-    //QLabel *titleLabel = new QLabel("🧠 BINAURAL", toolbar);
+    // QLabel *titleLabel = new QLabel("🧠 BINAURAL", toolbar);
     toneTypeCombo = new QComboBox(toolbar);
     toneTypeCombo->addItem("BINAURAL", BINAURAL);
     toneTypeCombo->addItem("ISOCHRONIC", ISOCHRONIC);
@@ -323,7 +321,7 @@ QToolBar *MainWindow::createBinauralToolbar()
     m_binauralPowerButton->setMaximumWidth(30);
     toolbar->addWidget(m_binauralPowerButton);
 
-    //toolbar->addSeparator();
+    // toolbar->addSeparator();
 
     // Left frequency
     QLabel *leftLabel = new QLabel("L:", toolbar);
@@ -361,11 +359,12 @@ QToolBar *MainWindow::createBinauralToolbar()
 
     m_beatFreqLabel->setMinimumWidth(95);
     m_beatFreqLabel->setAlignment(Qt::AlignLeft);
-    m_beatFreqLabel->setStyleSheet("background-color: #f0f0f0; padding: 2px; border: 1px solid #ccc;");
+    m_beatFreqLabel->setStyleSheet(
+                "background-color: #f0f0f0; padding: 2px; border: 1px solid #ccc;");
     m_beatFreqLabel->setToolTip("Binaural beat frequency (Right - Left)");
     toolbar->addWidget(m_beatFreqLabel);
 
-    isoPulseLabel = new QLabel("ISO:",toolbar);
+    isoPulseLabel = new QLabel("ISO:", toolbar);
     toolbar->addWidget(isoPulseLabel);
 
     m_pulseFreqLabel = new QDoubleSpinBox(toolbar);
@@ -388,7 +387,7 @@ QToolBar *MainWindow::createBinauralToolbar()
     m_waveformCombo->setEnabled(false);
     toolbar->addWidget(m_waveformCombo);
 
-    //toolbar->addSeparator();
+    // toolbar->addSeparator();
 
     // Volume control
     QLabel *volLabel = new QLabel("Vol:", toolbar);
@@ -407,44 +406,42 @@ QToolBar *MainWindow::createBinauralToolbar()
 
     toolbar->addSeparator();
 
-
     return toolbar;
 }
 
-
-QToolBar *MainWindow::createBinauralToolbarExt()
-{
+QToolBar *MainWindow::createBinauralToolbarExt() {
     QToolBar *toolbar = new QToolBar(this);
     toolbar->setMovable(false);
     toolbar->setIconSize(QSize(24, 24));
-
 
     tbarOpenPresetButton = new QPushButton(toolbar);
     tbarOpenPresetButton->setToolTip("Load Preset");
     tbarOpenPresetButton->setIcon(QIcon(":/icons/folder.svg"));
 
-    connect(tbarOpenPresetButton, &QPushButton::clicked, this, &MainWindow::onLoadPresetClicked);
+    connect(tbarOpenPresetButton, &QPushButton::clicked, this,
+            &MainWindow::onLoadPresetClicked);
     toolbar->addWidget(tbarOpenPresetButton);
 
     tbarSavePresetButton = new QPushButton(toolbar);
     tbarSavePresetButton->setToolTip("Save Preset");
     tbarSavePresetButton->setIcon(QIcon(":/icons/save.svg"));
 
-    connect(tbarSavePresetButton, &QPushButton::clicked, this, &MainWindow::onSavePresetClicked);
+    connect(tbarSavePresetButton, &QPushButton::clicked, this,
+            &MainWindow::onSavePresetClicked);
     toolbar->addWidget(tbarSavePresetButton);
 
     tbarResetBinauralSettingsButton = new QPushButton(toolbar);
     tbarResetBinauralSettingsButton->setIcon(QIcon(":/icons/refresh-cw.svg"));
-    tbarResetBinauralSettingsButton->setToolTip("Reset Brainwave settings to default");
+    tbarResetBinauralSettingsButton->setToolTip(
+                "Reset Brainwave settings to default");
     toolbar->addWidget(tbarResetBinauralSettingsButton);
-    connect(tbarResetBinauralSettingsButton, &QPushButton::clicked, this, [this]{
+    connect(tbarResetBinauralSettingsButton, &QPushButton::clicked, this, [this] {
         if (m_binauralEngine && m_binauralEngine->isPlaying()) {
             QMessageBox::StandardButton reply;
-            reply = QMessageBox::question(this,
-                                          tr("Binaural Engine Active"),
-                                          tr("Binaural engine is playing.\nStop and proceed?"),
-                                          QMessageBox::Ok | QMessageBox::Cancel,
-                                          QMessageBox::Cancel);
+            reply = QMessageBox::question(
+                        this, tr("Binaural Engine Active"),
+                        tr("Binaural engine is playing.\nStop and proceed?"),
+                        QMessageBox::Ok | QMessageBox::Cancel, QMessageBox::Cancel);
 
             if (reply == QMessageBox::Cancel) {
                 return; // User canceled, don't proceed
@@ -468,12 +465,12 @@ QToolBar *MainWindow::createBinauralToolbarExt()
     m_binauralPlayButton = new QPushButton(toolbar);
     m_binauralPlayButton->setMinimumWidth(80);
     m_binauralPlayButton->setIcon(QIcon(":/icons/play.svg"));
-    //m_binauralPlayButton->setMaximumWidth(30);
+    // m_binauralPlayButton->setMaximumWidth(30);
     m_binauralPlayButton->setToolTip("Start binaural tones");
     m_binauralPlayButton->setEnabled(false);
     toolbar->addWidget(m_binauralPlayButton);
 
-    //pause
+    // pause
     m_binauralPauseButton = new QPushButton(toolbar);
     m_binauralPauseButton->setMinimumWidth(50);
     m_binauralPauseButton->setIcon(QIcon(":/icons/pause.svg"));
@@ -484,14 +481,14 @@ QToolBar *MainWindow::createBinauralToolbarExt()
     m_binauralStopButton = new QPushButton(toolbar);
     m_binauralStopButton->setIcon(QIcon(":/icons/square.svg"));
 
-    //m_binauralStopButton->setMaximumWidth(30);
+    // m_binauralStopButton->setMaximumWidth(30);
     m_binauralStopButton->setMinimumWidth(50);
 
     m_binauralStopButton->setToolTip("Stop binaural tones");
     m_binauralStopButton->setEnabled(false);
     toolbar->addWidget(m_binauralStopButton);
-    //timer
-    //toolbar->addSeparator();
+    // timer
+    // toolbar->addSeparator();
 
     // Duration label
     durationLabel = new QLabel("Timer:", toolbar);
@@ -501,16 +498,16 @@ QToolBar *MainWindow::createBinauralToolbarExt()
     // Duration selector
     m_brainwaveDuration = new QSpinBox(toolbar);
     bool unlimited = settings.value("binaural/unlimitedDuration", false).toBool();
-    if(unlimited){
+    if (unlimited) {
     m_brainwaveDuration->setRange(1, 360);
-    }else{
+    } else {
         m_brainwaveDuration->setRange(1, 45);
-
     }
     m_brainwaveDuration->setValue(45);
     m_brainwaveDuration->setSuffix(" min");
     m_brainwaveDuration->setMaximumWidth(75);
-    m_brainwaveDuration->setToolTip("Auto-stop brainwave audio after X minutes (1-45)");
+    m_brainwaveDuration->setToolTip(
+                "Auto-stop brainwave audio after X minutes (1-45)");
     m_brainwaveDuration->setEnabled(false); // Enabled when binaural power is on
     toolbar->addWidget(m_brainwaveDuration);
 
@@ -519,14 +516,13 @@ QToolBar *MainWindow::createBinauralToolbarExt()
     m_countdownLabel->setMinimumWidth(50);
     m_countdownLabel->setAlignment(Qt::AlignCenter);
     m_countdownLabel->setStyleSheet(
-        "background-color: #f0f0f0; padding: 3px; border: 1px solid #ccc; "
-        "border-radius: 3px; color: #7B68EE;"
-    );
+                "background-color: #f0f0f0; padding: 3px; border: 1px solid #ccc; "
+                "border-radius: 3px; color: #7B68EE;");
     m_countdownLabel->setToolTip("Time remaining until auto-stop");
     m_countdownLabel->setVisible(true); // Only show when timer is active
     toolbar->addWidget(m_countdownLabel);
 
-    //sssion management
+    // sssion management
     toolbar->addSeparator();
     m_openSessionManagerButton = new QPushButton(" Sessions", toolbar);
     m_openSessionManagerButton->setCheckable(true);
@@ -540,61 +536,55 @@ QToolBar *MainWindow::createBinauralToolbarExt()
     return toolbar;
 }
 
-QToolBar *MainWindow::createNatureToolbar()
-{
+QToolBar *MainWindow::createNatureToolbar() {
     QToolBar *toolbar = new QToolBar("Nature Sounds", this);
     toolbar->setMovable(false);
     toolbar->setIconSize(QSize(24, 24));
-    //toolbar->setMinimumHeight(40);
-    // ----- SECTION 1: TITLE -----
+    // toolbar->setMinimumHeight(40);
+    //  ----- SECTION 1: TITLE -----
     QLabel *titleLabel = new QLabel("🌳 AMBIENCE", toolbar);
     titleLabel->setStyleSheet("QLabel { font-weight: bold; color: #2E8B57; }");
     toolbar->addWidget(titleLabel);
     toolbar->addSeparator();
 
     // ----- POWER BUTTON (ADD THIS SECTION) -----
-    m_naturePowerButton = new QPushButton("○", toolbar);  // Start OFF (○)
+    m_naturePowerButton = new QPushButton("○", toolbar); // Start OFF (○)
     m_naturePowerButton->setCheckable(true);
-    m_naturePowerButton->setChecked(false);  // Start unchecked
+    m_naturePowerButton->setChecked(false); // Start unchecked
     m_naturePowerButton->setToolTip("Enable/disable ALL nature sounds");
     m_naturePowerButton->setMaximumWidth(30);
     m_naturePowerButton->setStyleSheet("QPushButton { color: #888888; }");
     toolbar->addWidget(m_naturePowerButton);
     toolbar->addSeparator();
 
-
     //
     openAmbientPresetButton = new QPushButton(toolbar);
     openAmbientPresetButton->setToolTip("Load Preset");
     openAmbientPresetButton->setIcon(QIcon(":/icons/folder.svg"));
 
-    connect(openAmbientPresetButton, &QPushButton::clicked, this, [this]{
-        loadAmbientPreset("");
-    });
+    connect(openAmbientPresetButton, &QPushButton::clicked, this,
+            [this] { loadAmbientPreset(""); });
     toolbar->addWidget(openAmbientPresetButton);
 
     saveAmbientPresetButton = new QPushButton(toolbar);
     saveAmbientPresetButton->setToolTip("Save Preset");
     saveAmbientPresetButton->setIcon(QIcon(":/icons/save.svg"));
 
-    connect(saveAmbientPresetButton, &QPushButton::clicked, this, [this]{
-        saveAmbientPreset("");
-    });
+    connect(saveAmbientPresetButton, &QPushButton::clicked, this,
+            [this] { saveAmbientPreset(""); });
     toolbar->addWidget(saveAmbientPresetButton);
 
     resetPlayersButton = new QPushButton(toolbar);
     resetPlayersButton->setToolTip("Reset all players to defaults");
     resetPlayersButton->setIcon(QIcon(":/icons/refresh-cw.svg"));
     resetPlayersButton->setEnabled(false);
-    connect(resetPlayersButton, &QPushButton::clicked, this, [this]{
+    connect(resetPlayersButton, &QPushButton::clicked, this, [this] {
         // Confirm with user
         QMessageBox::StandardButton reply = QMessageBox::question(
-            this,
-            "Reset All Players",
-            "Reset all ambient players to default settings?\n\n"
-            "This will clear all audio files and reset volumes.",
-            QMessageBox::Yes | QMessageBox::No
-        );
+                    this, "Reset All Players",
+                    "Reset all ambient players to default settings?\n\n"
+                    "This will clear all audio files and reset volumes.",
+                    QMessageBox::Yes | QMessageBox::No);
 
         if (reply == QMessageBox::Yes) {
             resetAllPlayersToDefaults();
@@ -607,19 +597,21 @@ QToolBar *MainWindow::createNatureToolbar()
 
     // ----- SECTION 2: MASTER TRANSPORT CONTROLS -----
     QLabel *masterLabel = new QLabel(toolbar);
-    //toolbar->addWidget(masterLabel);
+    // toolbar->addWidget(masterLabel);
 
     m_masterPlayButton = new QPushButton("▶", toolbar);
     m_masterPlayButton->setToolTip("Play all ON nature sounds");
     m_masterPlayButton->setMaximumWidth(30);
-    m_masterPlayButton->setStyleSheet("QPushButton { font-weight: bold; color: #2E8B57; }");
+    m_masterPlayButton->setStyleSheet(
+                "QPushButton { font-weight: bold; color: #2E8B57; }");
     m_masterPlayButton->setEnabled(false);
     toolbar->addWidget(m_masterPlayButton);
 
     m_masterPauseButton = new QPushButton("❚❚", toolbar);
     m_masterPauseButton->setToolTip("Pause all ON nature sounds");
     m_masterPauseButton->setMaximumWidth(30);
-    m_masterPauseButton->setStyleSheet("QPushButton { font-weight: bold; color: #FF8C00; }");
+    m_masterPauseButton->setStyleSheet(
+                "QPushButton { font-weight: bold; color: #FF8C00; }");
     m_masterPauseButton->setEnabled(false);
 
     toolbar->addWidget(m_masterPauseButton);
@@ -627,7 +619,8 @@ QToolBar *MainWindow::createNatureToolbar()
     m_masterStopButton = new QPushButton("■", toolbar);
     m_masterStopButton->setToolTip("Stop all ON nature sounds");
     m_masterStopButton->setMaximumWidth(30);
-    m_masterStopButton->setStyleSheet("QPushButton { font-weight: bold; color: #DC143C; }");
+    m_masterStopButton->setStyleSheet(
+                "QPushButton { font-weight: bold; color: #DC143C; }");
     m_masterStopButton->setEnabled(false);
 
     toolbar->addWidget(m_masterStopButton);
@@ -636,12 +629,13 @@ QToolBar *MainWindow::createNatureToolbar()
 
     // ----- SECTION 3: AMBIENT PLAYER BUTTONS -----
     QLabel *playersLabel = new QLabel(toolbar);
-    //toolbar->addWidget(playersLabel);
+    // toolbar->addWidget(playersLabel);
 
     // Add all 5 ambient player buttons
     if (!m_ambientPlayers.isEmpty()) {
-        QStringList playerOrder = {"player1", "player2", "player3", "player4", "player5"};
-        for (const QString& key : playerOrder) {
+        QStringList playerOrder = {"player1", "player2", "player3", "player4",
+                                   "player5"};
+        for (const QString &key : playerOrder) {
             if (m_ambientPlayers.contains(key)) {
                 toolbar->addWidget(m_ambientPlayers[key]->button());
             }
@@ -649,7 +643,8 @@ QToolBar *MainWindow::createNatureToolbar()
     } else {
         // Fallback: create placeholder buttons if map is empty
         for (int i = 1; i <= 5; i++) {
-            QPushButton* placeholder = new QPushButton(QString("P%1").arg(i), toolbar);
+            QPushButton *placeholder =
+                    new QPushButton(QString("P%1").arg(i), toolbar);
             placeholder->setEnabled(false);
             placeholder->setStyleSheet("QPushButton { color: gray; }");
             toolbar->addWidget(placeholder);
@@ -669,7 +664,8 @@ QToolBar *MainWindow::createNatureToolbar()
     m_masterVolumeSlider->setRange(0, 100);
     m_masterVolumeSlider->setValue(100);
     m_masterVolumeSlider->setMaximumWidth(100);
-    m_masterVolumeSlider->setToolTip("Master volume for all ON nature sounds (0-100%)");
+    m_masterVolumeSlider->setToolTip(
+                "Master volume for all ON nature sounds (0-100%)");
     toolbar->addWidget(m_masterVolumeSlider);
 
     m_masterVolumeLabel = new QLabel("100%", toolbar);
@@ -683,8 +679,7 @@ QToolBar *MainWindow::createNatureToolbar()
 
 // =================== LAYOUT & SETUP METHODS ===================
 
-void MainWindow::setupLayout()
-{
+void MainWindow::setupLayout() {
     // Central widget
     QWidget *centralWidget = new QWidget(this);
     setCentralWidget(centralWidget);
@@ -697,16 +692,16 @@ void MainWindow::setupLayout()
     // Playlist tabs header
     QHBoxLayout *playlistHeaderLayout = new QHBoxLayout();
 
-    //QLabel *playlistTitle = new QLabel("* PLAYLISTS");
+    // QLabel *playlistTitle = new QLabel("* PLAYLISTS");
     QLabel *playlistTitle = new QLabel("□ PLAYLISTS");
     playlistTitle->setStyleSheet("font-weight: bold; font-size: 14px;");
     playlistHeaderLayout->addWidget(playlistTitle);
 
     // Playlist management buttons
     addPlaylistBtn = new QPushButton("New");
-    //addPlaylistBtn->setIcon(QIcon(":/icons/plus.svg"));
+    // addPlaylistBtn->setIcon(QIcon(":/icons/plus.svg"));
     renamePlaylistBtn = new QPushButton("Rename");
-    //renamePlaylistBtn->setIcon(QIcon(":/icons/hash.svg"));
+    // renamePlaylistBtn->setIcon(QIcon(":/icons/hash.svg"));
     renamePlaylistBtn->setToolTip("Rename Current Playlist");
     addPlaylistBtn->setMaximumWidth(80);
     addPlaylistBtn->setToolTip("Add New Playlist");
@@ -719,8 +714,9 @@ void MainWindow::setupLayout()
     QPushButton *searchButton = new QPushButton(this);
     searchButton->setCheckable(true);
     searchButton->setChecked(false);
-    connect(searchButton, &QPushButton::clicked, [this, searchEdit](bool checked){
-        if(!checked){
+    connect(searchButton, &QPushButton::clicked,
+            [this, searchEdit](bool checked) {
+        if (!checked) {
             searchEdit->clear();
         }
         searchEdit->setEnabled(checked);
@@ -732,7 +728,8 @@ void MainWindow::setupLayout()
 
     connect(searchEdit, &QLineEdit::textChanged, [this, searchEdit]() {
         QListWidget *playlist = currentPlaylistWidget();
-        if (!playlist || !searchEdit->isEnabled()) return;
+        if (!playlist || !searchEdit->isEnabled())
+            return;
 
         QString searchText = searchEdit->text().trimmed();
 
@@ -766,6 +763,7 @@ void MainWindow::setupLayout()
     m_playlistTabs->setDocumentMode(true);
     m_playlistTabs->setTabsClosable(true);
     m_playlistTabs->setMovable(true);
+
     mainLayout->addWidget(m_playlistTabs, 1); // Stretch factor 1
 
     // Add initial playlist
@@ -776,25 +774,25 @@ void MainWindow::setupLayout()
     playlistButtonLayout->setSpacing(5);
 
     m_addFilesButton = new QPushButton("Load Music", this);
-    //m_addFilesButton->setMinimumWidth(80);
-    //m_addFilesButton->setIcon(QIcon(":/icons/plus.svg"));
+    // m_addFilesButton->setMinimumWidth(80);
+    // m_addFilesButton->setIcon(QIcon(":/icons/plus.svg"));
     m_addFilesButton->setToolTip("Load Music Files");
     m_removeTrackButton = new QPushButton("Remove", this);
-    //m_removeTrackButton->setMinimumWidth(60);
-    //m_removeTrackButton->setIcon(QIcon(":/icons/file-minus.svg"));
+    // m_removeTrackButton->setMinimumWidth(60);
+    // m_removeTrackButton->setIcon(QIcon(":/icons/file-minus.svg"));
 
     m_removeTrackButton->setToolTip("Remove Selected Track");
 
     m_clearPlaylistButton = new QPushButton("Clear", this);
-    //m_clearPlaylistButton->setMinimumWidth(60);
-    //m_clearPlaylistButton->setIcon(QIcon(":/icons/folder-minus.svg"));
+    // m_clearPlaylistButton->setMinimumWidth(60);
+    // m_clearPlaylistButton->setIcon(QIcon(":/icons/folder-minus.svg"));
     m_clearPlaylistButton->setToolTip("Clear Currently Opened Playlist");
 
-    m_trackInfoButton  = new QPushButton(this);
+    m_trackInfoButton = new QPushButton(this);
     m_trackInfoButton->setCheckable(true);
     m_trackInfoButton->setChecked(false);
-    //m_trackInfoButton->setMinimumWidth(5);
-    //m_trackInfoButton->setMaximumWidth(20);
+    // m_trackInfoButton->setMinimumWidth(5);
+    // m_trackInfoButton->setMaximumWidth(20);
     m_trackInfoButton->setIcon(QIcon(":/icons/info.svg"));
     m_trackInfoButton->setToolTip("Display metadata on the current track");
     playlistButtonLayout->addWidget(m_addFilesButton);
@@ -813,197 +811,308 @@ void MainWindow::setupLayout()
     mainLayout->addLayout(playlistButtonLayout);
 }
 
-
-void MainWindow::setupConnections()
-{
+void MainWindow::setupConnections() {
 
     // Media player connections
-    connect(m_loadMusicButton, &QPushButton::clicked, this, &MainWindow::onLoadMusicClicked);
-    connect(m_playMusicButton, &QPushButton::clicked, this, &MainWindow::onPlayMusicClicked);
-    connect(m_pauseMusicButton, &QPushButton::clicked, this, &MainWindow::onPauseMusicClicked);
-    connect(m_stopMusicButton, &QPushButton::clicked, this, &MainWindow::onStopMusicClicked);
-    connect(m_nextButton, &QPushButton::clicked, this, &MainWindow::playNextTrack);
-    connect(m_previousButton, &QPushButton::clicked, this, &MainWindow::playPreviousTrack);
-    connect(m_repeatButton, &QPushButton::clicked, this, &MainWindow::onRepeatClicked);
+    connect(m_loadMusicButton, &QPushButton::clicked, this,
+            &MainWindow::onLoadMusicClicked);
+    connect(m_playMusicButton, &QPushButton::clicked, this,
+            &MainWindow::onPlayMusicClicked);
+    connect(m_pauseMusicButton, &QPushButton::clicked, this,
+            &MainWindow::onPauseMusicClicked);
+    connect(m_stopMusicButton, &QPushButton::clicked, this,
+            &MainWindow::onStopMusicClicked);
+    connect(m_nextButton, &QPushButton::clicked, this,
+            &MainWindow::playNextTrack);
+    connect(m_previousButton, &QPushButton::clicked, this,
+            &MainWindow::playPreviousTrack);
+    connect(m_repeatButton, &QPushButton::clicked, this,
+            &MainWindow::onRepeatClicked);
 
-    connect(m_shuffleButton, &QPushButton::clicked, [this](bool checked){
-        if(checked){
+    connect(m_shuffleButton, &QPushButton::clicked, [this](bool checked) {
+        if (m_isVideoEnabled) {
+            m_shuffleButton->setChecked(false);
+            return;
+        }
+        if (checked) {
             m_shuffleButton->setToolTip("Shuffle: ON");
-        }else{
+        } else {
             m_shuffleButton->setToolTip("Shuffle: OFF");
-
         }
         isShuffle = checked;
     });
 
-    connect(m_musicVolumeSlider, &QSlider::valueChanged, this, &MainWindow::onMusicVolumeChanged);
-    connect(m_mediaPlayer, &QMediaPlayer::mediaStatusChanged,
-            this, &MainWindow::onMediaStatusChanged);
-    connect(m_mediaPlayer, &QMediaPlayer::playbackStateChanged,
-            this, &MainWindow::onPlaybackStateChanged);
-    connect(m_mediaPlayer, &QMediaPlayer::errorOccurred,
-            this, &MainWindow::onMediaPlayerError);
+    connect(m_musicVolumeSlider, &QSlider::valueChanged, this,
+            &MainWindow::onMusicVolumeChanged);
+    connect(m_mediaPlayer, &QMediaPlayer::mediaStatusChanged, this,
+            &MainWindow::onMediaStatusChanged);
+    connect(m_mediaPlayer, &QMediaPlayer::playbackStateChanged, this,
+            &MainWindow::onPlaybackStateChanged);
+    connect(m_mediaPlayer, &QMediaPlayer::errorOccurred, this,
+            &MainWindow::onMediaPlayerError);
 
-    connect(m_mediaPlayer, &QMediaPlayer::durationChanged,
-            this, &MainWindow::onDurationChanged);
-    connect(m_mediaPlayer, &QMediaPlayer::positionChanged,
-               this, &MainWindow::onPositionChanged);
+    connect(m_mediaPlayer, &QMediaPlayer::durationChanged, this,
+            &MainWindow::onDurationChanged);
+    connect(m_mediaPlayer, &QMediaPlayer::positionChanged, this,
+            &MainWindow::onPositionChanged);
     // Connect seek slider
-    //connect(m_seekSlider, &QSlider::sliderMoved,
-      //      this, &MainWindow::onSeekSliderMoved);
-    connect(m_seekSlider, &QSlider::sliderReleased,
-            this, &MainWindow::onSeekSliderReleased);
+    // connect(m_seekSlider, &QSlider::sliderMoved,
+    //      this, &MainWindow::onSeekSliderMoved);
+    connect(m_seekSlider, &QSlider::sliderReleased, this,
+            &MainWindow::onSeekSliderReleased);
 
-    //cue importer
-    connect(openCueButton, &QPushButton::clicked, this, [this](bool checked){
-        if(checked){
+    // cue importer
+    connect(openCueButton, &QPushButton::clicked, this, [this](bool checked) {
+        if (checked) {
             m_cueDialog->show();
-        }else{
+        } else {
             m_cueDialog->hide();
         }
     });
-    connect(m_cueDialog, &CueSheetDialog::hideRequested, this ,[this]{
-        openCueButton->setChecked(false);
-    });
+    connect(m_cueDialog, &CueSheetDialog::hideRequested, this,
+            [this] { openCueButton->setChecked(false); });
 
-    connect(m_cueDialog, &CueSheetDialog::trackSelected,
-            this, &MainWindow::onCueTrackSelected);
+    connect(m_cueDialog, &CueSheetDialog::trackSelected, this,
+            &MainWindow::onCueTrackSelected);
 
-    connect(m_cueDialog, &CueSheetDialog::trackPositionChanged,
-            this, &MainWindow::onCuePositionChanged);
+    connect(m_cueDialog, &CueSheetDialog::trackPositionChanged, this,
+            &MainWindow::onCuePositionChanged);
 
-    //connect(volumeIcon, &QPushButton::clicked, this, &MainWindow::onMuteButtonClicked);
+    // connect(volumeIcon, &QPushButton::clicked, this,
+    // &MainWindow::onMuteButtonClicked);
 
-    connect(m_mediaPlayer, &QMediaPlayer::metaDataChanged,
-            this, &MainWindow::handleMetaDataUpdated);
+    connect(m_mediaPlayer, &QMediaPlayer::metaDataChanged, this,
+            &MainWindow::handleMetaDataUpdated);
 
-    connect(timeEditButton, &QPushButton::clicked, this, [this](bool checked){
-            timeEdit->setEnabled(checked);
-            if (checked) timeEdit->clear();
+    connect(timeEditButton, &QPushButton::clicked, this, [this](bool checked) {
+        timeEdit->setEnabled(checked);
+        if (checked)
+            timeEdit->clear();
     });
     connect(timeEdit, &QLineEdit::returnPressed, this, &MainWindow::onSeekTrack);
+
+    // video
+    connect(openVideoButton, &QPushButton::clicked, this, [this](bool checked) {
+        if (checked) {
+            const QString VIDEO_TAB_NAME = "Video Player";
+            const QString VPLAYLIST_TAB_NAME = "Video Playlist";
+
+            int videoTabIndex = -1;
+            int vplaylistTabIndex = -1;
+
+            // Find both tabs
+            for (int i = 0; i < m_playlistTabs->count(); ++i) {
+                QString tabName = m_playlistTabs->tabText(i);
+                if (tabName == VIDEO_TAB_NAME) {
+                    videoTabIndex = i;
+                } else if (tabName == VPLAYLIST_TAB_NAME) {
+                    vplaylistTabIndex = i;
+                }
+            }
+
+            // Create Video Player tab if not exists
+            if (videoTabIndex == -1) {
+                if (!videoWidget) {
+                    videoWidget = new QVideoWidget();
+                }
+                videoTabIndex = m_playlistTabs->addTab(videoWidget, VIDEO_TAB_NAME);
+            }
+
+            // Create Video Playlist tab if not exists
+            if (vplaylistTabIndex == -1) {
+                // Just add an empty widget for Video Playlist tab
+                QWidget *vplaylistWidget = new QWidget();
+                vplaylistTabIndex =
+                        m_playlistTabs->addTab(vplaylistWidget, VPLAYLIST_TAB_NAME);
+            }
+
+            // Show both tabs
+            m_playlistTabs->tabBar()->setTabVisible(videoTabIndex, true);
+            m_playlistTabs->tabBar()->setTabVisible(vplaylistTabIndex, true);
+
+            // Switch to Video Player tab
+            m_playlistTabs->setCurrentIndex(videoTabIndex);
+
+            m_binauralToolbar->setVisible(false);
+            m_binauralToolbarExt->setVisible(false);
+            m_natureToolbar->setVisible(false);
+
+            statusBar()->showMessage("Mouse Left -> show/hide playbar, Mouse Right -> context menu");
+
+            m_isVideoEnabled = true;
+        } else {
+            // Hide both tabs
+            for (int i = 0; i < m_playlistTabs->count(); ++i) {
+                QString tabName = m_playlistTabs->tabText(i);
+                if (tabName == "Video Player" || tabName == "Video Playlist") {
+                    m_playlistTabs->tabBar()->setTabVisible(i, false);
+                }
+            }
+
+            // Switch to first non-video tab
+            for (int i = 0; i < m_playlistTabs->count(); ++i) {
+                QString tabName = m_playlistTabs->tabText(i);
+                if (tabName != "Video Player" && tabName != "Video Playlist") {
+                    m_playlistTabs->setCurrentIndex(i);
+                    break;
+                }
+            }
+
+            bool isBinauralToolbarHidden =
+                    settings.value("UI/BinauralToolbarHidden", false).toBool();
+            bool isNatureToolbarHidden =
+                    settings.value("UI/NatureToolbarHidden", false).toBool();
+
+            m_binauralToolbar->setVisible(!isBinauralToolbarHidden);
+            m_binauralToolbarExt->setVisible(!isBinauralToolbarHidden);
+            m_natureToolbar->setVisible(!isNatureToolbarHidden);
+
+            m_isVideoEnabled = false;
+            //statusBar()->showMessage("");
+
+        }
+    });
+
     // Binaural connections
-    connect(m_binauralPowerButton, &QPushButton::toggled, this, &MainWindow::onBinauralPowerToggled);
+    connect(m_binauralPowerButton, &QPushButton::toggled, this,
+            &MainWindow::onBinauralPowerToggled);
     connect(m_leftFreqInput, QOverload<double>::of(&QDoubleSpinBox::valueChanged),
             this, &MainWindow::onLeftFrequencyChanged);
-    connect(m_rightFreqInput, QOverload<double>::of(&QDoubleSpinBox::valueChanged),
-            this, &MainWindow::onRightFrequencyChanged);
+    connect(m_rightFreqInput,
+            QOverload<double>::of(&QDoubleSpinBox::valueChanged), this,
+            &MainWindow::onRightFrequencyChanged);
     connect(m_waveformCombo, QOverload<int>::of(&QComboBox::currentIndexChanged),
             this, &MainWindow::onWaveformChanged);
-    connect(m_binauralVolumeInput, QOverload<double>::of(&QDoubleSpinBox::valueChanged),
-            this, &MainWindow::onBinauralVolumeChanged);
-    connect(m_binauralPlayButton, &QPushButton::clicked, this, &MainWindow::onBinauralPlayClicked);
-    connect(m_binauralPauseButton, &QPushButton::clicked, this, &MainWindow::onBinauralPauseClicked);
+    connect(m_binauralVolumeInput,
+            QOverload<double>::of(&QDoubleSpinBox::valueChanged), this,
+            &MainWindow::onBinauralVolumeChanged);
+    connect(m_binauralPlayButton, &QPushButton::clicked, this,
+            &MainWindow::onBinauralPlayClicked);
+    connect(m_binauralPauseButton, &QPushButton::clicked, this,
+            &MainWindow::onBinauralPauseClicked);
 
-    connect(m_binauralStopButton, &QPushButton::clicked, this, &MainWindow::onBinauralStopClicked);
+    connect(m_binauralStopButton, &QPushButton::clicked, this,
+            &MainWindow::onBinauralStopClicked);
 
-    connect(toneTypeCombo, &QComboBox::currentIndexChanged, this, &MainWindow::onToneTypeComboIndexChanged);
+    connect(toneTypeCombo, &QComboBox::currentIndexChanged, this,
+            &MainWindow::onToneTypeComboIndexChanged);
 
-    connect(m_pulseFreqLabel, &QDoubleSpinBox::valueChanged, [this](double hz){
+    connect(m_pulseFreqLabel, &QDoubleSpinBox::valueChanged, [this](double hz) {
         m_binauralEngine->setPulseFrequency(hz);
         m_binauralStatusLabel->setText(formatBinauralString());
     });
     // sessions
-    connect(m_openSessionManagerButton, &QPushButton::clicked, this, [this](bool checked){
-        if(checked){
+    connect(m_openSessionManagerButton, &QPushButton::clicked, this,
+            [this](bool checked) {
+        if (checked) {
             m_sessionManagerDialog->show();
-        }else{
+        } else {
             m_sessionManagerDialog->hide();
         }
     });
-    connect(m_sessionManagerDialog, &SessionDialog::dialogHidden, this, [this]{
-        m_openSessionManagerButton->setChecked(false);
-    });
+    connect(m_sessionManagerDialog, &SessionDialog::dialogHidden, this,
+            [this] { m_openSessionManagerButton->setChecked(false); });
 
-    connect(m_sessionManagerDialog, &SessionDialog::stageChanged,
-            this, &MainWindow::onSessionStageChanged);
+    connect(m_sessionManagerDialog, &SessionDialog::stageChanged, this,
+            &MainWindow::onSessionStageChanged);
 
-    connect(m_sessionManagerDialog, &SessionDialog::sessionStarted,
-            this, &MainWindow::onSessionStarted);
+    connect(m_sessionManagerDialog, &SessionDialog::sessionStarted, this,
+            &MainWindow::onSessionStarted);
 
-    connect(m_sessionManagerDialog, &SessionDialog::sessionEnded,
-            this, &MainWindow::onSessionEnded);
+    connect(m_sessionManagerDialog, &SessionDialog::sessionEnded, this,
+            &MainWindow::onSessionEnded);
 
-    //nature toolbar connections
-    connect(m_masterPlayButton, &QPushButton::clicked,
-            this, &MainWindow::onMasterPlayClicked);
-    connect(m_masterPauseButton, &QPushButton::clicked,
-            this, &MainWindow::onMasterPauseClicked);
-    connect(m_masterStopButton, &QPushButton::clicked,
-            this, &MainWindow::onMasterStopClicked);
-    connect(m_masterVolumeSlider, &QSlider::valueChanged,
-            this, &MainWindow::onMasterVolumeChanged);
-    connect(m_naturePowerButton, &QPushButton::toggled, this, &MainWindow::onNaturePowerToggled);
+    // nature toolbar connections
+    connect(m_masterPlayButton, &QPushButton::clicked, this,
+            &MainWindow::onMasterPlayClicked);
+    connect(m_masterPauseButton, &QPushButton::clicked, this,
+            &MainWindow::onMasterPauseClicked);
+    connect(m_masterStopButton, &QPushButton::clicked, this,
+            &MainWindow::onMasterStopClicked);
+    connect(m_masterVolumeSlider, &QSlider::valueChanged, this,
+            &MainWindow::onMasterVolumeChanged);
+    connect(m_naturePowerButton, &QPushButton::toggled, this,
+            &MainWindow::onNaturePowerToggled);
 
     // Playlist connections
-    connect(m_addFilesButton, &QPushButton::clicked, this, &MainWindow::onAddFilesClicked);
-    connect(m_removeTrackButton, &QPushButton::clicked, this, &MainWindow::onRemoveTrackClicked);
-    connect(m_clearPlaylistButton, &QPushButton::clicked, this, &MainWindow::onClearPlaylistClicked);
+    connect(m_addFilesButton, &QPushButton::clicked, this,
+            &MainWindow::onAddFilesClicked);
+    connect(m_removeTrackButton, &QPushButton::clicked, this,
+            &MainWindow::onRemoveTrackClicked);
+    connect(m_clearPlaylistButton, &QPushButton::clicked, this,
+            &MainWindow::onClearPlaylistClicked);
 
-    connect(m_trackInfoButton, &QPushButton::clicked, [this](bool checked){
-        if(checked){
-            //trackInfoDialog->exec();
+    connect(m_trackInfoButton, &QPushButton::clicked, [this](bool checked) {
+        if (checked) {
+            // trackInfoDialog->exec();
             trackInfoDialog->show();
-        }else{
+        } else {
             trackInfoDialog->hide();
         }
     });
 
     // Connect new playlist management signals
-    connect(addPlaylistBtn, &QPushButton::clicked, this, &MainWindow::onAddNewPlaylistClicked);
-    connect(renamePlaylistBtn, &QPushButton::clicked, this, &MainWindow::onRenamePlaylistClicked);
-    connect(m_playlistTabs, &QTabWidget::tabCloseRequested, this, &MainWindow::onClosePlaylistTab);
-    connect(m_playlistTabs, &QTabWidget::currentChanged, this, &MainWindow::onPlaylistTabChanged);
+    connect(addPlaylistBtn, &QPushButton::clicked, this,
+            &MainWindow::onAddNewPlaylistClicked);
+    connect(renamePlaylistBtn, &QPushButton::clicked, this,
+            &MainWindow::onRenamePlaylistClicked);
+    connect(m_playlistTabs, &QTabWidget::tabCloseRequested, this,
+            &MainWindow::onClosePlaylistTab);
+    connect(m_playlistTabs, &QTabWidget::currentChanged, this,
+            &MainWindow::onPlaylistTabChanged);
 
     // Binaural engine signal connections
-    connect(m_binauralEngine, &DynamicEngine::playbackStarted,
-            this, &MainWindow::onBinauralPlaybackStarted);
-    connect(m_binauralEngine, &DynamicEngine::playbackStopped,
-            this, &MainWindow::onBinauralPlaybackStopped);
-    connect(m_binauralEngine, &DynamicEngine::errorOccurred,
-            this, &MainWindow::onBinauralError);
+    connect(m_binauralEngine, &DynamicEngine::playbackStarted, this,
+            &MainWindow::onBinauralPlaybackStarted);
+    connect(m_binauralEngine, &DynamicEngine::playbackStopped, this,
+            &MainWindow::onBinauralPlaybackStopped);
+    connect(m_binauralEngine, &DynamicEngine::errorOccurred, this,
+            &MainWindow::onBinauralError);
 
-    //save-load connections
-    connect(savePresetAction, &QAction::triggered, this, &MainWindow::onSavePresetClicked);
-    connect(loadPresetAction, &QAction::triggered, this, &MainWindow::onLoadPresetClicked);
-    connect(managePresetsAction, &QAction::triggered, this, &MainWindow::onManagePresetsClicked);
+    // save-load connections
+    connect(savePresetAction, &QAction::triggered, this,
+            &MainWindow::onSavePresetClicked);
+    connect(loadPresetAction, &QAction::triggered, this,
+            &MainWindow::onLoadPresetClicked);
+    connect(managePresetsAction, &QAction::triggered, this,
+            &MainWindow::onManagePresetsClicked);
 
-    connect(openPlaylistAction, &QAction::triggered, this, &MainWindow::onOpenPlaylistClicked);
-    connect(saveCurrentPlaylistAction, &QAction::triggered, this, &MainWindow::onSaveCurrentPlaylistClicked);
-    connect(saveCurrentPlaylistAsAction, &QAction::triggered, this, &MainWindow::onSaveCurrentPlaylistAsClicked);
-    connect(saveAllPlaylistsAction, &QAction::triggered, this, &MainWindow::onSaveAllPlaylistsClicked);
-    connect(quitAction, &QAction::triggered, [this]{
-        qApp->quit();
-    });
+    connect(openPlaylistAction, &QAction::triggered, this,
+            &MainWindow::onOpenPlaylistClicked);
+    connect(saveCurrentPlaylistAction, &QAction::triggered, this,
+            &MainWindow::onSaveCurrentPlaylistClicked);
+    connect(saveCurrentPlaylistAsAction, &QAction::triggered, this,
+            &MainWindow::onSaveCurrentPlaylistAsClicked);
+    connect(saveAllPlaylistsAction, &QAction::triggered, this,
+            &MainWindow::onSaveAllPlaylistsClicked);
+    connect(quitAction, &QAction::triggered, [this] { qApp->quit(); });
 
-    connect(unlimitedDurationAction, &QAction::triggered, [this](bool checked){
-
-        if(checked){
-            QMessageBox::warning(this,
-                "Prolonged Exposure Warning",
-                "Prolonged exposure to binaural audio may cause fatigue or discomfort.\nUse responsibly.");
+    connect(unlimitedDurationAction, &QAction::triggered, [this](bool checked) {
+        if (checked) {
+            QMessageBox::warning(this, "Prolonged Exposure Warning",
+                                 "Prolonged exposure to binaural audio may cause "
+                                 "fatigue or discomfort.\nUse responsibly.");
             m_brainwaveDuration->setRange(1, 360);
             settings.setValue("binaural/unlimitedDuration", true);
-        }else{
+        } else {
             m_brainwaveDuration->setRange(1, 45);
             settings.setValue("binaural/unlimitedDuration", false);
-
         }
         m_sessionManagerDialog->setUnlimitedDuration(checked);
-
     });
-    //fade
+    // fade
 
     connect(&m_fadeTimer, &QTimer::timeout, this, [this]() {
         if (m_sessionManagerDialog) {
             m_sessionManagerDialog->pauseButton()->setDisabled(true);
             m_sessionManagerDialog->stopButton()->setDisabled(true);
-           }
+        }
 
         m_fadeSteps++;
 
         double progress = m_fadeSteps / 100.0;
-        double vol = m_fadeStartVolume + (m_fadeTargetVolume - m_fadeStartVolume) * progress;
+        double vol =
+                m_fadeStartVolume + (m_fadeTargetVolume - m_fadeStartVolume) * progress;
         m_binauralVolumeInput->setValue(vol);
 
         if (m_fadeSteps >= 100) {
@@ -1012,53 +1121,48 @@ void MainWindow::setupConnections()
             if (m_sessionManagerDialog) {
                 m_sessionManagerDialog->pauseButton()->setEnabled(true);
                 m_sessionManagerDialog->stopButton()->setEnabled(true);
-
             }
         }
-
     });
 
-    connect(m_sessionManagerDialog, &SessionDialog::fadeRequested, this, [this](double targetVolume){
-
+    connect(m_sessionManagerDialog, &SessionDialog::fadeRequested, this,
+            [this](double targetVolume) {
         m_fadeStartVolume = m_binauralEngine->getVolume() * 100;
 
-        if (m_fadeStartVolume == targetVolume) return;
+        if (m_fadeStartVolume == targetVolume)
+            return;
 
         m_fadeTargetVolume = targetVolume;
         m_fadeSteps = 0;
         m_fadeTimer.start();
-
     });
 
-    connect(m_sessionManagerDialog, &SessionDialog::pauseRequested, this, [this]{
+    connect(m_sessionManagerDialog, &SessionDialog::pauseRequested, this, [this] {
         m_binauralPauseButton->setEnabled(true);
         m_binauralPauseButton->click();
         m_binauralPauseButton->setDisabled(true);
-
     });
-    connect(m_sessionManagerDialog, &SessionDialog::resumeRequested, this, [this]{
+    connect(m_sessionManagerDialog, &SessionDialog::resumeRequested, this,
+            [this] {
         m_binauralPlayButton->setEnabled(true);
         m_binauralPlayButton->click();
         m_binauralPlayButton->setDisabled(true);
-
     });
-    connect(m_sessionManagerDialog, &SessionDialog::syncTimersRequested, this, [this](int currentIndex, int remainingTime){
-
+    connect(m_sessionManagerDialog, &SessionDialog::syncTimersRequested, this,
+            [this](int currentIndex, int remainingTime) {
         /*
-        int minutes = remainingTime / 60;
-        int seconds = remainingTime % 60;
-        m_countdownLabel->setText(QString("%1:%2")
-            .arg(minutes, 2, 10, QLatin1Char('0'))
-            .arg(seconds, 2, 10, QLatin1Char('0')));
-        */
+            int minutes = remainingTime / 60;
+            int seconds = remainingTime % 60;
+            m_countdownLabel->setText(QString("%1:%2")
+                .arg(minutes, 2, 10, QLatin1Char('0'))
+                .arg(seconds, 2, 10, QLatin1Char('0')));
+            */
         currentStageIndex = currentIndex;
         totalRemainigTime = remainingTime;
-
     });
 }
 
-void MainWindow::initializeAudioEngines()
-{
+void MainWindow::initializeAudioEngines() {
     // Binaural engine is already created in constructor
     // Media player engine will be initialized when we implement it
     // Nature sounds engine will be initialized when we implement it
@@ -1068,45 +1172,42 @@ void MainWindow::initializeAudioEngines()
 
     // Connect player to audio output (no playlist)
     m_mediaPlayer->setAudioOutput(m_audioOutput);
+    m_mediaPlayer->setVideoOutput(videoWidget);
 
     m_audioOutput->setVolume(m_musicVolumeSlider->value() / 100.0f);
 }
 
 // =================== UI STYLING METHODS ===================
 
-void MainWindow::styleToolbar(QToolBar *toolbar, const QString &color)
-{
-    QString style = QString(
-        "QToolBar {"
-        "  background-color: %1;"
-        "  border: 1px solid %2;"
-        "  border-radius: 4px;"
-        "  padding: 4px;"
-        "  spacing: 8px;"
-        "}"
-        "QToolBar::separator {"
-        "  background-color: %2;"
-        "  width: 1px;"
-        "  margin: 4px 2px;"
-        "}"
-    ).arg(color).arg(QColor(color).darker(120).name());
+void MainWindow::styleToolbar(QToolBar *toolbar, const QString &color) {
+    QString style = QString("QToolBar {"
+                            "  background-color: %1;"
+                            "  border: 1px solid %2;"
+                            "  border-radius: 4px;"
+                            "  padding: 4px;"
+                            "  spacing: 8px;"
+                            "}"
+                            "QToolBar::separator {"
+                            "  background-color: %2;"
+                            "  width: 1px;"
+                            "  margin: 4px 2px;"
+                            "}")
+            .arg(color)
+            .arg(QColor(color).darker(120).name());
 
     toolbar->setStyleSheet(style);
 }
 
-void MainWindow::updateBinauralBeatDisplay()
-{
+void MainWindow::updateBinauralBeatDisplay() {
     double leftFreq = m_leftFreqInput->value();
     double rightFreq = m_rightFreqInput->value();
     double beatFreq = qAbs(rightFreq - leftFreq);
 
     m_beatFreqLabel->setText(QString("%1 Hz").arg(beatFreq, 0, 'f', 2));
-    //m_beatFreqLabel->setValue(beatFreq);
-
+    // m_beatFreqLabel->setValue(beatFreq);
 }
 
-void MainWindow::updateBinauralPowerState(bool enabled)
-{
+void MainWindow::updateBinauralPowerState(bool enabled) {
     toneTypeCombo->setEnabled(enabled);
     m_leftFreqInput->setEnabled(enabled);
     m_rightFreqInput->setEnabled(enabled);
@@ -1124,71 +1225,71 @@ void MainWindow::updateBinauralPowerState(bool enabled)
     // Update power button text
     m_binauralPowerButton->setText(enabled ? "●" : "○");
     m_binauralPowerButton->setStyleSheet(
-        enabled ? "color: #00FF00; font-weight: bold;" : "color: #888888;"
-    );
+                enabled ? "color: #00FF00; font-weight: bold;" : "color: #888888;");
     // Enable/disable duration selector
-       m_brainwaveDuration->setEnabled(enabled);
+    m_brainwaveDuration->setEnabled(enabled);
 
-       // Reset timer when turning off
-       if (!enabled && m_autoStopTimer) {
-           stopAutoStopTimer();
-       }
+    // Reset timer when turning off
+    if (!enabled && m_autoStopTimer) {
+        stopAutoStopTimer();
+    }
 }
 
-void MainWindow::updateNaturePowerState(bool enabled)
-{
+void MainWindow::updateNaturePowerState(bool enabled) {
 
     // 1. Update power button appearance
     if (m_naturePowerButton) {
         m_naturePowerButton->setText(enabled ? "●" : "○");
         m_naturePowerButton->setStyleSheet(
-            enabled ? "QPushButton { color: #32CD32; font-weight: bold; }"
-                    : "QPushButton { color: #888888; }"
-        );
+                    enabled ? "QPushButton { color: #32CD32; font-weight: bold; }"
+                            : "QPushButton { color: #888888; }");
     }
 
     // 2. Enable/disable ALL ambient players
-    for (AmbientPlayer* player : std::as_const(m_ambientPlayers)) {
+    for (AmbientPlayer *player : std::as_const(m_ambientPlayers)) {
         if (player) {
             player->setEnabled(enabled);
         }
     }
 
-    // 3. Update player buttons in toolbar (they should auto-update via AmbientPlayer)
-    // No action needed - AmbientPlayer handles its own button updates
-
+    // 3. Update player buttons in toolbar (they should auto-update via
+    // AmbientPlayer) No action needed - AmbientPlayer handles its own button
+    // updates
 }
 // =================== SLOT IMPLEMENTATIONS ===================
 
 // Media player slots
 
-void MainWindow::onPauseMusicClicked()
-{
-    //pause for streaming
+void MainWindow::onPauseMusicClicked() {
+    // pause for streaming
     if (m_mediaPlayer) {
-            // Handle stream pause
-            if (m_isStream && !m_currentStreamUrl.isEmpty()) {
-                m_mediaPlayer->pause();  // Pause the stream
+        // Handle stream pause
+        if (m_isStream && !m_currentStreamUrl.isEmpty()) {
+            m_mediaPlayer->pause(); // Pause the stream
 
-                QUrl url(m_currentStreamUrl);
-                QString displayName = url.fileName();
-                if (displayName.isEmpty()) {
-                    displayName = url.host();
-                    if (displayName.isEmpty()) displayName = "Stream";
-                }
-                statusBar()->showMessage("Paused: " + displayName);
-
-                return;  // Exit the method - don't check playlist
+            QUrl url(m_currentStreamUrl);
+            QString displayName = url.fileName();
+            if (displayName.isEmpty()) {
+                displayName = url.host();
+                if (displayName.isEmpty())
+                    displayName = "Stream";
             }
+            statusBar()->showMessage("Paused: " + displayName);
+
+            return; // Exit the method - don't check playlist
+        }
     }
 
     // normal playlist track pausing
-    if (!m_currentPlaylistName.isEmpty() &&
-        m_currentTrackIndex >= 0 &&
-        m_currentTrackIndex < m_playlistFiles[m_currentPlaylistName].size()) {
+    if (m_isVideoEnabled)
+        m_currentPlaylistName = "Video Playlist";
+
+    if (!m_currentPlaylistName.isEmpty() && m_currentTrackIndex >= 0 &&
+            m_currentTrackIndex < m_playlistFiles[m_currentPlaylistName].size()) {
 
         // Get the file path of the current track
-        QString filePath = m_playlistFiles[m_currentPlaylistName].at(m_currentTrackIndex);
+        QString filePath =
+                m_playlistFiles[m_currentPlaylistName].at(m_currentTrackIndex);
 
         // Pause the player
         m_mediaPlayer->pause();
@@ -1203,22 +1304,26 @@ void MainWindow::onPauseMusicClicked()
         statusBar()->showMessage("Paused (no track loaded)");
     }
 
-    //m_mediaPlayer->pause();  // JUST PAUSES
+    // m_mediaPlayer->pause();  // JUST PAUSES
 }
 
-void MainWindow::onStopMusicClicked()
-{
-    if(m_isStream){
+void MainWindow::onStopMusicClicked() {
+    if (m_isStream) {
     m_isStream = false;
-    //m_currentStreamUrl = "";
+    // m_currentStreamUrl = "";
     }
 
-    if (!m_currentPlaylistName.isEmpty() &&
-        m_currentTrackIndex >= 0 &&
-        m_currentTrackIndex < m_playlistFiles[m_currentPlaylistName].size()) {
+    // if(m_isVideoEnabled) m_currentPlaylistName = "Video Playlist";
+
+    if (m_isVideoEnabled)
+        m_currentPlaylistName = m_lastVideoPlaylistName;
+
+    if (!m_currentPlaylistName.isEmpty() && m_currentTrackIndex >= 0 &&
+            m_currentTrackIndex < m_playlistFiles[m_currentPlaylistName].size()) {
 
         // Get the file path of the current track
-        QString filePath = m_playlistFiles[m_currentPlaylistName].at(m_currentTrackIndex);
+        QString filePath =
+                m_playlistFiles[m_currentPlaylistName].at(m_currentTrackIndex);
 
         // Pause the player
         m_mediaPlayer->stop();
@@ -1233,11 +1338,29 @@ void MainWindow::onStopMusicClicked()
         m_mediaPlayer->stop();
         statusBar()->showMessage("Stopped (no track loaded)");
     }
-    //m_mediaPlayer->stop();
+    // m_mediaPlayer->stop();
 }
 
-void MainWindow::onMusicVolumeChanged(int value)
-{
+void MainWindow::onMusicVolumeChanged(int value) {
+    // Update the OTHER slider if different
+    static bool updating = false; // Prevent re-entry
+
+    if (!updating) {
+        updating = true;
+
+        // Update master slider if video slider changed
+        if (sender() == m_vvolumeSlider && m_musicVolumeSlider->value() != value) {
+            m_musicVolumeSlider->setValue(value);
+        }
+        // Update video slider if master slider changed
+        else if (sender() == m_musicVolumeSlider &&
+                 m_vvolumeSlider->value() != value) {
+            m_vvolumeSlider->setValue(value);
+        }
+
+        updating = false;
+    }
+
     // Convert 0-100 slider value to 0.0-1.0 volume range
     float volume = value / 100.0f;
 
@@ -1248,15 +1371,15 @@ void MainWindow::onMusicVolumeChanged(int value)
 
     // Update the label
     m_musicVolumeLabel->setText(QString("%1%").arg(value));
+    m_volShowLabel->setText(QString("%1%").arg(value));
 
     // Optional: Show brief feedback
     // statusBar()->showMessage(QString("Volume: %1%").arg(value), 1500);
 }
 
-
 // Binaural slots
-void MainWindow::onBinauralPowerToggled(bool checked)
-{       // Show warning and check if user wants to proceed
+void MainWindow::onBinauralPowerToggled(
+        bool checked) { // Show warning and check if user wants to proceed
     if (checked) {
     bool proceed = showBinauralWarning();
 
@@ -1277,85 +1400,81 @@ void MainWindow::onBinauralPowerToggled(bool checked)
         toneTypeCombo->setCurrentIndex(0);
         m_waveformCombo->setCurrentIndex(0);
 
-    }else{
+    } else {
         toneTypeCombo->setCurrentIndex(0);
         m_waveformCombo->setCurrentIndex(0);
 
-        //squareWaveItem->setEnabled(false);
+        // squareWaveItem->setEnabled(false);
     }
-    m_binauralStatusLabel->setText(checked ? "Binaural engine enabled" : "Binaural engine disabled");
+    m_binauralStatusLabel->setText(checked ? "Binaural engine enabled"
+                                           : "Binaural engine disabled");
 }
 
-void MainWindow::onLeftFrequencyChanged(double value)
-{
+void MainWindow::onLeftFrequencyChanged(double value) {
     /*
-    if (m_binauralEngine->isPlaying()) {
-        // Show simple message and exit
-        QMessageBox::information(this,
-            "Stop Playback First",
-            "Please stop playback before changing frequency.");
-        return; // Exit method - no frequency change
-    }
-    */
+  if (m_binauralEngine->isPlaying()) {
+      // Show simple message and exit
+      QMessageBox::information(this,
+          "Stop Playback First",
+          "Please stop playback before changing frequency.");
+      return; // Exit method - no frequency change
+  }
+  */
 
     m_binauralEngine->setLeftFrequency(value);
     updateBinauralBeatDisplay();
     m_binauralStatusLabel->setText(formatBinauralString());
 }
 
-void MainWindow::onRightFrequencyChanged(double value)
-{
+void MainWindow::onRightFrequencyChanged(double value) {
     /*
-    if (m_binauralEngine->isPlaying()) {
-        // Show simple message and exit
-        QMessageBox::information(this,
-            "Stop Playback First",
-            "Please stop playback before changing frequency.");
-        return; // Exit method - no frequency change
-    }
-    */
+  if (m_binauralEngine->isPlaying()) {
+      // Show simple message and exit
+      QMessageBox::information(this,
+          "Stop Playback First",
+          "Please stop playback before changing frequency.");
+      return; // Exit method - no frequency change
+  }
+  */
 
     m_binauralEngine->setRightFrequency(value);
     updateBinauralBeatDisplay();
     m_binauralStatusLabel->setText(formatBinauralString());
 }
 
-void MainWindow::onWaveformChanged(int index)
-{
-    DynamicEngine::Waveform waveform = static_cast<DynamicEngine::Waveform>(index);
+void MainWindow::onWaveformChanged(int index) {
+    DynamicEngine::Waveform waveform =
+            static_cast<DynamicEngine::Waveform>(index);
     m_binauralEngine->setWaveform(waveform);
-    //m_binauralStatusLabel->setText(waveform == DynamicEngine::SINE_WAVE ?
-      //                      "Waveform: Sine" : "Waveform: Square");
+    // m_binauralStatusLabel->setText(waveform == DynamicEngine::SINE_WAVE ?
+    //                       "Waveform: Sine" : "Waveform: Square");
     m_binauralStatusLabel->setText(formatBinauralString());
-
 }
 
-void MainWindow::onBinauralVolumeChanged(double value)
-{
+void MainWindow::onBinauralVolumeChanged(double value) {
     m_binauralEngine->setVolume(value / 100.0); // Convert percentage to 0.0-1.0
-    //m_binauralStatusLabel->setText(QString("Binaural volume: %1%").arg(value));
+    // m_binauralStatusLabel->setText(QString("Binaural volume: %1%").arg(value));
 }
 
-void MainWindow::onBinauralPlayClicked()
-{
+void MainWindow::onBinauralPlayClicked() {
 
-    if(ConstantGlobals::currentToneType == 1) {
+    if (ConstantGlobals::currentToneType == 1) {
         double leftInputValue = m_leftFreqInput->value();
         m_rightFreqInput->setValue(leftInputValue);
     }
     if (m_binauralEngine->start()) {
-        if(ConstantGlobals::currentToneType == 0 || ConstantGlobals::currentToneType == 2){
+        if (ConstantGlobals::currentToneType == 0 ||
+                ConstantGlobals::currentToneType == 2) {
             m_leftFreqInput->setEnabled(true);
             m_rightFreqInput->setEnabled(true);
-        }else{
+        } else {
             m_rightFreqInput->setDisabled(true);
-
         }
         m_binauralStatusLabel->setText(formatBinauralString());
         startAutoStopTimer();
         m_engineIsPaused = false;
-        //m_leftFreqInput->setDisabled(true);
-        //m_rightFreqInput->setDisabled(true);
+        // m_leftFreqInput->setDisabled(true);
+        // m_rightFreqInput->setDisabled(true);
         m_brainwaveDuration->setDisabled(true);
         m_binauralPauseButton->setToolTip("Pause binaural tones");
         m_binauralPlayButton->setToolTip("Play binaural tones");
@@ -1363,14 +1482,14 @@ void MainWindow::onBinauralPlayClicked()
     }
 }
 
-void MainWindow::onBinauralPauseClicked()
-{
-    if(!m_binauralEngine->isPlaying()) return;
+void MainWindow::onBinauralPauseClicked() {
+    if (!m_binauralEngine->isPlaying())
+        return;
 
     if (!m_engineIsPaused) {
         // Pause
-        m_binauralEngine->stop();   // stop audio
-        stopAutoStopTimer();        // stop timer, but do NOT reset remaining seconds
+        m_binauralEngine->stop(); // stop audio
+        stopAutoStopTimer();      // stop timer, but do NOT reset remaining seconds
         m_engineIsPaused = true;
         m_binauralPauseButton->setToolTip("Paused");
         m_binauralPlayButton->setToolTip("Resume");
@@ -1379,13 +1498,11 @@ void MainWindow::onBinauralPauseClicked()
     }
 }
 
-void MainWindow::onBinauralStopClicked()
-{
+void MainWindow::onBinauralStopClicked() {
     m_binauralEngine->stop();
 
     m_binauralPauseButton->setToolTip("Pause binaural tones");
     m_binauralPlayButton->setToolTip("Play binaural tones");
-
 
     stopAutoStopTimer();
     m_remainingSeconds = 0;
@@ -1397,12 +1514,11 @@ void MainWindow::onBinauralStopClicked()
 
     m_brainwaveDuration->setEnabled(true);
     m_countdownLabel->setText(m_brainwaveDuration->text());
-    if(ConstantGlobals::currentToneType == 1) {
-       m_rightFreqInput->setDisabled(true);
+    if (ConstantGlobals::currentToneType == 1) {
+        m_rightFreqInput->setDisabled(true);
     }
     m_binauralStatusLabel->setText("Binaural tones stopped");
     unlimitedDurationAction->setEnabled(true);
-
 }
 
 // Nature sounds slots
@@ -1414,7 +1530,8 @@ void MainWindow::onNaturePowerToggled(bool checked)
     updateNaturePowerState(checked);
 
     // Update status bar
-    statusBar()->showMessage(checked ? "Nature sounds enabled" : "Nature sounds disabled");
+    statusBar()->showMessage(checked ? "Nature sounds enabled" : "Nature sounds
+disabled");
 
     // If turning ON, also update master controls appearance
     if (checked) {
@@ -1428,23 +1545,26 @@ void MainWindow::onNaturePowerToggled(bool checked)
         }
 
         // Enable master controls if any player is enabled
-        if (m_masterPlayButton) m_masterPlayButton->setEnabled(hasEnabledPlayers);
-        if (m_masterPauseButton) m_masterPauseButton->setEnabled(hasEnabledPlayers);
-        if (m_masterStopButton) m_masterStopButton->setEnabled(hasEnabledPlayers);
-        //if (m_masterVolumeSlider) m_masterVolumeSlider->setEnabled(hasEnabledPlayers);
-        //if (m_masterVolumeLabel) m_masterVolumeLabel->setEnabled(hasEnabledPlayers);
+        if (m_masterPlayButton)
+m_masterPlayButton->setEnabled(hasEnabledPlayers); if (m_masterPauseButton)
+m_masterPauseButton->setEnabled(hasEnabledPlayers); if (m_masterStopButton)
+m_masterStopButton->setEnabled(hasEnabledPlayers);
+        //if (m_masterVolumeSlider)
+m_masterVolumeSlider->setEnabled(hasEnabledPlayers);
+        //if (m_masterVolumeLabel)
+m_masterVolumeLabel->setEnabled(hasEnabledPlayers);
     }
 }
 */
 
-void MainWindow::onNaturePowerToggled(bool checked)
-{
+void MainWindow::onNaturePowerToggled(bool checked) {
 
     // Update the power state
     updateNaturePowerState(checked);
 
     // Update status bar
-    statusBar()->showMessage(checked ? "Nature sounds enabled" : "Nature sounds disabled");
+    statusBar()->showMessage(checked ? "Nature sounds enabled"
+                                     : "Nature sounds disabled");
 
     // Enable/disable all nature toolbar widgets based on power state
     openAmbientPresetButton->setEnabled(checked);
@@ -1457,40 +1577,38 @@ void MainWindow::onNaturePowerToggled(bool checked)
     // Enable/disable player buttons
     // Since m_ambientPlayers is a QMap<QString, AmbientPlayer*>
     for (auto it = m_ambientPlayers.begin(); it != m_ambientPlayers.end(); ++it) {
-        AmbientPlayer* player = it.value();
+        AmbientPlayer *player = it.value();
         if (player && player->button()) {
             player->button()->setEnabled(checked);
         }
     }
 }
 
-\
 // Playlist slots
-void MainWindow::onAddFilesClicked() { onLoadMusicClicked(); } // Reuse same functionality
+void MainWindow::onAddFilesClicked() {
+    onLoadMusicClicked();
+} // Reuse same functionality
 
 // Binaural engine signal handlers
-void MainWindow::onBinauralPlaybackStarted()
-{
-    //m_binauralPlayButton->setText("⏸");
-    //m_binauralPlayButton->setToolTip("Pause binaural tones");
+void MainWindow::onBinauralPlaybackStarted() {
+    // m_binauralPlayButton->setText("⏸");
+    // m_binauralPlayButton->setToolTip("Pause binaural tones");
     m_binauralStatusLabel->setText(formatBinauralString());
 }
 
-void MainWindow::onBinauralPlaybackStopped()
-{
-    //m_binauralPlayButton->setText("▶");
+void MainWindow::onBinauralPlaybackStopped() {
+    // m_binauralPlayButton->setText("▶");
     m_binauralPlayButton->setToolTip("Start binaural tones");
     m_binauralStatusLabel->setText("Binaural tones stopped");
 }
 
-void MainWindow::onBinauralError(const QString &error)
-{
+void MainWindow::onBinauralError(const QString &error) {
     m_binauralStatusLabel->setText("Error: " + error); // Show for 5 seconds
     QMessageBox::warning(this, "Binaural Engine Error", error);
 }
 
 void MainWindow::showFirstLaunchWarning() {
-    //QSettings settings;
+    // QSettings settings;
 
     // Check if user has already acknowledged
     if (settings.value("firstLaunchWarned", false).toBool()) {
@@ -1503,32 +1621,33 @@ void MainWindow::showFirstLaunchWarning() {
 
     // HTML formatting for better readability
     QString message =
-        "<div style='margin: 10px;'>"
-        "<h3>Welcome! 🎵</h3>"
-        "<p>This app creates audio tones for relaxation and focus.</p>"
+            "<div style='margin: 10px;'>"
+            "<h3>Welcome! 🎵</h3>"
+            "<p>This app creates audio tones for relaxation and focus.</p>"
 
-        "<p><b>For a safe experience:</b></p>"
-        "<ul>"
-        "<li>Use moderate volume levels</li>"
-        "<li>Take breaks during extended use</li>"
-        "<li>Find a comfortable environment</li>"
-        "</ul>"
+            "<p><b>For a safe experience:</b></p>"
+            "<ul>"
+            "<li>Use moderate volume levels</li>"
+            "<li>Take breaks during extended use</li>"
+            "<li>Find a comfortable environment</li>"
+            "</ul>"
 
-        "<p><b>Important considerations:</b></p>"
-        "<ul>"
-        "<li>If you have epilepsy or are prone to seizures, consult a doctor</li>"
-        "<li>Discontinue use if you feel dizzy or uncomfortable</li>"
-        "<li>Do not use while driving or operating machinery</li>"
-        "</ul>"
+            "<p><b>Important considerations:</b></p>"
+            "<ul>"
+            "<li>If you have epilepsy or are prone to seizures, consult a doctor</li>"
+            "<li>Discontinue use if you feel dizzy or uncomfortable</li>"
+            "<li>Do not use while driving or operating machinery</li>"
+            "</ul>"
 
-        "<p><i>This tool is for personal enjoyment and exploration.</i></p>"
-        "</div>";
+            "<p><i>This tool is for personal enjoyment and exploration.</i></p>"
+            "</div>";
 
     msgBox.setTextFormat(Qt::RichText);
     msgBox.setText(message);
 
     // Add "Don't show again" checkbox
-    QCheckBox *dontShowAgain = new QCheckBox("Don't show this message again", &msgBox);
+    QCheckBox *dontShowAgain =
+            new QCheckBox("Don't show this message again", &msgBox);
     msgBox.setCheckBox(dontShowAgain);
 
     // Add OK button
@@ -1544,7 +1663,7 @@ void MainWindow::showFirstLaunchWarning() {
 }
 
 bool MainWindow::showBinauralWarning() {
-    //QSettings settings;
+    // QSettings settings;
 
     // Check if user has already acknowledged
     if (settings.value("binauralWarned", false).toBool()) {
@@ -1557,36 +1676,41 @@ bool MainWindow::showBinauralWarning() {
 
     // HTML formatting
     QString message =
-        "<div style='margin: 10px;'>"
-        "<h3>Brainwave Audio Activation 🧠</h3>"
-        "<p>You're about to enable audio tones that may influence brain activity.</p>"
+            "<div style='margin: 10px;'>"
+            "<h3>Brainwave Audio Activation 🧠</h3>"
+            "<p>You're about to enable audio tones that may influence brain "
+            "activity.</p>"
 
-        "<p><b>Important usage notes:</b></p>"
-        "<ul>"
-        "<li><b>Binaural mode:</b> Requires headphones for the full effect</li>"
-        "<li><b>Isochronic mode:</b> Works with speakers or headphones</li>"
-        "<li>Audio will auto-pause after 45 minutes (recommended break)</li>"
-        "<li>Stop immediately if you feel any discomfort</li>"
-        "</ul>"
+            "<p><b>Important usage notes:</b></p>"
+            "<ul>"
+            "<li><b>Binaural mode:</b> Requires headphones for the full effect</li>"
+            "<li><b>Isochronic mode:</b> Works with speakers or headphones</li>"
+            "<li>Audio will auto-pause after 45 minutes (recommended break)</li>"
+            "<li>Stop immediately if you feel any discomfort</li>"
+            "</ul>"
 
-        "<p><b>Safety reminder:</b></p>"
-        "<ul>"
-        "<li>Not recommended for those with epilepsy or seizure disorders</li>"
-        "<li>Consult a doctor if you have heart conditions or other medical concerns</li>"
-        "<li>Use at your own discretion</li>"
-        "</ul>"
-        "</div>";
+            "<p><b>Safety reminder:</b></p>"
+            "<ul>"
+            "<li>Not recommended for those with epilepsy or seizure disorders</li>"
+            "<li>Consult a doctor if you have heart conditions or other medical "
+            "concerns</li>"
+            "<li>Use at your own discretion</li>"
+            "</ul>"
+            "</div>";
 
     msgBox.setTextFormat(Qt::RichText);
     msgBox.setText(message);
 
     // Add "Don't show again" checkbox
-    QCheckBox *dontShowAgain = new QCheckBox("Don't show this warning again", &msgBox);
+    QCheckBox *dontShowAgain =
+            new QCheckBox("Don't show this warning again", &msgBox);
     msgBox.setCheckBox(dontShowAgain);
 
     // Add two buttons: OK and Cancel
-    QPushButton *okButton = msgBox.addButton("Enable Audio", QMessageBox::AcceptRole);
-    QPushButton *cancelButton = msgBox.addButton("Cancel", QMessageBox::RejectRole);
+    QPushButton *okButton =
+            msgBox.addButton("Enable Audio", QMessageBox::AcceptRole);
+    QPushButton *cancelButton =
+            msgBox.addButton("Cancel", QMessageBox::RejectRole);
     msgBox.setDefaultButton(okButton);
 
     // Execute the message box
@@ -1603,23 +1727,23 @@ bool MainWindow::showBinauralWarning() {
     return proceed;
 }
 
-//timer
+// timer
 void MainWindow::startAutoStopTimer() {
     // Stop any existing timer
     stopAutoStopTimer();
 
     // Only reset duration if NOT resuming from pause
-        if (!m_engineIsPaused) {
-            m_remainingSeconds = m_brainwaveDuration->value() * 60;
-        }
+    if (!m_engineIsPaused) {
+        m_remainingSeconds = m_brainwaveDuration->value() * 60;
+    }
 
     // Calculate seconds from selected minutes
-    //m_remainingSeconds = m_brainwaveDuration->value() * 60;
+    // m_remainingSeconds = m_brainwaveDuration->value() * 60;
 
     // Create and start timer
     m_autoStopTimer = new QTimer(this);
-    connect(m_autoStopTimer, &QTimer::timeout,
-            this, &MainWindow::onAutoStopTimerTimeout);
+    connect(m_autoStopTimer, &QTimer::timeout, this,
+            &MainWindow::onAutoStopTimerTimeout);
 
     m_autoStopTimer->start(1000); // Update every second
 
@@ -1627,7 +1751,8 @@ void MainWindow::startAutoStopTimer() {
     m_countdownLabel->setVisible(true);
     updateCountdownDisplay();
 
-    //m_binauralStatusLabel->setText(QString("Brainwave audio will auto-stop in %1 minutes").arg(m_brainwaveDuration->value()));
+    // m_binauralStatusLabel->setText(QString("Brainwave audio will auto-stop in
+    // %1 minutes").arg(m_brainwaveDuration->value()));
 }
 
 // Stop the auto-stop timer
@@ -1640,7 +1765,7 @@ void MainWindow::stopAutoStopTimer() {
 
     // Hide countdown display
     m_countdownLabel->setVisible(false);
-   // m_remainingSeconds = 0;
+    // m_remainingSeconds = 0;
 }
 
 // Update countdown display
@@ -1649,25 +1774,22 @@ void MainWindow::updateCountdownDisplay() {
     int seconds = m_remainingSeconds % 60;
 
     QString timeText = QString("%1:%2")
-        .arg(minutes, 2, 10, QChar('0'))
-        .arg(seconds, 2, 10, QChar('0'));
+            .arg(minutes, 2, 10, QChar('0'))
+            .arg(seconds, 2, 10, QChar('0'));
 
     // Color coding for warnings
     if (minutes == 0) {
         m_countdownLabel->setStyleSheet(
-            "background-color: #F8D7DA; color: #721C24; padding: 3px; "
-            "border: 1px solid #F5C6CB; border-radius: 3px; font-weight: bold;"
-        );
+                    "background-color: #F8D7DA; color: #721C24; padding: 3px; "
+                    "border: 1px solid #F5C6CB; border-radius: 3px; font-weight: bold;");
     } else if (minutes <= 5) {
         m_countdownLabel->setStyleSheet(
-            "background-color: #FFF3CD; color: #856404; padding: 3px; "
-            "border: 1px solid #FFE082; border-radius: 3px;"
-        );
+                    "background-color: #FFF3CD; color: #856404; padding: 3px; "
+                    "border: 1px solid #FFE082; border-radius: 3px;");
     } else {
         m_countdownLabel->setStyleSheet(
-            "background-color: #f0f0f0; color: #7B68EE; padding: 3px; "
-            "border: 1px solid #ccc; border-radius: 3px;"
-        );
+                    "background-color: #f0f0f0; color: #7B68EE; padding: 3px; "
+                    "border: 1px solid #ccc; border-radius: 3px;");
     }
 
     m_countdownLabel->setText(timeText);
@@ -1681,7 +1803,8 @@ void MainWindow::onAutoStopTimerTimeout() {
 
         // Last minute warning
         if (m_remainingSeconds == 60) {
-            //m_binauralStatusLabel->setText("1 minute remaining in brainwave session");
+            // m_binauralStatusLabel->setText("1 minute remaining in brainwave
+            // session");
         }
     } else {
         // Time's up - stop the audio
@@ -1693,19 +1816,20 @@ void MainWindow::onAutoStopTimerTimeout() {
         }
 
         // Optional: Show completion message
-        QMessageBox::information(this, "Session Complete",
-            "Your brainwave session has finished.\n\n"
-            "Taking a short break is recommended before starting a new session.");
+        QMessageBox::information(
+                    this, "Session Complete",
+                    "Your brainwave session has finished.\n\n"
+                    "Taking a short break is recommended before starting a new session.");
     }
 }
 
 // Duration changed handler
 void MainWindow::onBrainwaveDurationChanged(int minutes) {
-   // m_binauralStatusLabel->setText(QString("Brainwave audio will auto-stop after %1 minutes").arg(minutes));
+    // m_binauralStatusLabel->setText(QString("Brainwave audio will auto-stop
+    // after %1 minutes").arg(minutes));
 }
-//mediaplayer
-void MainWindow::onMediaStatusChanged(QMediaPlayer::MediaStatus status)
-{
+// mediaplayer
+void MainWindow::onMediaStatusChanged(QMediaPlayer::MediaStatus status) {
 
     switch (status) {
     case QMediaPlayer::LoadingMedia:
@@ -1715,21 +1839,21 @@ void MainWindow::onMediaStatusChanged(QMediaPlayer::MediaStatus status)
 
         break;
     case QMediaPlayer::BufferedMedia:
-           break;
+        break;
     case QMediaPlayer::EndOfMedia:
 
-        if(!m_isRepeat){
-            if(isShuffle){
+        if (!m_isRepeat) {
+            if (isShuffle) {
                 playRandomTrack();
-            }else{
+            } else {
                 playNextTrack();
             }
-        }else{
+        } else {
             if (m_currentTrackIndex >= 0) {
-                    m_mediaPlayer->setPosition(0);
-                    m_mediaPlayer->play();
-                    //statusBar()->showMessage("Replaying track");
-                }
+                m_mediaPlayer->setPosition(0);
+                m_mediaPlayer->play();
+                // statusBar()->showMessage("Replaying track");
+            }
         }
         break;
     case QMediaPlayer::InvalidMedia:
@@ -1740,108 +1864,148 @@ void MainWindow::onMediaStatusChanged(QMediaPlayer::MediaStatus status)
     default:
         break;
     }
-
 }
 
-void MainWindow::onPlaybackStateChanged(QMediaPlayer::PlaybackState state)
-{
+void MainWindow::onPlaybackStateChanged(QMediaPlayer::PlaybackState state) {
     switch (state) {
-       case QMediaPlayer::PlayingState:
-           // Playing: can pause, can't play again
-           m_playMusicButton->setEnabled(true);
-           m_pauseMusicButton->setEnabled(true);
-           m_stopMusicButton->setEnabled(true);
-           m_playingTrackIndex = m_currentTrackIndex;
-           ConstantGlobals::playbackState = QMediaPlayer::PlayingState;
-            break;
+    case QMediaPlayer::PlayingState:
+        // Playing: can pause, can't play again
+        m_playMusicButton->setEnabled(true);
+        m_pauseMusicButton->setEnabled(true);
+        m_stopMusicButton->setEnabled(true);
+        m_playingTrackIndex = m_currentTrackIndex;
+        ConstantGlobals::playbackState = QMediaPlayer::PlayingState;
+        break;
 
     case QMediaPlayer::PausedState:
-           // Paused: can play or stop
-           m_playMusicButton->setEnabled(true);
-           m_pauseMusicButton->setEnabled(false);
-           m_stopMusicButton->setEnabled(true);
-           // Store pause position for resume
-           m_pausedPosition = m_mediaPlayer->position();
-           ConstantGlobals::playbackState = QMediaPlayer::PausedState;
+        // Paused: can play or stop
+        m_playMusicButton->setEnabled(true);
+        m_pauseMusicButton->setEnabled(false);
+        m_stopMusicButton->setEnabled(true);
+        // Store pause position for resume
+        m_pausedPosition = m_mediaPlayer->position();
+        ConstantGlobals::playbackState = QMediaPlayer::PausedState;
 
-           break;
+        break;
 
-       case QMediaPlayer::StoppedState:
-           // Stopped: can play, can't pause
-           m_playMusicButton->setEnabled(true);
-           m_pauseMusicButton->setEnabled(false);
-           m_stopMusicButton->setEnabled(false);
-           ConstantGlobals::playbackState = QMediaPlayer::StoppedState;
+    case QMediaPlayer::StoppedState:
+        // Stopped: can play, can't pause
+        m_playMusicButton->setEnabled(true);
+        m_pauseMusicButton->setEnabled(false);
+        m_stopMusicButton->setEnabled(false);
+        ConstantGlobals::playbackState = QMediaPlayer::StoppedState;
 
-           break;
-       }
+        break;
+    }
 }
 
-void MainWindow::onMediaPlayerError(QMediaPlayer::Error error, const QString &errorString)
-{
+void MainWindow::onMediaPlayerError(QMediaPlayer::Error error,
+                                    const QString &errorString) {
     Q_UNUSED(error);
     statusBar()->showMessage("Media error: " + errorString, 5000);
 }
 
 // Helper method for track navigation
 
-void MainWindow::playNextTrack()
-{
+void MainWindow::playNextTrack() {
     QListWidget *playlist = currentPlaylistWidget();
     QString playlistName = currentPlaylistName();
 
-    if (!playlist || playlistName.isEmpty() || m_playlistFiles[playlistName].isEmpty()) return;
+    if (m_isVideoEnabled) {
+        playlist = m_lastVideoPlaylist;
+
+        playlistName = m_lastVideoPlaylistName;
+        m_currentPlaylistName = m_lastVideoPlaylistName;
+
+        // Switch to Video Playlist tab
+        // m_playlistTabs->setCurrentIndex(i);
+    }
+
+    if (!playlist || playlistName.isEmpty() ||
+            m_playlistFiles[playlistName].isEmpty())
+        return;
 
     int nextIndex = m_currentTrackIndex + 1;
+
+    if (m_isVideoEnabled)
+        nextIndex = m_lastVideoTrackIndex + 1;
+
     if (nextIndex >= m_playlistFiles[playlistName].size()) {
         nextIndex = 0;
     }
 
     m_currentPlaylistName = playlistName;
+    if (m_isVideoEnabled)
+        m_currentPlaylistName = m_lastVideoPlaylistName;
     m_currentTrackIndex = nextIndex;
+    m_lastVideoTrackIndex = nextIndex;
+
     playlist->setCurrentRow(nextIndex);
+    if (m_isVideoEnabled)
+        playlist->setCurrentRow(m_lastVideoTrackIndex);
 
     QString filePath = m_playlistFiles[playlistName].at(nextIndex);
     m_mediaPlayer->setSource(QUrl::fromLocalFile(filePath));
-
 
     // Extract and display the track name
     QFileInfo fileInfo(filePath);
     QString trackName = fileInfo.fileName();
 
-
     QTimer::singleShot(100, this, [this, trackName]() {
         m_mediaPlayer->play();
         updatePlayerStatus(trackName);
-
     });
 }
 
-void MainWindow::onPlayMusicClicked()
-{
+void MainWindow::onPlayMusicClicked() {
 
     if (m_mediaPlayer) {
 
-           // FIRST: Check if we have a paused stream to resume
-           if (m_isStream && !m_currentStreamUrl.isEmpty() && m_mediaPlayer->playbackState() == QMediaPlayer::PausedState) {
-               m_mediaPlayer->play();  // Resume the paused stream
+        // FIRST: Check if we have a paused stream to resume
+        if (m_isStream && !m_currentStreamUrl.isEmpty() &&
+                m_mediaPlayer->playbackState() == QMediaPlayer::PausedState) {
+            m_mediaPlayer->play(); // Resume the paused stream
 
-               QUrl url(m_currentStreamUrl);
-               QString name = url.fileName();
-               if (name.isEmpty()) name = url.host();
-               if (name.isEmpty()) name = "Stream";
+            QUrl url(m_currentStreamUrl);
+            QString name = url.fileName();
+            if (name.isEmpty())
+                name = url.host();
+            if (name.isEmpty())
+                name = "Stream";
 
-               statusBar()->showMessage("▶ Streaming: " + name);
-               return;  // Exit - we handled the stream resume
-           }
+            statusBar()->showMessage("▶ Streaming: " + name);
+            return; // Exit - we handled the stream resume
+        }
     }
 
     // Get current playlist and its name
     QListWidget *playlist = currentPlaylistWidget();
     QString playlistName = currentPlaylistName();
 
+    if (m_isVideoEnabled) {
+        // Check if we're coming from Video Player tab
+        if (playlistName != "Video Playlist") {
+            // Case 1: Coming from Video Player tab - switch to Video Playlist
+            for (int i = 0; i < m_playlistTabs->count(); ++i) {
+                if (m_playlistTabs->tabText(i) == "Video Playlist") {
+                    playlist = qobject_cast<QListWidget *>(m_playlistTabs->widget(i));
+                    m_lastVideoPlaylist = playlist;
+                    playlistName = "Video Playlist";
+                    m_currentPlaylistName = "Video Playlist";
+                    break;
+                }
+            }
+        }
+        // Case 2: Already in Video Playlist tab - just use current playlist
+        // (no action needed, playlist and playlistName are already correct)
+    }
+
+       if (m_isVideoEnabled) m_lastVideoPlaylist = playlist;
+
     // Check if we have a valid playlist with files
-    if (!playlist || playlistName.isEmpty() || !m_playlistFiles.contains(playlistName) || m_playlistFiles[playlistName].isEmpty()) {
+    if (!playlist || playlistName.isEmpty() ||
+            !m_playlistFiles.contains(playlistName) ||
+            m_playlistFiles[playlistName].isEmpty()) {
         statusBar()->showMessage("No music loaded in current playlist", 3000);
         return;
     }
@@ -1853,7 +2017,9 @@ void MainWindow::onPlayMusicClicked()
     if (selectedRow >= 0 && selectedRow < m_playlistFiles[playlistName].size()) {
         // Update tracking to user's selection BEFORE checking state
         m_currentTrackIndex = selectedRow;
+        m_lastVideoTrackIndex = selectedRow;
         m_currentPlaylistName = playlistName;
+        m_lastVideoPlaylistName = playlistName;
     }
     // If nothing selected, use current or default
     else if (m_currentTrackIndex == -1 || m_currentPlaylistName != playlistName) {
@@ -1885,8 +2051,7 @@ void MainWindow::onPlayMusicClicked()
             updatePlayerStatus(filePath);
             return;
         }
-    }
-    else if (state == QMediaPlayer::PlayingState) {
+    } else if (state == QMediaPlayer::PlayingState) {
         // Check if currently playing track is the SAME as selected track
         QString currentSource = m_mediaPlayer->source().toLocalFile();
         bool sameTrack = (currentSource == filePath);
@@ -1908,8 +2073,7 @@ void MainWindow::onPlayMusicClicked()
 }
 // Playlist interaction
 
-void MainWindow::onPlaylistItemClicked(QListWidgetItem *item)
-{
+void MainWindow::onPlaylistItemClicked(QListWidgetItem *item) {
     // JUST SELECT, DON'T LOAD
     QListWidget *playlist = currentPlaylistWidget();
     QString playlistName = currentPlaylistName();
@@ -1920,16 +2084,15 @@ void MainWindow::onPlaylistItemClicked(QListWidgetItem *item)
 
     int index = playlist->row(item);
     m_currentTrackIndex = index;
-    m_currentPlaylistName = playlistName;  // Track which playlist this selection belongs to
+    m_currentPlaylistName =
+            playlistName; // Track which playlist this selection belongs to
 
-    //statusBar()->showMessage(QString("Selected track %1 in '%2'")
-      //                       .arg(index + 1)
-        //                     .arg(playlistName));
+    // statusBar()->showMessage(QString("Selected track %1 in '%2'")
+    //                        .arg(index + 1)
+    //                      .arg(playlistName));
 }
 
-
-void MainWindow::onDurationChanged(qint64 durationMs)
-{
+void MainWindow::onDurationChanged(qint64 durationMs) {
 
     if (durationMs <= 0) {
         m_totalTimeLabel->setText("00:00");
@@ -1946,13 +2109,13 @@ void MainWindow::onDurationChanged(qint64 durationMs)
     QString durationStr;
     if (hours > 0) {
         durationStr = QString("%1:%2:%3")
-            .arg(hours, 2, 10, QChar('0'))
-            .arg(minutes, 2, 10, QChar('0'))
-            .arg(seconds, 2, 10, QChar('0'));
+                .arg(hours, 2, 10, QChar('0'))
+                .arg(minutes, 2, 10, QChar('0'))
+                .arg(seconds, 2, 10, QChar('0'));
     } else {
         durationStr = QString("%1:%2")
-            .arg(minutes, 2, 10, QChar('0'))
-            .arg(seconds, 2, 10, QChar('0'));
+                .arg(minutes, 2, 10, QChar('0'))
+                .arg(seconds, 2, 10, QChar('0'));
     }
 
     // Update UI
@@ -1962,12 +2125,11 @@ void MainWindow::onDurationChanged(qint64 durationMs)
 
     // Store duration if needed for playlist
     if (m_currentTrackIndex >= 0) {
-        //updatePlaylistDuration(m_currentTrackIndex, durationMs);
+        // updatePlaylistDuration(m_currentTrackIndex, durationMs);
     }
 }
 
-void MainWindow::onPositionChanged(qint64 positionMs)
-{
+void MainWindow::onPositionChanged(qint64 positionMs) {
     // Don't update slider if user is dragging it
     if (m_seekSlider->isSliderDown()) {
         return;
@@ -1975,109 +2137,72 @@ void MainWindow::onPositionChanged(qint64 positionMs)
 
     // Format current position
     int currentSeconds = positionMs / 1000;
-    //int minutes = (currentSeconds / 60) % 60;
+    // int minutes = (currentSeconds / 60) % 60;
     int minutes = currentSeconds / 60;
     int seconds = currentSeconds % 60;
 
-    m_currentTimeLabel->setText(
-        QString("%1:%2")
-            .arg(minutes, 2, 10, QChar('0'))
-            .arg(seconds, 2, 10, QChar('0'))
-    );
+    m_currentTimeLabel->setText(QString("%1:%2")
+                                .arg(minutes, 2, 10, QChar('0'))
+                                .arg(seconds, 2, 10, QChar('0')));
 
     // Update slider position
     m_seekSlider->setValue(currentSeconds);
 }
 
-void MainWindow::onSeekSliderMoved(int value)
-{
+void MainWindow::onSeekSliderMoved(int value) {
     // Convert slider value (seconds) to milliseconds
     m_mediaPlayer->setPosition(value * 1000);
 
     // Update current time label while seeking
     int minutes = value / 60;
     int seconds = value % 60;
-    m_currentTimeLabel->setText(
-        QString("%1:%2")
-            .arg(minutes, 2, 10, QChar('0'))
-            .arg(seconds, 2, 10, QChar('0'))
-    );
+    m_currentTimeLabel->setText(QString("%1:%2")
+                                .arg(minutes, 2, 10, QChar('0'))
+                                .arg(seconds, 2, 10, QChar('0')));
 }
 
-void MainWindow::onSeekSliderReleased()
-{
+void MainWindow::onSeekSliderReleased() {
     int value = m_seekSlider->value();
     m_mediaPlayer->setPosition(value * 1000);
 }
 
-
-
-/*
-void MainWindow::playPreviousTrack()
-{
-    // Check current playlist
-    QString playlistName = m_currentPlaylistName;
-    if (playlistName.isEmpty() || !m_playlistFiles.contains(playlistName)) {
-        statusBar()->showMessage("No active playlist", 2000);
-        return;
-    }
-
-    const QStringList &files = m_playlistFiles[playlistName];
-    if (files.isEmpty()) {
-        statusBar()->showMessage("No tracks in current playlist", 2000);
-        return;
-    }
-
-    // Calculate previous index
-    int prevIndex = m_currentTrackIndex - 1;
-
-    // Handle wrap-around
-    if (prevIndex < 0) {
-        prevIndex = files.size() - 1; // Go to last track
-    }
-
-    // Select and auto-play
-    m_currentTrackIndex = prevIndex;
-
-    // Update UI selection in current playlist
-    QListWidget *playlist = currentPlaylistWidget();
-    if (playlist && m_currentPlaylistName == playlistName) {
-        playlist->setCurrentRow(prevIndex);
-    }
-
-
-    // Use the same logic as Play button
-    QString filePath = files.at(prevIndex);
-    m_mediaPlayer->setSource(QUrl::fromLocalFile(filePath));
-
-    // Extract and display the track name
-    QFileInfo fileInfo(filePath);
-    QString trackName = fileInfo.fileName();
-
-    // Delay for loading (same 100ms delay as nextTrack)
-    QTimer::singleShot(100, this, [this, trackName]() {
-        m_mediaPlayer->play();
-        //statusBar()->showMessage("Playing: " + trackName);
-        updatePlayerStatus(trackName);
-    });
-}
-*/
-
-void MainWindow::playPreviousTrack()
-{
+void MainWindow::playPreviousTrack() {
     QListWidget *playlist = currentPlaylistWidget();
     QString playlistName = currentPlaylistName();
 
-    if (!playlist || playlistName.isEmpty() || m_playlistFiles[playlistName].isEmpty()) return;
+    if (m_isVideoEnabled) {
+        playlist = m_lastVideoPlaylist;
+
+        playlistName = m_lastVideoPlaylistName;
+        m_currentPlaylistName = m_lastVideoPlaylistName;
+
+        // Switch to Video Playlist tab
+        // m_playlistTabs->setCurrentIndex(i);
+    }
+
+    if (!playlist || playlistName.isEmpty() ||
+            m_playlistFiles[playlistName].isEmpty())
+        return;
 
     int prevIndex = m_currentTrackIndex - 1;
+    if (m_isVideoEnabled)
+        prevIndex = m_lastVideoTrackIndex - 1;
+
     if (prevIndex < 0) {
         prevIndex = m_playlistFiles[playlistName].size() - 1;
     }
 
     m_currentPlaylistName = playlistName;
+
+    if (m_isVideoEnabled)
+        m_currentPlaylistName = m_lastVideoPlaylistName;
+
     m_currentTrackIndex = prevIndex;
+    m_lastVideoTrackIndex = prevIndex;
+
     playlist->setCurrentRow(prevIndex);
+    if (m_isVideoEnabled)
+        playlist->setCurrentRow(m_lastVideoTrackIndex);
 
     QString filePath = m_playlistFiles[playlistName].at(prevIndex);
     m_mediaPlayer->setSource(QUrl::fromLocalFile(filePath));
@@ -2092,32 +2217,32 @@ void MainWindow::playPreviousTrack()
     });
 }
 
+void MainWindow::onRepeatClicked() {
+    if (m_isVideoEnabled) {
+        m_repeatButton->setChecked(false);
+        return;
+    }
 
-void MainWindow::onRepeatClicked()
-{
-    if(m_repeatButton->isChecked()){
+    if (m_repeatButton->isChecked()) {
         m_isRepeat = true;
         m_repeatButton->setToolTip("Repeat: ON");
-    }else{
+    } else {
         m_isRepeat = false;
         m_repeatButton->setToolTip("Repeat: OFF");
-
     }
 }
 
-void MainWindow::onToneTypeComboIndexChanged(int index)
-{
-    //if(m_binauralEngine) m_binauralEngine->stop();
-
+void MainWindow::onToneTypeComboIndexChanged(int index) {
+    // if(m_binauralEngine) m_binauralEngine->stop();
 
     int toneValue = toneTypeCombo->itemData(index).toInt();
 
     switch (toneValue) {
 
     case BINAURAL:
-       // squareWaveItem->setEnabled(false);
-        ConstantGlobals::currentToneType = 0;  // Set to 0
-        //m_binauralEngine->forceBufferRegeneration();
+        // squareWaveItem->setEnabled(false);
+        ConstantGlobals::currentToneType = 0; // Set to 0
+        // m_binauralEngine->forceBufferRegeneration();
         m_rightFreqInput->setEnabled(true);
         m_leftFreqInput->setValue(360.00);
         m_rightFreqInput->setValue(367.83);
@@ -2125,9 +2250,9 @@ void MainWindow::onToneTypeComboIndexChanged(int index)
         m_binauralStatusLabel->setText(formatBinauralString());
         break;
     case ISOCHRONIC:
-        //squareWaveItem->setEnabled(true);
-        ConstantGlobals::currentToneType = 1;  // Set to 0
-        //m_binauralEngine->forceBufferRegeneration();
+        // squareWaveItem->setEnabled(true);
+        ConstantGlobals::currentToneType = 1; // Set to 0
+        // m_binauralEngine->forceBufferRegeneration();
         m_leftFreqInput->setValue(360.00);
         m_pulseFreqLabel->setValue(7.83);
         m_rightFreqInput->setDisabled(true);
@@ -2137,10 +2262,10 @@ void MainWindow::onToneTypeComboIndexChanged(int index)
         break;
 
     case GENERATOR:
-       // squareWaveItem->setEnabled(true);
-        //item->setForeground(QBrush());  // Reset color
-        ConstantGlobals::currentToneType = 2;  // Set to 0
-        //m_binauralEngine->forceBufferRegeneration();
+        // squareWaveItem->setEnabled(true);
+        // item->setForeground(QBrush());  // Reset color
+        ConstantGlobals::currentToneType = 2; // Set to 0
+        // m_binauralEngine->forceBufferRegeneration();
         m_leftFreqInput->setValue(360.00);
         m_rightFreqInput->setValue(360.00);
         m_rightFreqInput->setEnabled(true);
@@ -2154,53 +2279,46 @@ void MainWindow::onToneTypeComboIndexChanged(int index)
     }
 }
 
-void MainWindow::onMuteButtonClicked()
-{
+void MainWindow::onMuteButtonClicked() {
     bool checked = volumeIcon->isChecked();
 
-    //mute all ambient players in playback state and the main media player
+    // mute all ambient players in playback state and the main media player
     mutePlayingAmbientPlayers(checked);
     m_audioOutput->setMuted(checked);
-    //m_masterStopButton->setDisabled(checked);
-    //m_stopMusicButton->setDisabled(true);
+    // m_masterStopButton->setDisabled(checked);
+    // m_stopMusicButton->setDisabled(true);
 
-    QAudioSink* binauralOutput = m_binauralEngine ?
-                                       m_binauralEngine->audioOutput() : nullptr;
-    if(checked) {
+    QAudioSink *binauralOutput =
+            m_binauralEngine ? m_binauralEngine->audioOutput() : nullptr;
+    if (checked) {
 
-        if(binauralOutput){
+        if (binauralOutput) {
             binEngineVolume = binauralOutput->volume();
             binauralOutput->setVolume(0);
             m_binauralStopButton->setDisabled(true);
-
         }
         volumeIcon->setIcon(QIcon(":/icons/volume-x.svg"));
-        //m_audioOutput->setMuted(checked);
+        // m_audioOutput->setMuted(checked);
         m_stopMusicButton->setDisabled(true);
         m_masterStopButton->setDisabled(true);
 
-    }else{
+    } else {
         volumeIcon->setIcon(QIcon(":/icons/volume-2.svg"));
-        //m_audioOutput->setMuted(checked);
+        // m_audioOutput->setMuted(checked);
 
         m_stopMusicButton->setEnabled(true);
         m_masterStopButton->setEnabled(true);
 
-        if(binauralOutput){
+        if (binauralOutput) {
             binauralOutput->setVolume(binEngineVolume);
             m_binauralStopButton->setEnabled(true);
-
         }
-
     }
-
 }
 
-//shuffle
+// shuffle
 
-
-void MainWindow::playRandomTrack()
-{
+void MainWindow::playRandomTrack() {
     // Check current playlist
     QString playlistName = m_currentPlaylistName;
     if (playlistName.isEmpty() || !m_playlistFiles.contains(playlistName)) {
@@ -2240,47 +2358,53 @@ void MainWindow::playRandomTrack()
     });
 }
 
-//tabbedwidget
+// tabbedwidget
 
-QListWidget* MainWindow::currentPlaylistWidget() const {
-    //if (m_playlistTabs->count() == 0) return nullptr;
-    //return qobject_cast<QListWidget*>(m_playlistTabs->currentWidget());
-    if (!m_playlistTabs || m_playlistTabs->count() == 0) return nullptr;
-        QWidget *widget = m_playlistTabs->currentWidget();
-        if (!widget) return nullptr;
-        return qobject_cast<QListWidget*>(widget);
+QListWidget *MainWindow::currentPlaylistWidget() const {
+    // if (m_playlistTabs->count() == 0) return nullptr;
+    // return qobject_cast<QListWidget*>(m_playlistTabs->currentWidget());
+    if (!m_playlistTabs || m_playlistTabs->count() == 0)
+        return nullptr;
+    QWidget *widget = m_playlistTabs->currentWidget();
+    if (!widget)
+        return nullptr;
+    return qobject_cast<QListWidget *>(widget);
 }
 
 QString MainWindow::currentPlaylistName() const {
-    if (m_playlistTabs->count() == 0) return QString();
+    if (m_playlistTabs->count() == 0)
+        return QString();
     return m_playlistTabs->tabText(m_playlistTabs->currentIndex());
 }
 
 void MainWindow::addNewPlaylist(const QString &name) {
 
+    if (name == "Video Playlist")
+        return;
 
     QListWidget *newPlaylist = new QListWidget();
     newPlaylist->setAlternatingRowColors(true);
     newPlaylist->setSelectionMode(QAbstractItemView::SingleSelection);
     // Initialize empty playlist in data structure
-    QString playlistName = name.isEmpty() ?
-    QString("Playlist %1").arg(m_playlistTabs->count() + 1) : name;
+    QString playlistName =
+            name.isEmpty() ? QString("Playlist %1").arg(m_playlistTabs->count() - 1)
+                           : name; // was +1 changed to -1 to disregard video tabs
 
     m_playlistFiles[playlistName] = QStringList();
     m_playlistTabs->addTab(newPlaylist, playlistName);
     m_playlistTabs->setCurrentWidget(newPlaylist);
 
     // Connect signals for the new playlist
-    connect(newPlaylist, &QListWidget::itemClicked,
-            this, &MainWindow::onPlaylistItemClicked);
-    connect(newPlaylist, &QListWidget::itemDoubleClicked,
-            this, &MainWindow::onPlaylistItemDoubleClicked);
+    connect(newPlaylist, &QListWidget::itemClicked, this,
+            &MainWindow::onPlaylistItemClicked);
+    connect(newPlaylist, &QListWidget::itemDoubleClicked, this,
+            &MainWindow::onPlaylistItemDoubleClicked);
 
     updateCurrentPlaylistReference();
 
     if (m_currentPlaylistName.isEmpty()) {
-            m_currentPlaylistName = playlistName;
-        }
+        m_currentPlaylistName = playlistName;
+    }
 }
 
 void MainWindow::updateCurrentPlaylistReference() {
@@ -2290,11 +2414,12 @@ void MainWindow::updateCurrentPlaylistReference() {
 
 void MainWindow::onAddNewPlaylistClicked() {
     bool ok;
-    QString name = QInputDialog::getText(this, "New Playlist",
-                                        "Enter playlist name:",
-                                        QLineEdit::Normal,
-                                        QString("Playlist %1").arg(m_playlistTabs->count() + 1),
-                                        &ok);
+    QString name = QInputDialog::getText(
+                this, "New Playlist", "Enter playlist name:", QLineEdit::Normal,
+                QString("Playlist %1")
+                .arg(m_playlistTabs->count() -
+                     1), // was +1 changed to -1 to disregard video tabs
+                &ok);
     if (ok && !name.isEmpty()) {
         addNewPlaylist(name);
         updatePlaylistButtonsState();
@@ -2303,15 +2428,20 @@ void MainWindow::onAddNewPlaylistClicked() {
 }
 
 void MainWindow::onRenamePlaylistClicked() {
+
     QListWidget *widget = currentPlaylistWidget();
-    if (!widget) return;
+    if (!widget)
+        return;
 
     QString oldName = currentPlaylistName();
+
+    if (oldName == "Video Playlist" || oldName == "Video Player")
+        return;
+
     bool ok;
-    QString newName = QInputDialog::getText(this, "Rename Playlist",
-                                           "Enter new name:",
-                                           QLineEdit::Normal,
-                                           oldName, &ok);
+    QString newName =
+            QInputDialog::getText(this, "Rename Playlist",
+                                  "Enter new name:", QLineEdit::Normal, oldName, &ok);
     if (ok && !newName.isEmpty() && newName != oldName) {
         // Update tab text
         int currentIndex = m_playlistTabs->currentIndex();
@@ -2333,21 +2463,37 @@ void MainWindow::onRenamePlaylistClicked() {
 
 void MainWindow::onClosePlaylistTab(int index) {
     if (m_playlistTabs->count() <= 1) {
-        QMessageBox::warning(this, "Cannot Close", "You must have at least one playlist.");
+        QMessageBox::warning(this, "Cannot Close",
+                             "You must have at least one playlist.");
         return;
+    }
+
+    QString tabName = m_playlistTabs->tabText(index);
+
+    // Handle Video Player tab specially
+    // Prevent closing video tabs
+    if (tabName == "Video Player" || tabName == "Video Playlist") {
+        QMessageBox::information(
+                    this, "Cannot Close",
+        "Video tabs cannot be closed. Use the video toggle button instead.");
+        return; // Exit without closing
     }
 
     QString playlistName = m_playlistTabs->tabText(index);
 
     // Confirm if playlist has tracks
-    QListWidget *playlist = qobject_cast<QListWidget*>(m_playlistTabs->widget(index));
+    QListWidget *playlist =
+            qobject_cast<QListWidget *>(m_playlistTabs->widget(index));
     if (playlist && playlist->count() > 0) {
         QMessageBox::StandardButton reply;
-        reply = QMessageBox::question(this, "Close Playlist",
-                                     QString("Playlist '%1' contains %2 tracks. Close anyway?")
-                                     .arg(playlistName).arg(playlist->count()),
-                                     QMessageBox::Yes | QMessageBox::No);
-        if (reply == QMessageBox::No) return;
+        reply = QMessageBox::question(
+                    this, "Close Playlist",
+                    QString("Playlist '%1' contains %2 tracks. Close anyway?")
+                    .arg(playlistName)
+                    .arg(playlist->count()),
+                    QMessageBox::Yes | QMessageBox::No);
+        if (reply == QMessageBox::No)
+            return;
     }
 
     // Remove from data structures
@@ -2360,60 +2506,82 @@ void MainWindow::onClosePlaylistTab(int index) {
     statusBar()->showMessage("Closed playlist: " + playlistName);
 }
 
-
 void MainWindow::onPlaylistTabChanged(int index) {
     updateCurrentPlaylistReference();
-    //updatePlaylistButtonsState();
-    // Clear current track selection when switching playlists
-       m_currentTrackIndex = -1;
+    // updatePlaylistButtonsState();
+    //  Clear current track selection when switching playlists
+    m_currentTrackIndex = -1;
 
-       // Update button states
-       updatePlaylistButtonsState();
+    // Update button states
+    updatePlaylistButtonsState();
 
-       // Show status message
-       QString playlistName = currentPlaylistName();
-       if (!playlistName.isEmpty()) {
-           int trackCount = m_playlistFiles.value(playlistName).size();
-           statusBar()->showMessage(
-               QString("Switched to '%1' (%2 tracks)").arg(playlistName).arg(trackCount),
-               2000
-           );
-       }
+    // Show status message
+    QString playlistName = currentPlaylistName();
+    if (!playlistName.isEmpty()) {
+        int trackCount = m_playlistFiles.value(playlistName).size();
+        statusBar()->showMessage(QString("Switched to '%1' (%2 tracks)")
+                                 .arg(playlistName)
+                                 .arg(trackCount),
+                                 2000);
+    }
+
 }
 
-
-
 // In onLoadMusicClicked():
-void MainWindow::onLoadMusicClicked()
-{
-    QString filter = "All Supported Media (*.mp3 *.wav *.flac *.ogg *.m4a *.mp4 *.m4v *.avi *.mkv);;"
-                         "Audio Files (*.mp3 *.wav *.flac *.ogg *.m4a);;"
-                         "Video Files (*.mp4 *.m4v *.avi *.mkv);;"
-                         "All Files (*.*)";
-    QStringList files = QFileDialog::getOpenFileNames(this,
-        "Select Music Files",
-        ConstantGlobals::musicFilePath,
-        //"Audio Files (*.mp3 *.wav *.flac *.ogg *.m4a)");
-        filter);
+void MainWindow::onLoadMusicClicked() {
+
+    QString filter = "All Supported Media (*.mp3 *.wav *.flac *.ogg *.m4a *.mp4 "
+                     "*.m4v *.avi *.mkv);;"
+                     "Audio Files (*.mp3 *.wav *.flac *.ogg *.m4a);;"
+                     "Video Files (*.mp4 *.m4v *.avi *.mkv);;"
+                     "All Files (*.*)";
+    QStringList files = QFileDialog::getOpenFileNames(
+                this, "Select Music Files", ConstantGlobals::musicFilePath,
+                //"Audio Files (*.mp3 *.wav *.flac *.ogg *.m4a)");
+                filter);
     if (!files.isEmpty()) {
+
         ConstantGlobals::lastMusicDirPath = QFileInfo(files.first()).absolutePath();
+
+        // Get playlist widget and name ONCE at the beginning
+        QListWidget *playlist = currentPlaylistWidget();
         QString playlistName = currentPlaylistName();
+
+        if (m_isVideoEnabled) {
+            // Find Video Playlist tab
+            for (int i = 0; i < m_playlistTabs->count(); ++i) {
+                if (m_playlistTabs->tabText(i) == "Video Playlist") {
+                    playlist = qobject_cast<QListWidget *>(m_playlistTabs->widget(i));
+                    playlistName = "Video Playlist";
+                    // Switch to Video Playlist tab
+                    m_playlistTabs->setCurrentIndex(i);
+                    break;
+                }
+            }
+        }
+
         foreach (const QString &file, files) {
             QString fileName = QFileInfo(file).fileName();
-            currentPlaylistWidget()->addItem(fileName);
+            playlist->addItem(fileName);
             m_playlistFiles[playlistName].append(file);
         }
-        statusBar()->showMessage(QString("Added %1 file(s) to '%2'").arg(files.size()).arg(playlistName));
+        // Set index to 0 and highlight the first item
+        if (playlist->count() > 0) {
+            playlist->setCurrentRow(0); // This highlights and selects the first item
+            playlist->scrollToTop();    // Optional: Ensure first item is visible
+        }
+        statusBar()->showMessage(QString("Added %1 file(s) to '%2'")
+                                 .arg(files.size())
+                                 .arg(playlistName));
     }
 }
 
-
-void MainWindow::onRemoveTrackClicked()
-{
+void MainWindow::onRemoveTrackClicked() {
     QListWidget *playlist = currentPlaylistWidget();
     QString playlistName = currentPlaylistName();
 
-    if (!playlist || playlistName.isEmpty()) return;
+    if (!playlist || playlistName.isEmpty())
+        return;
 
     // Store the currently playing track index
     int playingIndex = m_playingTrackIndex;
@@ -2422,10 +2590,10 @@ void MainWindow::onRemoveTrackClicked()
     if (selectedRow >= 0 && selectedRow < m_playlistFiles[playlistName].size()) {
 
         // Check if trying to remove the playing track
-        if (playlistName == m_currentPlaylistName &&
-            selectedRow == playingIndex) {
-            QMessageBox::warning(this, "Cannot Remove Track",
-                "Cannot remove the currently playing track. Stop playback first.");
+        if (playlistName == m_currentPlaylistName && selectedRow == playingIndex) {
+            QMessageBox::warning(
+                        this, "Cannot Remove Track",
+                        "Cannot remove the currently playing track. Stop playback first.");
             return;
         }
 
@@ -2459,20 +2627,22 @@ void MainWindow::onRemoveTrackClicked()
     }
 }
 
-void MainWindow::onClearPlaylistClicked()
-{
+void MainWindow::onClearPlaylistClicked() {
     QListWidget *playlist = currentPlaylistWidget();
     QString playlistName = currentPlaylistName();
 
-    if (!playlist || playlistName.isEmpty()) return;
+    if (!playlist || playlistName.isEmpty())
+        return;
 
     QMessageBox::StandardButton reply;
-    reply = QMessageBox::question(this, "Clear Playlist",
-                                 QString("Clear all tracks from '%1'?").arg(playlistName),
-                                 QMessageBox::Yes | QMessageBox::No);
+    reply = QMessageBox::question(
+                this, "Clear Playlist",
+                QString("Clear all tracks from '%1'?").arg(playlistName),
+                QMessageBox::Yes | QMessageBox::No);
 
     if (reply == QMessageBox::Yes) {
-        if(m_mediaPlayer && m_mediaPlayer->playbackState() == QMediaPlayer::PlayingState) {
+        if (m_mediaPlayer &&
+                m_mediaPlayer->playbackState() == QMediaPlayer::PlayingState) {
             m_mediaPlayer->stop();
         }
         playlist->clear();
@@ -2489,19 +2659,21 @@ void MainWindow::onClearPlaylistClicked()
 
 // In onPlaylistItemDoubleClicked():
 
-void MainWindow::onPlaylistItemDoubleClicked(QListWidgetItem *item)
-{
-    //QListWidget *playlist = currentPlaylistWidget();
+void MainWindow::onPlaylistItemDoubleClicked(QListWidgetItem *item) {
+
+    if (m_isVideoEnabled)
+        return;
 
     // Get the playlist that sent the signal
-        QListWidget *playlist = qobject_cast<QListWidget*>(sender());
-        if (!playlist) {
-            playlist = currentPlaylistWidget();
-        }
+    QListWidget *playlist = qobject_cast<QListWidget *>(sender());
+    if (!playlist) {
+        playlist = currentPlaylistWidget();
+    }
 
     QString playlistName = currentPlaylistName();
 
-    if (!playlist || playlistName.isEmpty()) return;
+    if (!playlist || playlistName.isEmpty())
+        return;
 
     int index = playlist->row(item);
     if (index >= 0 && index < m_playlistFiles[playlistName].size()) {
@@ -2514,14 +2686,14 @@ void MainWindow::onPlaylistItemDoubleClicked(QListWidgetItem *item)
         m_stopMusicButton->setToolTip("Stop Playback");
         m_playMusicButton->setToolTip("Playing...");
         statusBar()->showMessage("Playing: " + item->text());
-        //updatePlayerStatus(filePath);
+        // updatePlayerStatus(filePath);
     }
 }
 
 void MainWindow::updatePlaylistButtonsState() {
     return;
     QListWidget *playlist = currentPlaylistWidget();
-    //bool hasSelection = playlist && playlist->currentItem();
+    // bool hasSelection = playlist && playlist->currentItem();
     bool hasSelection = playlist && !playlist->selectedItems().isEmpty();
     bool hasItems = playlist && playlist->count() > 0;
 
@@ -2545,7 +2717,8 @@ QJsonObject MainWindow::BrainwavePreset::toJson() const {
     return json;
 }
 
-MainWindow::BrainwavePreset MainWindow::BrainwavePreset::fromJson(const QJsonObject &json) {
+MainWindow::BrainwavePreset
+MainWindow::BrainwavePreset::fromJson(const QJsonObject &json) {
     BrainwavePreset preset;
     preset.name = json["name"].toString();
     preset.toneType = json["toneType"].toInt();
@@ -2558,13 +2731,11 @@ MainWindow::BrainwavePreset MainWindow::BrainwavePreset::fromJson(const QJsonObj
 }
 
 bool MainWindow::BrainwavePreset::isValid() const {
-    return !name.isEmpty() &&
-           toneType >= 0 && toneType <= 2 &&
-           leftFrequency >= 20.0 && leftFrequency <= 20000.0 &&
-           rightFrequency >= 20.0 && rightFrequency <= 20000.0 &&
-           waveform >= 0 && waveform <= 3 &&
-           pulseFrequency >= 0.0 && pulseFrequency <= 100.0 &&
-           volume >= 0.0 && volume <= 100.0;
+    return !name.isEmpty() && toneType >= 0 && toneType <= 2 &&
+            leftFrequency >= 20.0 && leftFrequency <= 20000.0 &&
+            rightFrequency >= 20.0 && rightFrequency <= 20000.0 && waveform >= 0 &&
+            waveform <= 3 && pulseFrequency >= 0.0 && pulseFrequency <= 100.0 &&
+            volume >= 0.0 && volume <= 100.0;
 }
 
 // PlaylistTrack methods
@@ -2576,7 +2747,8 @@ QJsonObject MainWindow::PlaylistTrack::toJson() const {
     return json;
 }
 
-MainWindow::PlaylistTrack MainWindow::PlaylistTrack::fromJson(const QJsonObject &json) {
+MainWindow::PlaylistTrack
+MainWindow::PlaylistTrack::fromJson(const QJsonObject &json) {
     PlaylistTrack track;
     track.filePath = json["filePath"].toString();
     track.title = json["title"].toString();
@@ -2588,23 +2760,34 @@ MainWindow::PlaylistTrack MainWindow::PlaylistTrack::fromJson(const QJsonObject 
 
 QString MainWindow::generateDefaultPresetName() const {
     QString toneType;
-    switch(ConstantGlobals::currentToneType) {
-        case 0: toneType = "BIN"; break;
-        case 1: toneType = "ISO"; break;
-        case 2: toneType = "GEN"; break;
-        default: toneType = "PRESET"; break;
+    switch (ConstantGlobals::currentToneType) {
+    case 0:
+        toneType = "BIN";
+        break;
+    case 1:
+        toneType = "ISO";
+        break;
+    case 2:
+        toneType = "GEN";
+        break;
+    default:
+        toneType = "PRESET";
+        break;
     }
 
     if (ConstantGlobals::currentToneType == 0) {
         // Binaural: BIN-7.83Hz
-        double beatFreq = qAbs(m_rightFreqInput->value() - m_leftFreqInput->value());
+        double beatFreq =
+                qAbs(m_rightFreqInput->value() - m_leftFreqInput->value());
         return QString("%1-%2Hz").arg(toneType).arg(beatFreq, 0, 'f', 2);
     } else if (ConstantGlobals::currentToneType == 1) {
         // Isochronic: ISO-10.00Hz
-        return QString("%1-%2Hz").arg(toneType).arg(m_pulseFreqLabel->value(), 0, 'f', 2);
+        return QString("%1-%2Hz").arg(toneType).arg(m_pulseFreqLabel->value(), 0,
+                                                    'f', 2);
     } else {
         // Generator: GEN-200.00Hz
-        return QString("%1-%2Hz").arg(toneType).arg(m_leftFreqInput->value(), 0, 'f', 2);
+        return QString("%1-%2Hz").arg(toneType).arg(m_leftFreqInput->value(), 0,
+                                                    'f', 2);
     }
 }
 
@@ -2625,13 +2808,8 @@ void MainWindow::onSavePresetClicked() {
     // Ask user for preset name
     bool ok;
     QString presetName = QInputDialog::getText(
-        this,
-        "Save Brainwave Preset",
-        "Enter preset name:",
-        QLineEdit::Normal,
-        defaultName,
-        &ok
-    );
+                this, "Save Brainwave Preset", "Enter preset name:", QLineEdit::Normal,
+                defaultName, &ok);
 
     if (!ok || presetName.isEmpty()) {
         return;
@@ -2649,25 +2827,26 @@ void MainWindow::onSavePresetClicked() {
 
     // Validate
     if (!preset.isValid()) {
-        QMessageBox::warning(this, "Invalid Preset",
-            "Current settings are invalid. Please check frequency ranges.");
+        QMessageBox::warning(
+                    this, "Invalid Preset",
+                    "Current settings are invalid. Please check frequency ranges.");
         return;
     }
 
     // Ensure preset directory exists
     if (!ensureDirectoryExists(ConstantGlobals::presetFilePath)) {
         QMessageBox::warning(this, "Save Error",
-            "Cannot create presets directory.");
+                             "Cannot create presets directory.");
         return;
     }
 
     // Save to file
-    QString filename = ConstantGlobals::presetFilePath + "/" + presetName + ".json";
+    QString filename =
+            ConstantGlobals::presetFilePath + "/" + presetName + ".json";
     if (savePresetToFile(filename, preset)) {
         statusBar()->showMessage("Preset saved: " + presetName, 3000);
     } else {
-        QMessageBox::warning(this, "Save Error",
-            "Failed to save preset to file.");
+        QMessageBox::warning(this, "Save Error", "Failed to save preset to file.");
     }
 }
 
@@ -2678,7 +2857,8 @@ void MainWindow::onLoadPresetClicked() {
 
     if (presetFiles.isEmpty()) {
         QMessageBox::information(this, "No Presets",
-            "No saved presets found in:\n" + ConstantGlobals::presetFilePath);
+                                 "No saved presets found in:\n" +
+                                 ConstantGlobals::presetFilePath);
         return;
     }
 
@@ -2690,26 +2870,21 @@ void MainWindow::onLoadPresetClicked() {
 
     bool ok;
     QString selectedPreset = QInputDialog::getItem(
-        this,
-        "Load Preset",
-        "Select preset to load:",
-        presetNames,
-        0,
-        false,
-        &ok
-    );
+                this, "Load Preset", "Select preset to load:", presetNames, 0, false,
+                &ok);
 
     if (!ok || selectedPreset.isEmpty()) {
         return;
     }
 
     // Load preset
-    QString filename = ConstantGlobals::presetFilePath + "/" + selectedPreset + ".json";
+    QString filename =
+            ConstantGlobals::presetFilePath + "/" + selectedPreset + ".json";
     BrainwavePreset preset = loadPresetFromFile(filename);
 
     if (!preset.isValid()) {
         QMessageBox::warning(this, "Load Error",
-            "Failed to load preset or preset is invalid.");
+                             "Failed to load preset or preset is invalid.");
         return;
     }
 
@@ -2745,7 +2920,8 @@ void MainWindow::onManagePresetsClicked() {
     QDesktopServices::openUrl(presetUrl);
 }
 
-bool MainWindow::savePresetToFile(const QString &filename, const BrainwavePreset &preset) {
+bool MainWindow::savePresetToFile(const QString &filename,
+                                  const BrainwavePreset &preset) {
     QFile file(filename);
     if (!file.open(QIODevice::WriteOnly)) {
         qWarning() << "Could not open preset file for writing:" << filename;
@@ -2760,7 +2936,8 @@ bool MainWindow::savePresetToFile(const QString &filename, const BrainwavePreset
     return true;
 }
 
-MainWindow::BrainwavePreset MainWindow::loadPresetFromFile(const QString &filename) {
+MainWindow::BrainwavePreset
+MainWindow::loadPresetFromFile(const QString &filename) {
     QFile file(filename);
     if (!file.open(QIODevice::ReadOnly)) {
         qWarning() << "Could not open preset file:" << filename;
@@ -2806,12 +2983,14 @@ QList<MainWindow::BrainwavePreset> MainWindow::loadAllPresets() {
 // =================== PLAYLIST OPERATIONS ===================
 
 void MainWindow::onOpenPlaylistClicked() {
+
+    if (m_isVideoEnabled) {
+        // return;
+    }
+
     QString filename = QFileDialog::getOpenFileName(
-        this,
-        "Open Playlist",
-        ConstantGlobals::playlistFilePath,
-        "Playlist Files (*.json);;All Files (*)"
-    );
+                this, "Open Playlist", ConstantGlobals::playlistFilePath,
+                "Playlist Files (*.json);;All Files (*)");
 
     if (filename.isEmpty()) {
         return;
@@ -2821,12 +3000,18 @@ void MainWindow::onOpenPlaylistClicked() {
         statusBar()->showMessage("Playlist loaded", 3000);
     } else {
         QMessageBox::warning(this, "Load Error",
-            "Failed to load playlist from file.");
+                             "Failed to load playlist from file.");
     }
 }
 
 void MainWindow::onSaveCurrentPlaylistClicked() {
+
+    if (m_isVideoEnabled) {
+        // return;
+    }
+
     QString playlistName = currentPlaylistName();
+    if (playlistName == "Video Playlist")
     if (playlistName.isEmpty()) {
         QMessageBox::warning(this, "Save Error", "No active playlist.");
         return;
@@ -2835,60 +3020,78 @@ void MainWindow::onSaveCurrentPlaylistClicked() {
     // Ensure playlist directory exists
     if (!ensureDirectoryExists(ConstantGlobals::playlistFilePath)) {
         QMessageBox::warning(this, "Save Error",
-            "Cannot create playlists directory.");
+                             "Cannot create playlists directory.");
         return;
     }
 
-    QString filename = ConstantGlobals::playlistFilePath + "/"+ playlistName + ".json";
+    QString filename =
+            ConstantGlobals::playlistFilePath + "/" + playlistName + ".json";
     if (savePlaylistToFile(filename, playlistName)) {
         statusBar()->showMessage("Playlist saved: " + playlistName, 3000);
     } else {
         QMessageBox::warning(this, "Save Error",
-            "Failed to save playlist to file.");
+                             "Failed to save playlist to file.");
     }
 }
 
 void MainWindow::onSaveCurrentPlaylistAsClicked() {
+
     QString playlistName = currentPlaylistName();
+
+    if (playlistName == "Video Playlist") {
+        onSaveCurrentPlaylistClicked();
+        return;
+    }
+    if (playlistName == "Video Player")
+        return;
+
     if (playlistName.isEmpty()) {
         QMessageBox::warning(this, "Save Error", "No active playlist.");
         return;
     }
 
     QString filename = QFileDialog::getSaveFileName(
-        this,
-        "Save Playlist As",
-        ConstantGlobals::playlistFilePath + "/" + playlistName + ".json",
-        "Playlist Files (*.json);;All Files (*)"
-    );
+                this, "Save Playlist As",
+                ConstantGlobals::playlistFilePath + "/" + playlistName + ".json",
+                "Playlist Files (*.json);;All Files (*)");
 
     if (filename.isEmpty()) {
         return;
     }
 
     if (savePlaylistToFile(filename, playlistName)) {
-        statusBar()->showMessage("Playlist saved as: " + QFileInfo(filename).fileName(), 3000);
+        statusBar()->showMessage(
+                    "Playlist saved as: " + QFileInfo(filename).fileName(), 3000);
     } else {
         QMessageBox::warning(this, "Save Error",
-            "Failed to save playlist to file.");
+                             "Failed to save playlist to file.");
     }
 }
 
 void MainWindow::onSaveAllPlaylistsClicked() {
+
     int successCount = 0;
     int failCount = 0;
 
     // Ensure playlist directory exists
     if (!ensureDirectoryExists(ConstantGlobals::playlistFilePath)) {
         QMessageBox::warning(this, "Save Error",
-            "Cannot create playlists directory.");
+                             "Cannot create playlists directory.");
         return;
     }
 
     // Save each playlist tab
     for (int i = 0; i < m_playlistTabs->count(); ++i) {
         QString playlistName = m_playlistTabs->tabText(i);
-        QString filename = ConstantGlobals::playlistFilePath + "/" + playlistName + ".json";
+
+        if (playlistName == "Video Player") {
+            successCount++;
+
+            continue;
+        }
+
+        QString filename =
+                ConstantGlobals::playlistFilePath + "/" + playlistName + ".json";
 
         // Temporarily switch to this tab to get current data
         m_playlistTabs->setCurrentIndex(i);
@@ -2903,17 +3106,19 @@ void MainWindow::onSaveAllPlaylistsClicked() {
 
     if (failCount == 0) {
         statusBar()->showMessage(
-            QString("All %1 playlists saved successfully").arg(successCount),
-            3000
-        );
+                    QString("All %1 playlists saved successfully").arg(successCount), 3000);
     } else {
-        QMessageBox::warning(this, "Save Warning",
-            QString("Saved %1 playlists, failed to save %2 playlists")
-            .arg(successCount).arg(failCount));
+        QMessageBox::warning(
+                    this, "Save Warning",
+                    QString("Saved %1 playlists, failed to save %2 playlists")
+            .arg(successCount)
+                    .arg(failCount));
     }
 }
 
-bool MainWindow::savePlaylistToFile(const QString &filename, const QString &playlistName) {
+bool MainWindow::savePlaylistToFile(const QString &filename,
+                                    const QString &playlistName) {
+
     QListWidget *playlist = currentPlaylistWidget();
     if (!playlist || playlist->count() == 0) {
         statusBar()->showMessage("Playlist is empty", 2000);
@@ -2962,6 +3167,7 @@ bool MainWindow::savePlaylistToFile(const QString &filename, const QString &play
 }
 
 bool MainWindow::loadPlaylistFromFile(const QString &filename) {
+
     QFile file(filename);
     if (!file.open(QIODevice::ReadOnly)) {
         qWarning() << "Could not open playlist file:" << filename;
@@ -2994,26 +3200,35 @@ bool MainWindow::loadPlaylistFromFile(const QString &filename) {
 
     // Check if playlist already exists
     for (int i = 0; i < m_playlistTabs->count(); ++i) {
+
+        if (m_playlistTabs->tabText(i) == playlistName &&
+                m_playlistTabs->tabText(i) == "Video Playlist") {
+            m_playlistTabs->setCurrentIndex(i);
+            updateCurrentPlaylistReference();
+            m_playlistFiles[playlistName].clear();
+            QListWidget *existingPlaylist = currentPlaylistWidget();
+
+            if (existingPlaylist) {
+                existingPlaylist->clear();
+            }
+            break;
+        }
+
         if (m_playlistTabs->tabText(i) == playlistName) {
             // Ask to replace or rename
             QMessageBox::StandardButton reply = QMessageBox::question(
-                this,
-                "Playlist Exists",
-                QString("Playlist '%1' already exists. Replace it?").arg(playlistName),
-                QMessageBox::Yes | QMessageBox::No
-            );
+                        this, "Playlist Exists",
+                        QString("Playlist '%1' already exists. Replace it?")
+                        .arg(playlistName),
+                        QMessageBox::Yes | QMessageBox::No);
 
             if (reply == QMessageBox::No) {
                 // Ask for new name
                 bool ok;
-                playlistName = QInputDialog::getText(
-                    this,
-                    "Rename Playlist",
-                    "Enter new playlist name:",
-                    QLineEdit::Normal,
-                    playlistName + "_copy",
-                    &ok
-                );
+                playlistName =
+                        QInputDialog::getText(this, "Rename Playlist",
+                                              "Enter new playlist name:", QLineEdit::Normal,
+                                              playlistName + "_copy", &ok);
 
                 if (!ok || playlistName.isEmpty()) {
                     return false;
@@ -3024,6 +3239,7 @@ bool MainWindow::loadPlaylistFromFile(const QString &filename) {
                 updateCurrentPlaylistReference();
                 m_playlistFiles[playlistName].clear();
                 QListWidget *existingPlaylist = currentPlaylistWidget();
+
                 if (existingPlaylist) {
                     existingPlaylist->clear();
                 }
@@ -3034,7 +3250,7 @@ bool MainWindow::loadPlaylistFromFile(const QString &filename) {
 
     // Create new playlist tab if needed
     if (m_currentPlaylistWidget == nullptr ||
-        m_playlistTabs->currentWidget() != m_currentPlaylistWidget) {
+            m_playlistTabs->currentWidget() != m_currentPlaylistWidget) {
         addNewPlaylist(playlistName);
     } else {
         // Update existing tab name
@@ -3073,9 +3289,8 @@ void MainWindow::updatePlaylistFromCurrentTab(const QString &filename) {
     }
 }
 
-//add actions
-void MainWindow::addActions()
-{
+// add actions
+void MainWindow::addActions() {
     // ========== PRESET ACTIONS ==========
     savePresetAction = new QAction("Save &Preset...", this);
     savePresetAction->setShortcut(QKeySequence::Save);
@@ -3104,7 +3319,8 @@ void MainWindow::addActions()
 
     saveCurrentPlaylistAsAction = new QAction("Save Playlist &As...", this);
     saveCurrentPlaylistAsAction->setShortcut(Qt::CTRL | Qt::SHIFT | Qt::Key_S);
-    saveCurrentPlaylistAsAction->setStatusTip("Save current playlist with a new name");
+    saveCurrentPlaylistAsAction->setStatusTip(
+                "Save current playlist with a new name");
     saveCurrentPlaylistAsAction->setIcon(QIcon(":/icons/save.svg")); // Optional
 
     saveAllPlaylistsAction = new QAction("Save A&ll Playlists", this);
@@ -3119,9 +3335,8 @@ void MainWindow::addActions()
     quitAction->setIcon(QIcon(":/icons/power.svg")); // Optional
 }
 
-//add menubar
-void MainWindow::setupMenus()
-{
+// add menubar
+void MainWindow::setupMenus() {
     // ========== FILE MENU ==========
     QMenu *fileMenu = menuBar()->addMenu("&File");
 
@@ -3132,14 +3347,12 @@ void MainWindow::setupMenus()
     fileMenu->addAction(saveAllPlaylistsAction);
     fileMenu->addSeparator();
 
-    QAction *streamAction = fileMenu->addAction("&Stream from URL",
-                                                 this,
-                                                 &MainWindow::onStreamFromUrl);
+    QAction *streamAction = fileMenu->addAction("&Stream from URL", this,
+                                                &MainWindow::onStreamFromUrl);
     streamAction->setShortcut(QKeySequence("Ctrl+U"));
     streamAction->setIcon(QIcon(":/icons/rss.svg"));
     fileMenu->addAction(streamAction);
     fileMenu->addSeparator();
-
 
     // Exit action
 
@@ -3148,27 +3361,31 @@ void MainWindow::setupMenus()
     // =========== View Menu ============
     QMenu *viewMenu = menuBar()->addMenu("&View");
 
-    QAction *hideBinauralToolbarAction = new QAction("Hide Binaural Toolbar",viewMenu);
-    //hideBinauralToolbarAction->setIcon(QIcon(":/icons/eye.svg"));
+    QAction *hideBinauralToolbarAction =
+            new QAction("Hide Binaural Toolbar", viewMenu);
+    // hideBinauralToolbarAction->setIcon(QIcon(":/icons/eye.svg"));
     hideBinauralToolbarAction->setCheckable(true);
-    bool isToolbarHidden = settings.value("UI/BinauralToolbarHidden", false).toBool();
+    bool isToolbarHidden =
+            settings.value("UI/BinauralToolbarHidden", false).toBool();
     hideBinauralToolbarAction->setChecked(isToolbarHidden);
     m_binauralToolbar->setVisible(!isToolbarHidden);
     m_binauralToolbarExt->setVisible(!isToolbarHidden);
-    //hideBinauralToolbarAction->setChecked(false);
-    connect(hideBinauralToolbarAction, &QAction::triggered, [this](bool checked){
-       m_binauralToolbar->setVisible(!checked);
-       m_binauralToolbarExt->setVisible(!checked);
-       settings.setValue("UI/BinauralToolbarHidden", checked);
+    // hideBinauralToolbarAction->setChecked(false);
+    connect(hideBinauralToolbarAction, &QAction::triggered, [this](bool checked) {
+        m_binauralToolbar->setVisible(!checked);
+        m_binauralToolbarExt->setVisible(!checked);
+        settings.setValue("UI/BinauralToolbarHidden", checked);
     });
     viewMenu->addAction(hideBinauralToolbarAction);
     viewMenu->addSeparator();
 
     //
-    QAction *hideNatureToolbarAction = new QAction("Hide Nature Toolbar", viewMenu);
+    QAction *hideNatureToolbarAction =
+            new QAction("Hide Nature Toolbar", viewMenu);
     // hideNatureToolbarAction->setIcon(QIcon(":/icons/eye.svg")); // Optional
     hideNatureToolbarAction->setCheckable(true);
-    bool isNatureToolbarHidden = settings.value("UI/NatureToolbarHidden", false).toBool();
+    bool isNatureToolbarHidden =
+            settings.value("UI/NatureToolbarHidden", false).toBool();
     hideNatureToolbarAction->setChecked(isNatureToolbarHidden);
     m_natureToolbar->setVisible(!isNatureToolbarHidden);
     // Connect the action
@@ -3180,38 +3397,37 @@ void MainWindow::setupMenus()
     //
 
     // ========== Settings Menu =========
-    QMenu *settingsMenu= menuBar()->addMenu("&Settings");
+    QMenu *settingsMenu = menuBar()->addMenu("&Settings");
     QAction *factoryResetAction = new QAction("Factory Reset", settingsMenu);
     factoryResetAction->setIcon(QIcon(":/icons/refresh-cw.svg"));
-    connect(factoryResetAction, &QAction::triggered, [this]{
+    connect(factoryResetAction, &QAction::triggered, [this] {
         // Confirmation dialog
         QMessageBox::StandardButton reply;
-        reply = QMessageBox::question(this,
-                                     "Factory Reset Confirmation",
-                                     "Are you sure you want to reset all settings to defaults?\n\n"
-                                     "This will delete all your preferences and customizations.\n"
-                                     "Your music files, saved playlists, and presets will NOT be affected.",
-                                     QMessageBox::Ok | QMessageBox::Cancel,
-                                     QMessageBox::Cancel);
+        reply = QMessageBox::question(
+                    this, "Factory Reset Confirmation",
+                    "Are you sure you want to reset all settings to defaults?\n\n"
+                    "This will delete all your preferences and customizations.\n"
+                    "Your music files, saved playlists, and presets will NOT be affected.",
+                    QMessageBox::Ok | QMessageBox::Cancel, QMessageBox::Cancel);
 
         if (reply == QMessageBox::Ok) {
             settings.clear();
-            QMessageBox::information(this,
-                                    "Factory Reset Complete",
-                                    "All settings have been reset to defaults.\n"
-                                    "Please restart the application for changes to take full effect.");
+            QMessageBox::information(
+                        this, "Factory Reset Complete",
+                        "All settings have been reset to defaults.\n"
+                        "Please restart the application for changes to take full effect.");
 
             // Restart the application immediately
             // QTimer::singleShot(1000, this, &QApplication::quit);
         }
     });
     settingsMenu->addAction(factoryResetAction);
-    //unliited time
+    // unliited time
     settingsMenu->addSeparator();
 
     unlimitedDurationAction = new QAction("Unlimited Duration", settingsMenu);
     unlimitedDurationAction->setCheckable(true);
-    //unlimitedDurationAction->setIcon(QIcon(":/icons/infinity.svg"));
+    // unlimitedDurationAction->setIcon(QIcon(":/icons/infinity.svg"));
 
     bool unlimited = settings.value("binaural/unlimitedDuration", false).toBool();
     unlimitedDurationAction->setChecked(unlimited);
@@ -3225,10 +3441,8 @@ void MainWindow::setupMenus()
     presetsMenu->addAction(savePresetAction);
     presetsMenu->addAction(loadPresetAction);
     presetsMenu->addSeparator();
-    //presetsMenu->addAction(managePresetsAction);
-    //presetsMenu->addSeparator();
-
-
+    // presetsMenu->addAction(managePresetsAction);
+    // presetsMenu->addSeparator();
 
     // Reset to defaults
     QAction *resetPresetsAction = new QAction("&Binaural Defaults", this);
@@ -3237,11 +3451,10 @@ void MainWindow::setupMenus()
     connect(resetPresetsAction, &QAction::triggered, this, [this]() {
         if (m_binauralEngine && m_binauralEngine->isPlaying()) {
             QMessageBox::StandardButton reply;
-            reply = QMessageBox::question(this,
-                                          tr("Binaural Engine Active"),
-                                          tr("Binaural engine is playing.\nStop and proceed?"),
-                                          QMessageBox::Ok | QMessageBox::Cancel,
-                                          QMessageBox::Cancel);
+            reply = QMessageBox::question(
+                        this, tr("Binaural Engine Active"),
+                        tr("Binaural engine is playing.\nStop and proceed?"),
+                        QMessageBox::Ok | QMessageBox::Cancel, QMessageBox::Cancel);
 
             if (reply == QMessageBox::Cancel) {
                 return; // User canceled, don't proceed
@@ -3260,7 +3473,6 @@ void MainWindow::setupMenus()
         statusBar()->showMessage("Brainwave settings reset to defaults", 3000);
     });
     presetsMenu->addAction(resetPresetsAction);
-
 
     // ========== HELP MENU ==========
     QMenu *helpMenu = menuBar()->addMenu("&Help");
@@ -3291,23 +3503,22 @@ void MainWindow::setupMenus()
         dialog.exec();
     });
 
-    //whatsnew
+    // whatsnew
     QAction *whatsNewAction = helpMenu->addAction("What's New");
     connect(whatsNewAction, &QAction::triggered, [this]() {
         HelpMenuDialog dialog(HelpType::WhatsNew, this);
         dialog.exec();
     });
 
-    QAction* supportusAction = helpMenu->addAction("Support Us");
+    QAction *supportusAction = helpMenu->addAction("Support Us");
     connect(supportusAction, &QAction::triggered, [this]() {
-            DonationDialog dialog(this);
-                dialog.exec();
-        });
+        DonationDialog dialog(this);
+        dialog.exec();
+    });
 }
 
-//staus update
-void MainWindow::updatePlayerStatus(const QString& filePath)
-{
+// staus update
+void MainWindow::updatePlayerStatus(const QString &filePath) {
     QFileInfo fileInfo(filePath);
     QString trackName = fileInfo.fileName(); // Or use baseName() for cleaner name
 
@@ -3315,96 +3526,95 @@ void MainWindow::updatePlayerStatus(const QString& filePath)
 
     QString status;
     switch (state) {
-        case QMediaPlayer::PlayingState:
-            status = "Playing: ";
-            break;
-        case QMediaPlayer::PausedState:
-            status = "Paused: ";
-            break;
-        case QMediaPlayer::StoppedState:
-            status = "Stopped";
-            // Optionally don't show track name when stopped
-            statusBar()->showMessage(status);
-            return;
+    case QMediaPlayer::PlayingState:
+        status = "Playing: ";
+        break;
+    case QMediaPlayer::PausedState:
+        status = "Paused: ";
+        break;
+    case QMediaPlayer::StoppedState:
+        status = "Stopped";
+        // Optionally don't show track name when stopped
+        statusBar()->showMessage(status);
+        return;
     }
 
     statusBar()->showMessage(status + trackName);
 }
 
-QString MainWindow::formatBinauralString()
-{
+QString MainWindow::formatBinauralString() {
     QString result = "";
 
     // Get current tone type from combo box
     int toneType = toneTypeCombo->currentData().toInt();
 
     switch (toneType) {
-        case BINAURAL:
-            result = "BIN:";  // Only BIN for binaural
-            {
-                // Add beat frequency from the label
-                QString beatText = m_beatFreqLabel->text();
-                // Extract just the number (remove " Hz")
-                QString beatValue = beatText.split(" ")[0];
-                result += beatValue;
-            }
-            break;
+    case BINAURAL:
+        result = "BIN:"; // Only BIN for binaural
+    {
+        // Add beat frequency from the label
+        QString beatText = m_beatFreqLabel->text();
+        // Extract just the number (remove " Hz")
+        QString beatValue = beatText.split(" ")[0];
+        result += beatValue;
+    }
+        break;
 
-        case ISOCHRONIC:
-            result = "ISO:";  // Only ISO for isochronic
-            result += QString("%1").arg(m_pulseFreqLabel->value(), 0, 'f', 1);
-            break;
+    case ISOCHRONIC:
+        result = "ISO:"; // Only ISO for isochronic
+        result += QString("%1").arg(m_pulseFreqLabel->value(), 0, 'f', 1);
+        break;
 
-        case GENERATOR:
-            result = "GEN:";  // GEN for generator
-            //result += QString("%1").arg(m_leftFreqInput->value(), 0, 'f', 1);
-            result += QString("L:%1/R:%2").arg(
-                    m_leftFreqInput->value(), 0, 'f', 2).arg(
-                    m_rightFreqInput->value(), 0, 'f', 2);
-            break;
+    case GENERATOR:
+        result = "GEN:"; // GEN for generator
+        // result += QString("%1").arg(m_leftFreqInput->value(), 0, 'f', 1);
+        result += QString("L:%1/R:%2")
+                .arg(m_leftFreqInput->value(), 0, 'f', 2)
+                .arg(m_rightFreqInput->value(), 0, 'f', 2);
+        break;
 
-        default:
-            result = "OFF";
-            return result;
+    default:
+        result = "OFF";
+        return result;
     }
 
     // Add waveform type
     QString waveform = m_waveformCombo->currentText();
 
     // Abbreviate waveforms for compact display
-    if (waveform == "Sine") result += ":Sine";
-    else if (waveform == "Square") result += ":Sqr";
-    else if (waveform == "Triangle") result += ":Tri";
-    else if (waveform == "Sawtooth") result += ":Saw";
+    if (waveform == "Sine")
+        result += ":Sine";
+    else if (waveform == "Square")
+        result += ":Sqr";
+    else if (waveform == "Triangle")
+        result += ":Tri";
+    else if (waveform == "Sawtooth")
+        result += ":Saw";
 
     return result;
 }
 
+// streaming
 
-//streaming
-
-void MainWindow::onStreamFromUrl()
-{
+void MainWindow::onStreamFromUrl() {
     bool ok;
-    QString url = QInputDialog::getText(this,
-                                        "Stream from URL",
-                                        "Enter audio stream URL:",
-                                        QLineEdit::Normal,
-                                        m_currentStreamUrl.isEmpty() ? "https://" : m_currentStreamUrl,  // Default suggestion
-                                        &ok);
+    QString url = QInputDialog::getText(
+                this, "Stream from URL", "Enter audio stream URL:", QLineEdit::Normal,
+                m_currentStreamUrl.isEmpty() ? "https://"
+                                             : m_currentStreamUrl, // Default suggestion
+                &ok);
 
     if (ok && !url.isEmpty()) {
         playRemoteStream(url);
     }
 }
 
-void MainWindow::playRemoteStream(const QString &urlString)
-{
+void MainWindow::playRemoteStream(const QString &urlString) {
     if (!m_mediaPlayer) {
         m_mediaPlayer = new QMediaPlayer(this);
         m_audioOutput = new QAudioOutput(this);
         m_mediaPlayer->setAudioOutput(m_audioOutput);
-       // setupMediaPlayerConnections();
+        // setupMediaPlayerConnections();
     }
 
     QUrl audioUrl(urlString);
@@ -3416,14 +3626,14 @@ void MainWindow::playRemoteStream(const QString &urlString)
 
     // Stop current playback
     QMediaPlayer::PlaybackState state = m_mediaPlayer->playbackState();
-    if (state == QMediaPlayer::PlayingState || state == QMediaPlayer::PausedState) {
+    if (state == QMediaPlayer::PlayingState ||
+            state == QMediaPlayer::PausedState) {
         m_mediaPlayer->stop();
     }
 
-
     // Set stream flag and URL
     m_isStream = true;
-    m_currentStreamUrl = urlString;  // Store for pause/resume
+    m_currentStreamUrl = urlString; // Store for pause/resume
 
     // Clear previous source and set new one
     m_mediaPlayer->setSource(audioUrl);
@@ -3436,17 +3646,16 @@ void MainWindow::playRemoteStream(const QString &urlString)
     if (displayName.isEmpty()) {
         // For streams without filename, show host
         displayName = audioUrl.host();
-        if (displayName.isEmpty()) displayName = "Network Stream";
+        if (displayName.isEmpty())
+            displayName = "Network Stream";
     }
 
-    //statusBar()->showMessage("Streaming: " + audioUrl.toString());
+    // statusBar()->showMessage("Streaming: " + audioUrl.toString());
     statusBar()->showMessage("Streaming: " + displayName);
-
 }
 
-//open with
-void MainWindow::onFileOpened(const QString &filePath)
-{
+// open with
+void MainWindow::onFileOpened(const QString &filePath) {
     // 1. Check if file exists
     QFileInfo fileInfo(filePath);
     if (!fileInfo.exists() || !fileInfo.isFile()) {
@@ -3455,7 +3664,8 @@ void MainWindow::onFileOpened(const QString &filePath)
 
     // 2. Extract and check file extension (case-insensitive)
     QString suffix = fileInfo.suffix().toLower();
-    QStringList supportedExtensions = {"mp3", "wav", "flac", "ogg", "m4a", "mp4", "m4v", "avi", "mkv"};
+    QStringList supportedExtensions = {"mp3", "wav", "flac", "ogg", "m4a",
+                                       "mp4", "m4v", "avi",  "mkv"};
 
     if (!supportedExtensions.contains(suffix)) {
         statusBar()->showMessage("Unsupported file format: ." + suffix, 3000);
@@ -3483,7 +3693,7 @@ void MainWindow::onFileOpened(const QString &filePath)
     statusBar()->showMessage("Opened: " + fileName, 3000);
 }
 
-//metadata for playing track
+// metadata for playing track
 QString MainWindow::getTrackMetadata() {
     metaData = m_mediaPlayer->metaData();
 
@@ -3492,27 +3702,17 @@ QString MainWindow::getTrackMetadata() {
     // List of ALL Qt metadata keys from the documentation
     QList<QMediaMetaData::Key> allKeys = {
         // Common attributes
-        QMediaMetaData::Title,
-        QMediaMetaData::Author,
-        QMediaMetaData::Genre,
-        QMediaMetaData::Date,
-        QMediaMetaData::Copyright,
-        QMediaMetaData::Comment,
+        QMediaMetaData::Title, QMediaMetaData::Author, QMediaMetaData::Genre,
+        QMediaMetaData::Date, QMediaMetaData::Copyright, QMediaMetaData::Comment,
 
         // Music-specific attributes
-        QMediaMetaData::AlbumTitle,
-        QMediaMetaData::AlbumArtist,
-        QMediaMetaData::ContributingArtist,
-        QMediaMetaData::TrackNumber,
-        QMediaMetaData::Composer,
-        QMediaMetaData::CoverArtImage,
+        QMediaMetaData::AlbumTitle, QMediaMetaData::AlbumArtist,
+        QMediaMetaData::ContributingArtist, QMediaMetaData::TrackNumber,
+        QMediaMetaData::Composer, QMediaMetaData::CoverArtImage,
 
         // Technical attributes
-        QMediaMetaData::Duration,
-        QMediaMetaData::AudioBitRate,
-        QMediaMetaData::AudioCodec,
-        QMediaMetaData::FileFormat
-    };
+        QMediaMetaData::Duration, QMediaMetaData::AudioBitRate,
+        QMediaMetaData::AudioCodec, QMediaMetaData::FileFormat};
 
     // Process each key - ONLY include if it has a valid, non-empty value
     for (const auto &key : allKeys) {
@@ -3527,7 +3727,8 @@ QString MainWindow::getTrackMetadata() {
         if (value.typeId() == QMetaType::QString && value.toString().isEmpty()) {
             continue;
         }
-        if (value.typeId() == QMetaType::QStringList && value.toStringList().isEmpty()) {
+        if (value.typeId() == QMetaType::QStringList &&
+                value.toStringList().isEmpty()) {
             continue;
         }
         if (value.typeId() == QMetaType::Int && value.toInt() == 0) {
@@ -3567,7 +3768,7 @@ QString MainWindow::getTrackMetadata() {
         } else if (value.typeId() == QMetaType::QImage) {
             valueStr = "[Image]"; // Just indicate there's image data
         } else if (value.typeId() == QMetaType::Int ||
-                  value.typeId() == QMetaType::LongLong) {
+                   value.typeId() == QMetaType::LongLong) {
             valueStr = value.toString();
         } else if (value.typeId() == QMetaType::Bool) {
             valueStr = value.toBool() ? "true" : "false";
@@ -3577,7 +3778,8 @@ QString MainWindow::getTrackMetadata() {
         }
 
         // Add to output
-        displayMetaData += QString("    %1: %2\n").arg(formattedKeyName).arg(valueStr);
+        displayMetaData +=
+                QString("    %1: %2\n").arg(formattedKeyName).arg(valueStr);
     }
 
     // Add duration in FFmpeg format (always show if available)
@@ -3590,16 +3792,14 @@ QString MainWindow::getTrackMetadata() {
         int centiseconds = (durationMs % 1000) / 10;
 
         displayMetaData += QString("\n  Duration: %1:%2:%3.%4")
-                               .arg(hours, 2, 10, QChar('0'))
-                               .arg(minutes, 2, 10, QChar('0'))
-                               .arg(seconds, 2, 10, QChar('0'))
-                               .arg(centiseconds, 2, 10, QChar('0'));
+                .arg(hours, 2, 10, QChar('0'))
+                .arg(minutes, 2, 10, QChar('0'))
+                .arg(seconds, 2, 10, QChar('0'))
+                .arg(centiseconds, 2, 10, QChar('0'));
     }
 
     return displayMetaData.trimmed();
 }
-
-
 
 void MainWindow::handleMetaDataUpdated() {
     // Metadata is now guaranteed to be available (or updated)
@@ -3608,13 +3808,12 @@ void MainWindow::handleMetaDataUpdated() {
 
         metadataBrowser->setText(currentTrackMetadata);
 
-
         // Update the dialog if it's currently visible
         if (trackInfoDialog->isVisible()) {
             trackInfoDialog->update(); // Force UI refresh
         }
     }
-    //updateTooltip(currentTrackMetadata);
+    // updateTooltip(currentTrackMetadata);
 }
 
 void MainWindow::createInfoDialog() {
@@ -3639,55 +3838,50 @@ void MainWindow::createInfoDialog() {
             m_trackInfoButton->setChecked(false);
         }
     });
-
 }
 
 ////////   ambience
 
-void MainWindow::setupAmbientPlayers()
-{
+void MainWindow::setupAmbientPlayers() {
     // Create 5 ambient players
     for (int i = 1; i <= 5; i++) {
         QString key = QString("player%1").arg(i);
 
         // Create the player
-        AmbientPlayer* player = new AmbientPlayer(this);
+        AmbientPlayer *player = new AmbientPlayer(this);
         player->setName(QString("Player %1").arg(i));
 
         // Store in map
         m_ambientPlayers[key] = player;
         // Create dialog FOR THIS PLAYER
-               AmbientPlayerDialog* dialog = new AmbientPlayerDialog(player, this);
-               dialog->setWindowTitle(QString("Ambient Player %1").arg(i));
-               dialog->hide();  // Start hidden
-               m_playerDialogs[key] = dialog;
+        AmbientPlayerDialog *dialog = new AmbientPlayerDialog(player, this);
+        dialog->setWindowTitle(QString("Ambient Player %1").arg(i));
+        dialog->hide(); // Start hidden
+        m_playerDialogs[key] = dialog;
 
-               // Connect button to show ITS dialog
-               connect(player->button(), &QPushButton::clicked, this, [this, key]() {
-                   if (m_playerDialogs.contains(key)) {
-                       m_playerDialogs[key]->show();
-                       m_playerDialogs[key]->raise();
-                       m_playerDialogs[key]->activateWindow();
-                   }
-               });
+        // Connect button to show ITS dialog
+        connect(player->button(), &QPushButton::clicked, this, [this, key]() {
+            if (m_playerDialogs.contains(key)) {
+                m_playerDialogs[key]->show();
+                m_playerDialogs[key]->raise();
+                m_playerDialogs[key]->activateWindow();
+            }
+        });
         // Set player key as property on the button for identification
         player->button()->setProperty("playerKey", key);
-
-
     }
 }
 
-
-void MainWindow::onAmbientButtonClicked()
-{
-    QPushButton* clickedButton = qobject_cast<QPushButton*>(sender());
-    if (!clickedButton) return;
+void MainWindow::onAmbientButtonClicked() {
+    QPushButton *clickedButton = qobject_cast<QPushButton *>(sender());
+    if (!clickedButton)
+        return;
 
     QString playerKey = clickedButton->property("playerKey").toString();
 
     if (m_playerDialogs.contains(playerKey)) {
         // Get the dialog FOR THIS SPECIFIC PLAYER
-        AmbientPlayerDialog* dialog = m_playerDialogs[playerKey];
+        AmbientPlayerDialog *dialog = m_playerDialogs[playerKey];
 
         // Show it - it's already configured for this player
         dialog->show();
@@ -3708,23 +3902,24 @@ void MainWindow::onMasterPlayClicked()
 }
 */
 
-void MainWindow::onMasterPlayClicked()
-{
-    for (const QString& key : m_ambientPlayers.keys()) {
-        AmbientPlayer* player = m_ambientPlayers[key];
-        if (!player->isEnabled()) continue;
+void MainWindow::onMasterPlayClicked() {
+    for (const QString &key : m_ambientPlayers.keys()) {
+        AmbientPlayer *player = m_ambientPlayers[key];
+        if (!player->isEnabled())
+            continue;
 
         // Play the internal media player
-        QMediaPlayer* mediaPlayer = player->mediaPlayer();
-        if (mediaPlayer && mediaPlayer->playbackState() != QMediaPlayer::PlayingState) {
-            mediaPlayer->play();  // ensure actual playback
+        QMediaPlayer *mediaPlayer = player->mediaPlayer();
+        if (mediaPlayer &&
+                mediaPlayer->playbackState() != QMediaPlayer::PlayingState) {
+            mediaPlayer->play(); // ensure actual playback
         }
 
         // Update the corresponding dialog's state variable
         if (m_playerDialogs.contains(key)) {
-            AmbientPlayerDialog* dlg = m_playerDialogs[key];
-            dlg->state = mediaPlayer->playbackState();  // sync dialog state
-            //dlg->updateUI();                             // refresh buttons/slider
+            AmbientPlayerDialog *dlg = m_playerDialogs[key];
+            dlg->state = mediaPlayer->playbackState(); // sync dialog state
+            // dlg->updateUI();                             // refresh buttons/slider
         }
     }
 }
@@ -3740,23 +3935,25 @@ void MainWindow::onMasterPauseClicked()
 }
 */
 
-void MainWindow::onMasterPauseClicked()
-{
-    for (const QString& key : m_ambientPlayers.keys()) {
-        AmbientPlayer* player = m_ambientPlayers[key];
-        if (!player->isEnabled()) continue;
+void MainWindow::onMasterPauseClicked() {
+    for (const QString &key : m_ambientPlayers.keys()) {
+        AmbientPlayer *player = m_ambientPlayers[key];
+        if (!player->isEnabled())
+            continue;
 
         // Pause the internal media player
-        QMediaPlayer* mediaPlayer = player->mediaPlayer();
-        if (mediaPlayer && mediaPlayer->playbackState() == QMediaPlayer::PlayingState) {
-            mediaPlayer->pause();  // pause actual playback
+        QMediaPlayer *mediaPlayer = player->mediaPlayer();
+        if (mediaPlayer &&
+                mediaPlayer->playbackState() == QMediaPlayer::PlayingState) {
+            mediaPlayer->pause(); // pause actual playback
         }
 
         // Update corresponding dialog's state variable
         if (m_playerDialogs.contains(key)) {
-            AmbientPlayerDialog* dlg = m_playerDialogs[key];
-            dlg->state = mediaPlayer->playbackState();  // should be PausedState now
-            //dlg->updateUI();                             // refresh buttons, slider, etc.
+            AmbientPlayerDialog *dlg = m_playerDialogs[key];
+            dlg->state = mediaPlayer->playbackState(); // should be PausedState now
+            // dlg->updateUI();                             // refresh buttons,
+            // slider, etc.
         }
     }
 }
@@ -3772,61 +3969,56 @@ void MainWindow::onMasterStopClicked()
 }
 */
 
-
-void MainWindow::onMasterStopClicked()
-{
-    for (const QString& key : m_ambientPlayers.keys()) {
-        AmbientPlayer* player = m_ambientPlayers[key];
-        if (!player->isEnabled()) continue;
+void MainWindow::onMasterStopClicked() {
+    for (const QString &key : m_ambientPlayers.keys()) {
+        AmbientPlayer *player = m_ambientPlayers[key];
+        if (!player->isEnabled())
+            continue;
 
         // Stop the internal media player
-        QMediaPlayer* mediaPlayer = player->mediaPlayer();
-        if (mediaPlayer && mediaPlayer->playbackState() != QMediaPlayer::StoppedState) {
-            mediaPlayer->stop();  // stop actual playback
+        QMediaPlayer *mediaPlayer = player->mediaPlayer();
+        if (mediaPlayer &&
+                mediaPlayer->playbackState() != QMediaPlayer::StoppedState) {
+            mediaPlayer->stop(); // stop actual playback
         }
 
         // Update corresponding dialog's state variable
         if (m_playerDialogs.contains(key)) {
-            AmbientPlayerDialog* dlg = m_playerDialogs[key];
-            dlg->state = mediaPlayer->playbackState();  // should be StoppedState now
-            //dlg->updateUI();                             // refresh buttons, slider, etc.
+            AmbientPlayerDialog *dlg = m_playerDialogs[key];
+            dlg->state = mediaPlayer->playbackState(); // should be StoppedState now
+            // dlg->updateUI();                             // refresh buttons,
+            // slider, etc.
         }
     }
 }
 
-void MainWindow::onMasterVolumeChanged(int value)
-{
+void MainWindow::onMasterVolumeChanged(int value) {
     return;
     float masterRatio = value / 100.0f;
-    for (AmbientPlayer* player : std::as_const(m_ambientPlayers)) {
+    for (AmbientPlayer *player : std::as_const(m_ambientPlayers)) {
         if (player->isEnabled()) {
-            int actualVolume = player->volume() * masterRatio;  // ⚠️ BUG!
-            player->setVolume(actualVolume);  // Overwrites base volume!
+            int actualVolume = player->volume() * masterRatio; // ⚠️ BUG!
+            player->setVolume(actualVolume); // Overwrites base volume!
         }
     }
     m_masterVolumeLabel->setText(QString("%1%").arg(value));
 }
 
-
-void MainWindow::saveAmbientPreset(const QString& presetName)
-{
+void MainWindow::saveAmbientPreset(const QString &presetName) {
     // Get the preset directory path
 
     QString presetDir = ConstantGlobals::ambientPresetFilePath;
 
     // Create default filename
-    QString defaultFileName = presetName.isEmpty() ?
-                              "ambient_preset.json" :
-                              QString("ambient_%1.json").arg(presetName);
+    QString defaultFileName = presetName.isEmpty()
+            ? "ambient_preset.json"
+            : QString("ambient_%1.json").arg(presetName);
     QString defaultFilePath = QDir(presetDir).filePath(defaultFileName);
 
     // Use QFileDialog to get save location
-    QString fileName = QFileDialog::getSaveFileName(
-        this,
-        "Save Ambient Preset",
-        defaultFilePath,
-        "JSON Files (*.json);;All Files (*)"
-    );
+    QString fileName =
+            QFileDialog::getSaveFileName(this, "Save Ambient Preset", defaultFilePath,
+                                         "JSON Files (*.json);;All Files (*)");
 
     // If user cancelled, return
     if (fileName.isEmpty()) {
@@ -3852,7 +4044,7 @@ void MainWindow::saveAmbientPreset(const QString& presetName)
     QJsonArray playersArray;
 
     for (auto it = m_ambientPlayers.begin(); it != m_ambientPlayers.end(); ++it) {
-        AmbientPlayer* player = it.value();
+        AmbientPlayer *player = it.value();
 
         QJsonObject playerObj;
         playerObj["key"] = it.key();
@@ -3878,23 +4070,19 @@ void MainWindow::saveAmbientPreset(const QString& presetName)
     }
 }
 
-void MainWindow::loadAmbientPreset(const QString& presetName)
-{
+void MainWindow::loadAmbientPreset(const QString &presetName) {
     QString fileName;
     QString presetPath = ConstantGlobals::ambientPresetFilePath;
 
     // If presetName is provided, construct the filename
     if (!presetName.isEmpty()) {
-        fileName = QDir(presetPath)
-                   .filePath(QString("ambient_%1.json").arg(presetName));
+        fileName =
+                QDir(presetPath).filePath(QString("ambient_%1.json").arg(presetName));
     } else {
         // Use QFileDialog to let user select a file
         fileName = QFileDialog::getOpenFileName(
-            this,
-            "Load Ambient Preset",
-            ConstantGlobals::ambientPresetFilePath,
-            "JSON Files (*.json);;All Files (*)"
-        );
+                    this, "Load Ambient Preset", ConstantGlobals::ambientPresetFilePath,
+                    "JSON Files (*.json);;All Files (*)");
 
         // If user cancelled, return
         if (fileName.isEmpty()) {
@@ -3921,17 +4109,17 @@ void MainWindow::loadAmbientPreset(const QString& presetName)
     QJsonArray playersArray = presetObject["players"].toArray();
 
     // Stop all players first
-    for (AmbientPlayer* player : m_ambientPlayers) {
+    for (AmbientPlayer *player : m_ambientPlayers) {
         player->stop();
     }
 
     // Load each player
-    for (const QJsonValue& playerValue : playersArray) {
+    for (const QJsonValue &playerValue : playersArray) {
         QJsonObject playerObj = playerValue.toObject();
         QString key = playerObj["key"].toString();
 
         if (m_ambientPlayers.contains(key)) {
-            AmbientPlayer* player = m_ambientPlayers[key];
+            AmbientPlayer *player = m_ambientPlayers[key];
 
             player->setName(playerObj["name"].toString());
             player->setFilePath(playerObj["filePath"].toString());
@@ -3941,34 +4129,32 @@ void MainWindow::loadAmbientPreset(const QString& presetName)
 
             // UPDATE THE DIALOG UI IF IT EXISTS
             if (m_playerDialogs.contains(key)) {
-                AmbientPlayerDialog* dialog = m_playerDialogs[key];
-                dialog->loadPlayerData();  // This refreshes the dialog UI
+                AmbientPlayerDialog *dialog = m_playerDialogs[key];
+                dialog->loadPlayerData(); // This refreshes the dialog UI
             }
 
             // Optional: Restore play state
-            //QMediaPlayer::PlaybackState savedState =
-              //  static_cast<QMediaPlayer::PlaybackState>(playerObj["playState"].toInt());
+            // QMediaPlayer::PlaybackState savedState =
+            //  static_cast<QMediaPlayer::PlaybackState>(playerObj["playState"].toInt());
 
-          //  if (savedState == QMediaPlayer::PlayingState && player->isEnabled()) {
+            //  if (savedState == QMediaPlayer::PlayingState && player->isEnabled()) {
             //    QTimer::singleShot(100, player, &AmbientPlayer::play);
             //}
         }
     }
-
 }
 
-void MainWindow::resetAllPlayersToDefaults()
-{
+void MainWindow::resetAllPlayersToDefaults() {
     for (auto it = m_ambientPlayers.begin(); it != m_ambientPlayers.end(); ++it) {
-        AmbientPlayer* player = it.value();
+        AmbientPlayer *player = it.value();
 
         // Reset to defaults
-        player->setFilePath("");                    // Clear audio file
-        player->setName(it.key());                  // Reset name to default (player1, player2, etc.)
-        player->setVolume(50);                      // Default volume
-        player->setEnabled(false);                  // Enabled: OFF by default
-        player->setAutoRepeat(true);                // Auto-repeat: ON by default
-        player->stop();                             // Stop playback
+        player->setFilePath("");   // Clear audio file
+        player->setName(it.key()); // Reset name to default (player1, player2, etc.)
+        player->setVolume(50);     // Default volume
+        player->setEnabled(false); // Enabled: OFF by default
+        player->setAutoRepeat(true); // Auto-repeat: ON by default
+        player->stop();              // Stop playback
 
         // Update dialog UI if open
         if (m_playerDialogs.contains(it.key())) {
@@ -3977,21 +4163,19 @@ void MainWindow::resetAllPlayersToDefaults()
     }
 
     // Update master controls state
-
 }
 
-void MainWindow::saveAmbientPlayersSettings()
-{
+void MainWindow::saveAmbientPlayersSettings() {
     return;
     settings.beginGroup("AmbientPlayers");
 
     // Clear old settings
-    settings.remove("");  // Remove all in this group
+    settings.remove(""); // Remove all in this group
 
     // Save each player
     for (auto it = m_ambientPlayers.begin(); it != m_ambientPlayers.end(); ++it) {
-        QString key = it.key();  // "player1", "player2", etc.
-        AmbientPlayer* player = it.value();
+        QString key = it.key(); // "player1", "player2", etc.
+        AmbientPlayer *player = it.value();
 
         settings.beginGroup(key);
         settings.setValue("name", player->name());
@@ -4003,19 +4187,19 @@ void MainWindow::saveAmbientPlayersSettings()
     }
 
     settings.endGroup();
-    settings.sync();  // Force write to disk
+    settings.sync(); // Force write to disk
 }
 
-void MainWindow::loadAmbientPlayersSettings()
-{
+void MainWindow::loadAmbientPlayersSettings() {
     return;
     settings.beginGroup("AmbientPlayers");
 
-    QStringList playerKeys = settings.childGroups();  // ["player1", "player2", ...]
+    QStringList playerKeys =
+            settings.childGroups(); // ["player1", "player2", ...]
 
-    for (const QString& key : playerKeys) {
+    for (const QString &key : playerKeys) {
         if (m_ambientPlayers.contains(key)) {
-            AmbientPlayer* player = m_ambientPlayers[key];
+            AmbientPlayer *player = m_ambientPlayers[key];
 
             settings.beginGroup(key);
 
@@ -4027,25 +4211,24 @@ void MainWindow::loadAmbientPlayersSettings()
             player->setFilePath(filePath);
 
             player->setVolume(settings.value("volume", 50).toInt());
-            player->setEnabled(settings.value("enabled", true).toBool());  // Changed from false to true
+            player->setEnabled(settings.value("enabled", true)
+                               .toBool()); // Changed from false to true
             player->setAutoRepeat(settings.value("autoRepeat", true).toBool());
 
             settings.endGroup();
 
             // Update the dialog UI if it exists for this player
             if (m_playerDialogs.contains(key)) {
-                AmbientPlayerDialog* dialog = m_playerDialogs[key];
-                dialog->loadPlayerData();  // This will refresh the dialog UI
+                AmbientPlayerDialog *dialog = m_playerDialogs[key];
+                dialog->loadPlayerData(); // This will refresh the dialog UI
             }
-
         }
     }
 
     settings.endGroup();
 }
 
-QStringList MainWindow::getAvailablePresets() const
-{
+QStringList MainWindow::getAvailablePresets() const {
     QStringList presets;
     QString presetPath = ConstantGlobals::ambientPresetFilePath;
     QDir presetDir(presetPath);
@@ -4054,9 +4237,10 @@ QStringList MainWindow::getAvailablePresets() const
         QStringList filters = {"ambient_*.json"};
         QStringList files = presetDir.entryList(filters, QDir::Files);
 
-        for (const QString& file : files) {
+        for (const QString &file : files) {
             // Extract preset name: "ambient_forest.json" → "forest"
-            QString name = file.mid(8, file.length() - 13);  // Remove "ambient_" and ".json"
+            QString name =
+                    file.mid(8, file.length() - 13); // Remove "ambient_" and ".json"
             presets << name;
         }
     }
@@ -4064,31 +4248,26 @@ QStringList MainWindow::getAvailablePresets() const
     return presets;
 }
 
-
-
-void MainWindow::closeEvent(QCloseEvent *event)
-{
-    //saveAmbientPlayersSettings();
+void MainWindow::closeEvent(QCloseEvent *event) {
+    // saveAmbientPlayersSettings();
     QMainWindow::closeEvent(event);
 }
 
+void MainWindow::copyUserFiles() {
 
-
-void MainWindow::copyUserFiles()
-{
-
-       // Check if files have already been copied
-       bool filesCopied = settings.value("userFilesCopied", false).toBool();
-       if (filesCopied) {
-           return; // Exit early if already done
-       }
+    // Check if files have already been copied
+    bool filesCopied = settings.value("userFilesCopied", false).toBool();
+    if (filesCopied) {
+        return; // Exit early if already done
+    }
 
     // Helper lambda function for cleaner code
-    auto copyFileWithPerms = [](const QString& resourcePath, const QString& destPath) {
+    auto copyFileWithPerms = [](const QString &resourcePath,
+            const QString &destPath) {
         if (!QFile::exists(destPath)) {
             if (QFile::copy(resourcePath, destPath)) {
                 QFile(destPath).setPermissions(QFile::ReadOwner | QFile::WriteOwner |
-                                              QFile::ReadGroup | QFile::ReadOther);
+                                               QFile::ReadGroup | QFile::ReadOther);
                 return true;
             }
         }
@@ -4097,35 +4276,35 @@ void MainWindow::copyUserFiles()
 
     // Copy AmbientNatureSounds.txt
     copyFileWithPerms(":/files/AmbientNatureSounds.txt",
-                     ConstantGlobals::ambientFilePath + "/AmbientNatureSounds.txt");
+                      ConstantGlobals::ambientFilePath +
+                      "/AmbientNatureSounds.txt");
 
     // Copy FrequencyList.txt
     copyFileWithPerms(":/files/FrequencyList.txt",
-                     ConstantGlobals::presetFilePath + "/FrequencyList.txt");
+                      ConstantGlobals::presetFilePath + "/FrequencyList.txt");
 
     // Copy README.txt to both locations
     copyFileWithPerms(":/files/README.txt",
-                     ConstantGlobals::ambientFilePath + "/README.txt");
+                      ConstantGlobals::ambientFilePath + "/README.txt");
 
     copyFileWithPerms(":/files/README.txt",
-                     ConstantGlobals::presetFilePath + "/README.txt");
+                      ConstantGlobals::presetFilePath + "/README.txt");
 
     // Copy MUSIC.txt to music directory
     copyFileWithPerms(":/files/MUSIC.txt",
-                     ConstantGlobals::musicFilePath + "/MUSIC.txt");
+                      ConstantGlobals::musicFilePath + "/MUSIC.txt");
 
-    //set their bool status created = true
+    // set their bool status created = true
     settings.setValue("userFilesCopied", true);
 }
 
-//mute all ambient players
-void MainWindow::mutePlayingAmbientPlayers(bool needMute)
-{
+// mute all ambient players
+void MainWindow::mutePlayingAmbientPlayers(bool needMute) {
     for (auto it = m_ambientPlayers.begin(); it != m_ambientPlayers.end(); ++it) {
-        AmbientPlayer* ambientPlayer = it.value();
+        AmbientPlayer *ambientPlayer = it.value();
 
         if (ambientPlayer && ambientPlayer->mediaPlayer()) {
-            QMediaPlayer* mediaPlayer = ambientPlayer->mediaPlayer();
+            QMediaPlayer *mediaPlayer = ambientPlayer->mediaPlayer();
 
             // Check if the player is in playing state
             if (mediaPlayer->playbackState() == QMediaPlayer::PlayingState) {
@@ -4138,23 +4317,22 @@ void MainWindow::mutePlayingAmbientPlayers(bool needMute)
     }
 }
 
+// sessions
 
-//sessions
-
-void MainWindow::onSessionStageChanged(int toneType, double leftFreq, double rightFreq,
-                                       int waveform, double pulseFreq, double volume)
-{
+void MainWindow::onSessionStageChanged(int toneType, double leftFreq,
+                                       double rightFreq, int waveform,
+                                       double pulseFreq, double volume) {
     targetVolume = volume;
     // Update UI displays ONCE
     toneTypeCombo->setCurrentIndex(toneType);
     m_waveformCombo->setCurrentIndex(waveform);
-    //m_binauralVolumeInput->setValue(volume);
+    // m_binauralVolumeInput->setValue(volume);
 
     if (toneType == 1) { // ISOCHRONIC
         // For ISO: left shows carrier, right shows pulse for clarity
-        m_leftFreqInput->setValue(leftFreq);      // Carrier frequency
-        m_rightFreqInput->setValue(leftFreq);    // Pulse frequency (for display)
-        m_pulseFreqLabel->setValue(pulseFreq);    // Pulse in pulse field
+        m_leftFreqInput->setValue(leftFreq);   // Carrier frequency
+        m_rightFreqInput->setValue(leftFreq);  // Pulse frequency (for display)
+        m_pulseFreqLabel->setValue(pulseFreq); // Pulse in pulse field
 
         // Beat field not used for ISO
         m_beatFreqLabel->setText("__.__");
@@ -4173,13 +4351,12 @@ void MainWindow::onSessionStageChanged(int toneType, double leftFreq, double rig
     }
 }
 
-void MainWindow::onSessionStarted(int totalSeconds)
-{
-    //it is handled by the fader timer
+void MainWindow::onSessionStarted(int totalSeconds) {
+    // it is handled by the fader timer
     m_binauralVolumeInput->setValue(0.0);
 
     // Enable session button now that we have a session
-    //m_openSessionManagerButton->setEnabled(true);
+    // m_openSessionManagerButton->setEnabled(true);
 
     // Update toolbar timers
     int totalMinutes = totalSeconds / 60;
@@ -4189,71 +4366,66 @@ void MainWindow::onSessionStarted(int totalSeconds)
     int minutes = totalSeconds / 60;
     int seconds = totalSeconds % 60;
     m_countdownLabel->setText(QString("%1:%2")
-        .arg(minutes, 2, 10, QLatin1Char('0'))
-        .arg(seconds, 2, 10, QLatin1Char('0')));
+                              .arg(minutes, 2, 10, QLatin1Char('0'))
+                              .arg(seconds, 2, 10, QLatin1Char('0')));
 
     // Disable regular controls to prevent conflicts
-    //m_binauralPowerButton->setEnabled(false);
-    //m_leftFreqInput->setEnabled(false);
-    //m_rightFreqInput->setEnabled(false);
-    //m_waveformCombo->setEnabled(false);
-    //m_binauralVolumeInput->setEnabled(false);
-    //m_brainwaveDuration->setEnabled(false);
+    // m_binauralPowerButton->setEnabled(false);
+    // m_leftFreqInput->setEnabled(false);
+    // m_rightFreqInput->setEnabled(false);
+    // m_waveformCombo->setEnabled(false);
+    // m_binauralVolumeInput->setEnabled(false);
+    // m_brainwaveDuration->setEnabled(false);
 
     // Enable/disable playback buttons appropriately
 
     m_binauralPlayButton->click();
 
-
-    m_binauralPlayButton->setEnabled(false);  // Session controls playback
+    m_binauralPlayButton->setEnabled(false); // Session controls playback
     m_binauralStopButton->setEnabled(false); // Allow emergency stop
     m_binauralPauseButton->setEnabled(false);
 
     statusBar()->showMessage("Session started", 3000);
 }
 
-void MainWindow::onSessionEnded()
-{
+void MainWindow::onSessionEnded() {
     // Re-enable all regular controls
-    //m_binauralPowerButton->setEnabled(true);
-    //m_leftFreqInput->setEnabled(true);
-    //m_rightFreqInput->setEnabled(true);
-    //m_waveformCombo->setEnabled(true);
-    //m_binauralVolumeInput->setEnabled(true);
-    //m_brainwaveDuration->setEnabled(true);
+    // m_binauralPowerButton->setEnabled(true);
+    // m_leftFreqInput->setEnabled(true);
+    // m_rightFreqInput->setEnabled(true);
+    // m_waveformCombo->setEnabled(true);
+    // m_binauralVolumeInput->setEnabled(true);
+    // m_brainwaveDuration->setEnabled(true);
 
     // Reset playback buttons to default state
-    //m_binauralPlayButton->setEnabled(true);
-    //m_binauralStopButton->setEnabled(false);
+    // m_binauralPlayButton->setEnabled(true);
+    // m_binauralStopButton->setEnabled(false);
 
     // Reset timer displays
-    //m_countdownLabel->setText("--:--");
+    // m_countdownLabel->setText("--:--");
 
-    m_binauralPlayButton->setEnabled(true);  // Session controls playback
+    m_binauralPlayButton->setEnabled(true); // Session controls playback
     m_binauralStopButton->setEnabled(true); // Allow emergency stop
     m_binauralPauseButton->setEnabled(true);
     m_binauralStopButton->click();
 
-
-
-    if (m_sessionManagerDialog->isSessionActive()){
+    if (m_sessionManagerDialog->isSessionActive()) {
         m_sessionManagerDialog->stopSession();
     }
     m_sessionManagerDialog->stopSession();
     m_brainwaveDuration->setValue(45);
     m_countdownLabel->setText("--:--");
     statusBar()->showMessage("Session ended", 3000);
-    QTimer::singleShot(5000, this, [this]() {
-        m_binauralVolumeInput->setValue(15.0);
-    });
+    QTimer::singleShot(5000, this,
+                       [this]() { m_binauralVolumeInput->setValue(15.0); });
 }
 
-void MainWindow::onSeekTrack()
-{
-    if (!timeEdit || !m_mediaPlayer) return;
+void MainWindow::onSeekTrack() {
+    if (!timeEdit || !m_mediaPlayer)
+        return;
 
-    //if (!m_mediaPlayer->isPlaying()){
-    //}
+    // if (!m_mediaPlayer->isPlaying()){
+    // }
 
     QString input = timeEdit->text().trimmed();
 
@@ -4263,7 +4435,7 @@ void MainWindow::onSeekTrack()
 
     if (totalMs < 0 || totalMs > duration) {
         // Invalid input - reset to current position and clear
-       // updateTimeFromPlayer(m_mediaPlayer->position());
+        // updateTimeFromPlayer(m_mediaPlayer->position());
         timeEdit->clear();
         return;
     }
@@ -4275,12 +4447,10 @@ void MainWindow::onSeekTrack()
         m_seekSlider->setValue(totalMs);
     }
 
-    //timeEdit->clearFocus();
-
+    // timeEdit->clearFocus();
 }
 
-qint64 MainWindow::parseTimeStringToMs(const QString &timeStr)
-{
+qint64 MainWindow::parseTimeStringToMs(const QString &timeStr) {
     if (timeStr.isEmpty()) {
         return 0; // Empty string = seek to beginning
     }
@@ -4294,9 +4464,8 @@ qint64 MainWindow::parseTimeStringToMs(const QString &timeStr)
         int minutes = parts[0].toInt(&minutesOk);
         int seconds = parts[1].toInt(&secondsOk);
 
-        if (minutesOk && secondsOk &&
-            minutes >= 0 && minutes < 60 &&
-            seconds >= 0 && seconds < 60) {
+        if (minutesOk && secondsOk && minutes >= 0 && minutes < 60 &&
+                seconds >= 0 && seconds < 60) {
             return (minutes * 60000) + (seconds * 1000);
         }
     }
@@ -4308,9 +4477,8 @@ qint64 MainWindow::parseTimeStringToMs(const QString &timeStr)
         int minutes = parts[1].toInt(&minutesOk);
         int seconds = parts[2].toInt(&secondsOk);
 
-        if (hoursOk && minutesOk && secondsOk &&
-            hours >= 0 && minutes >= 0 && minutes < 60 &&
-            seconds >= 0 && seconds < 60) {
+        if (hoursOk && minutesOk && secondsOk && hours >= 0 && minutes >= 0 &&
+                minutes < 60 && seconds >= 0 && seconds < 60) {
             return (hours * 3600000) + (minutes * 60000) + (seconds * 1000);
         }
     }
@@ -4335,8 +4503,8 @@ void MainWindow::onCueTrackSelected(const QString &audioFile, qint64 startMs)
         QObject::connect(m_mediaPlayer, &QMediaPlayer::positionChanged, this,
             [this, startMs](qint64 pos) {
                 // Disconnect after first position change
-                QObject::disconnect(m_mediaPlayer, &QMediaPlayer::positionChanged,
-                                    this, nullptr);
+                QObject::disconnect(m_mediaPlayer,
+&QMediaPlayer::positionChanged, this, nullptr);
                 // Seek to the cue position
                 m_mediaPlayer->setPosition(startMs);
             });
@@ -4350,9 +4518,9 @@ void MainWindow::onCueTrackSelected(const QString &audioFile, qint64 startMs)
 }
 */
 
-void MainWindow::onCuePositionChanged(qint64 positionMs)
-{
-    if (!m_seekSlider) return;
+void MainWindow::onCuePositionChanged(qint64 positionMs) {
+    if (!m_seekSlider)
+        return;
 
     // Update slider WITHOUT triggering seek
     m_seekSlider->blockSignals(true);
@@ -4361,17 +4529,16 @@ void MainWindow::onCuePositionChanged(qint64 positionMs)
 
     // Optional: Update time display
     if (m_currentTimeLabel) {
-        //QTime currentTime = QTime(0, 0, 0).addMSecs(positionMs);
-        //m_currentTimeLabel->setText(currentTime.toString("hh:mm:ss"));
+        // QTime currentTime = QTime(0, 0, 0).addMSecs(positionMs);
+        // m_currentTimeLabel->setText(currentTime.toString("hh:mm:ss"));
     }
-
-    qDebug() << "CUE dialog updated slider to:" << positionMs << "ms";
 }
 
-
-void MainWindow::onCueTrackSelected(const QString &audioFile, qint64 startSeconds)  // Now seconds!
+void MainWindow::onCueTrackSelected(const QString &audioFile,
+                                    qint64 startSeconds) // Now seconds!
 {
-    if (!m_mediaPlayer) return;
+    if (!m_mediaPlayer)
+        return;
 
     // Convert back to ms for player
     qint64 startMs = startSeconds * 1000;
@@ -4388,10 +4555,9 @@ void MainWindow::onCueTrackSelected(const QString &audioFile, qint64 startSecond
     }
 }
 
-//drag n drop
+// drag n drop
 
-void MainWindow::dragEnterEvent(QDragEnterEvent* event)
-{
+void MainWindow::dragEnterEvent(QDragEnterEvent *event) {
     if (event->mimeData()->hasUrls()) {
         QList<QUrl> urls = event->mimeData()->urls();
 
@@ -4415,8 +4581,7 @@ void MainWindow::dragEnterEvent(QDragEnterEvent* event)
     }
 }
 
-void MainWindow::dropEvent(QDropEvent* event)
-{
+void MainWindow::dropEvent(QDropEvent *event) {
     QList<QUrl> urls = event->mimeData()->urls();
     if (!urls.isEmpty()) {
         QStringList filePaths;
@@ -4432,21 +4597,37 @@ void MainWindow::dropEvent(QDropEvent* event)
     event->acceptProposedAction();
 }
 
-void MainWindow::processDroppedFiles(const QStringList& filePaths)
-{
-    if (filePaths.isEmpty()) return;
+void MainWindow::processDroppedFiles(const QStringList &filePaths) {
+    if (filePaths.isEmpty())
+        return;
 
     // Update last music directory with first file's directory
-    ConstantGlobals::lastMusicDirPath = QFileInfo(filePaths.first()).absolutePath();
+    ConstantGlobals::lastMusicDirPath =
+            QFileInfo(filePaths.first()).absolutePath();
 
     QString playlistName = currentPlaylistName();
+    QListWidget *playlist = currentPlaylistWidget();
+
+    if (m_isVideoEnabled) {
+        // Find Video Playlist tab
+        for (int i = 0; i < m_playlistTabs->count(); ++i) {
+            if (m_playlistTabs->tabText(i) == "Video Playlist") {
+                playlist = qobject_cast<QListWidget *>(m_playlistTabs->widget(i));
+                playlistName = "Video Playlist";
+                // Switch to Video Playlist tab
+                m_playlistTabs->setCurrentIndex(i);
+                break;
+            }
+        }
+    }
+
     int addedCount = 0;
 
     foreach (const QString &filePath, filePaths) {
         QString fileName = QFileInfo(filePath).fileName();
 
         // Add to playlist widget
-        currentPlaylistWidget()->addItem(fileName);
+        playlist->addItem(fileName);
 
         // Add to playlist files map
         m_playlistFiles[playlistName].append(filePath);
@@ -4454,18 +4635,526 @@ void MainWindow::processDroppedFiles(const QStringList& filePaths)
         addedCount++;
     }
 
+    // Set index to 0 and highlight the first item
+    if (playlist->count() > 0) {
+        playlist->setCurrentRow(0); // This highlights and selects the first item
+        playlist->scrollToTop();    // Optional: Ensure first item is visible
+    }
+
     statusBar()->showMessage(QString("Added %1 file(s) to '%2' via drag & drop")
                              .arg(addedCount)
                              .arg(playlistName));
 
-    // Optional: Auto-play first dropped file
-    if (m_mediaPlayer && m_mediaPlayer->playbackState() != QMediaPlayer::PlayingState) {
-        if (!filePaths.isEmpty()) {
-            m_mediaPlayer->setSource(QUrl::fromLocalFile(filePaths.first()));
-            m_mediaPlayer->play();
+    // Auto-play first dropped file
+    /*
+  if (m_mediaPlayer && m_mediaPlayer->playbackState() !=
+  QMediaPlayer::PlayingState) { if (!filePaths.isEmpty()) {
+          m_mediaPlayer->setSource(QUrl::fromLocalFile(filePaths.first()));
+          m_mediaPlayer->play();
+      }
+  }
+  */
+}
+
+// video player context menu
+void MainWindow::onVideoContextMenu(const QPoint &pos) {
+
+    QMenu menu(this);
+
+    // Playback controls
+
+    QAction *playAction = menu.addAction("Play");
+
+    QAction *pauseAction = menu.addAction("Pause");
+
+    QAction *stopAction = menu.addAction("Stop");
+    menu.addSeparator();
+
+    QAction *playNextAction = menu.addAction("Next Track");
+    QAction *playPreviousAction = menu.addAction("Previous Track");
+
+    menu.addSeparator();
+
+    QAction *increaseVolumeAction = menu.addAction("Volume Up");
+    increaseVolumeAction->setShortcut(QKeySequence(Qt::CTRL | Qt::Key_Up));
+    increaseVolumeAction->setShortcutContext(Qt::ApplicationShortcut);
+
+    QAction *decreaseVolumeAction = menu.addAction("Volume Down");
+    decreaseVolumeAction->setShortcut(QKeySequence(Qt::CTRL | Qt::Key_Down));
+    decreaseVolumeAction->setShortcutContext(Qt::ApplicationShortcut);
+
+    QAction *muteAction = menu.addAction("Mute/Unmute");
+
+    menu.addSeparator();
+    // Video controls
+    QAction* fullscreenAction = menu.addAction(
+                videoWidget && videoWidget->isFullScreen() ? "Exit Fullscreen"
+                                                           : "Fullscreen");
+    // fullscreenAction->setShortcut(QKeySequence(Qt::ALT | Qt::Key_Return));
+    // fullscreenAction->setShortcutContext(Qt::ApplicationShortcut);
+
+    menu.addSeparator();
+
+    QMenu *aspectMenu = menu.addMenu("Aspect Ratio");
+    QAction* actionKeepAspect = aspectMenu->addAction("Default");
+    menu.addSeparator();
+
+    QAction* actionZoom = aspectMenu->addAction("Zoom");
+    QAction* actionStretch = aspectMenu->addAction("Stretch");
+
+    // Connect actions
+
+    connect(actionKeepAspect, &QAction::triggered, this, [this]() {
+        if (videoWidget) {
+            videoWidget->setAspectRatioMode(Qt::KeepAspectRatio);
+
+            statusBar()->showMessage("Aspect: Default", 2000);
+        }
+    });
+
+    connect(actionZoom, &QAction::triggered, this, [this]() {
+        if (videoWidget) {
+            videoWidget->setAspectRatioMode(Qt::KeepAspectRatioByExpanding);
+
+            statusBar()->showMessage("Aspect: Zoom - edges may be cropped", 2000);
+        }
+    });
+
+    connect(actionStretch, &QAction::triggered, this, [this]() {
+        if (videoWidget) {
+            videoWidget->setAspectRatioMode(Qt::IgnoreAspectRatio);
+
+            statusBar()->showMessage("Aspect: Stretched", 2000);
+        }
+    });
+
+
+
+    menu.addSeparator();
+
+    // Connect actions
+    connect(playAction, &QAction::triggered, this, [this]() {
+        if (m_mediaPlayer) {
+            if (m_mediaPlayer->playbackState() == QMediaPlayer::PlayingState) {
+
+            } else {
+                m_playMusicButton->click();
+            }
+        }
+    });
+
+    connect(pauseAction, &QAction::triggered, this, [this]() {
+        if (m_mediaPlayer) {
+            if (m_mediaPlayer->playbackState() == QMediaPlayer::PlayingState) {
+                m_pauseMusicButton->click();
+            } else {
+            }
+        }
+    });
+
+    connect(stopAction, &QAction::triggered, this, [this]() {
+        if (m_mediaPlayer) {
+            if (m_mediaPlayer->playbackState() == QMediaPlayer::PlayingState ||
+                    m_mediaPlayer->playbackState() == QMediaPlayer::PausedState) {
+                m_stopMusicButton->click();
+            } else {
+            }
+        }
+    });
+
+    connect(playNextAction, &QAction::triggered, this, [this]() {
+        if (m_mediaPlayer) {
+            playNextTrack();
+        }
+    });
+
+    connect(playPreviousAction, &QAction::triggered, this, [this]() {
+        if (m_mediaPlayer) {
+            playPreviousTrack();
+        }
+    });
+
+    connect(muteAction, &QAction::triggered, this,
+            [this]() { volumeIcon->click(); });
+
+    connect(increaseVolumeAction, &QAction::triggered, this, [this]() {
+        int currentVolume = m_masterVolumeSlider->value();
+        m_masterVolumeSlider->setValue(currentVolume + 1); // Pre-increment
+    });
+
+    connect(decreaseVolumeAction, &QAction::triggered, this, [this]() {
+        int currentVolume = m_masterVolumeSlider->value();
+        m_masterVolumeSlider->setValue(currentVolume - 1); // Pre-decrement
+    });
+
+    connect(fullscreenAction, &QAction::triggered, this,
+            &MainWindow::toggleFullScreen);
+
+    menu.exec(videoWidget->mapToGlobal(pos));
+}
+
+// video toolbar
+
+void MainWindow::setupVideoPlayer() {
+    // Create video widget
+    // videoWidget = new QVideoWidget();
+    videoWidget->setObjectName("videoWidget");
+
+    // Set context menu policy
+    videoWidget->setContextMenuPolicy(Qt::CustomContextMenu);
+
+    // Create video player container
+    m_videoPlayerContainer = new QWidget();
+    m_videoPlayerContainer->setObjectName("videoPlayerContainer");
+    QVBoxLayout *containerLayout = new QVBoxLayout(m_videoPlayerContainer);
+    containerLayout->setContentsMargins(0, 0, 0, 0);
+    containerLayout->setSpacing(0);
+
+    // Add video widget to container
+    containerLayout->addWidget(videoWidget);
+
+    // Create toolbar
+    createVideoToolbar();
+    containerLayout->addWidget(m_videoToolbar);
+
+    // Create video playlist
+    videoPlaylist = new QListWidget();
+    videoPlaylist->setObjectName("videoPlaylist");
+
+    // Add tabs to playlist tabs widget
+    int videoPlayerTabIndex = m_playlistTabs->addTab(m_videoPlayerContainer, "Video Player");
+    int videoPlayListTabIndex = m_playlistTabs->addTab(videoPlaylist, "Video Playlist");
+
+    // Remove close buttons from tabs
+    m_playlistTabs->tabBar()->setTabButton(videoPlayerTabIndex, QTabBar::RightSide, nullptr);
+    m_playlistTabs->tabBar()->setTabButton(videoPlayListTabIndex, QTabBar::RightSide, nullptr);
+
+    // Hide tabs initially
+    m_playlistTabs->tabBar()->setTabVisible(videoPlayerTabIndex, false);
+    m_playlistTabs->tabBar()->setTabVisible(videoPlayListTabIndex, false);
+
+    // Enable mouse tracking
+    m_videoPlayerContainer->setMouseTracking(true);
+    videoWidget->setMouseTracking(true);
+
+    // Install event filters
+    //m_videoPlayerContainer->installEventFilter(this);
+    videoWidget->installEventFilter(this);
+
+    // show toolbar initially
+    m_videoToolbar->show();
+}
+
+void MainWindow::createVideoToolbar() {
+    // Create toolbar widget
+    m_videoToolbar = new QWidget();
+    m_videoToolbar->setObjectName("videoToolbar");
+    m_videoToolbar->setFixedHeight(50);
+
+    // Create toolbar layout
+    QHBoxLayout *toolbarLayout = new QHBoxLayout(m_videoToolbar);
+    toolbarLayout->setContentsMargins(10, 5, 10, 5);
+    toolbarLayout->setSpacing(10);
+
+    m_loadVideoButton = new QPushButton(m_videoToolbar);
+    m_loadVideoButton->setObjectName("loadButton");
+    m_loadVideoButton->setIcon(QIcon(":/icons-white/folder.svg"));
+    m_loadVideoButton->setFixedSize(48, 32);
+    m_loadVideoButton->setToolTip("Load Videos");
+    // Create control buttons
+    m_playButton = new QPushButton(m_videoToolbar);
+    m_playButton->setObjectName("playButton");
+    m_playButton->setIcon(QIcon(":/icons-white/play.svg"));
+    m_playButton->setFixedSize(32, 32);
+    //m_playButton->setToolTip("Play");
+
+    m_pauseButton = new QPushButton(m_videoToolbar);
+    m_pauseButton->setObjectName("pauseButton");
+    m_pauseButton->setIcon(QIcon(":/icons-white/pause.svg"));
+    m_pauseButton->setFixedSize(32, 32);
+    //m_pauseButton->setToolTip("Pause");
+
+    m_stopButton = new QPushButton(m_videoToolbar);
+    m_stopButton->setObjectName("stopButton");
+    m_stopButton->setIcon(QIcon(":/icons-white/square.svg"));
+    m_stopButton->setFixedSize(32, 32);
+    //m_stopButton->setToolTip("Stop");
+
+  m_vpreviousButton = new QPushButton(m_videoToolbar);
+  m_vpreviousButton->setObjectName("previousButton");
+  m_vpreviousButton->setIcon(QIcon(":/icons-white/skip-back.svg"));
+  m_vpreviousButton->setFixedSize(32, 32);
+  //m_vpreviousButton->setToolTip("Previous");
+
+  m_vnextButton = new QPushButton(m_videoToolbar);
+  m_vnextButton->setObjectName("nextButton");
+  m_vnextButton->setIcon(QIcon(":/icons-white/skip-forward.svg"));
+  m_vnextButton->setFixedSize(32, 32);
+  //m_vnextButton->setToolTip("Next");
+
+
+    QLabel *m_volLabel = new QLabel("Vol:", m_videoToolbar);
+    m_volShowLabel = new QLabel("70%", m_videoToolbar);
+
+    m_vvolumeSlider = new QSlider(Qt::Horizontal);
+    m_vvolumeSlider->setObjectName("vvolumeSlider");
+    m_vvolumeSlider->setMinimumWidth(150);
+    m_vvolumeSlider->setRange(0, 100);
+    m_vvolumeSlider->setValue(70);
+
+    // Create progress slider
+    m_progressSlider = new QSlider(Qt::Horizontal);
+    m_progressSlider->setObjectName("progressSlider");
+    m_progressSlider->setRange(0, 100);
+    m_progressSlider->setValue(0);
+
+    // Create time label
+    m_timeLabel = new QLabel("00:00 / 00:00");
+    m_timeLabel->setObjectName("timeLabel");
+    m_timeLabel->setStyleSheet("color: white; font-size: 12px;");
+
+    // Create fullscreen button
+    m_fullscreenButton = new QPushButton(m_videoToolbar);
+    m_fullscreenButton->setObjectName("fullscreenButton");
+    m_fullscreenButton->setIcon(QIcon(":/icons-white/maximize-2.svg"));
+    m_fullscreenButton->setFixedSize(32, 32);
+    //m_fullscreenButton->setToolTip("Fullscreen");
+
+    // Add widgets to toolbar layout
+    toolbarLayout->addWidget(m_loadVideoButton);
+    toolbarLayout->addWidget(m_playButton);
+    toolbarLayout->addWidget(m_pauseButton);
+    toolbarLayout->addWidget(m_stopButton);
+    toolbarLayout->addWidget(m_vpreviousButton);
+    toolbarLayout->addWidget(m_vnextButton);
+    toolbarLayout->addWidget(m_volLabel);
+
+    toolbarLayout->addWidget(m_vvolumeSlider);
+    toolbarLayout->addWidget(m_volShowLabel);
+
+    toolbarLayout->addWidget(m_progressSlider, 1); // Give slider stretch factor
+    toolbarLayout->addWidget(m_timeLabel);
+    toolbarLayout->addWidget(m_fullscreenButton);
+
+    // Connect button signals (implement these slots as needed)
+    connect(m_playButton, &QPushButton::clicked, this,
+            &MainWindow::onPlayClicked);
+    connect(m_pauseButton, &QPushButton::clicked, this,
+            &MainWindow::onPauseClicked);
+    connect(m_stopButton, &QPushButton::clicked, this,
+            &MainWindow::onStopClicked);
+    connect(m_fullscreenButton, &QPushButton::clicked, this,
+            &MainWindow::toggleFullScreen);
+    connect(m_progressSlider, &QSlider::sliderReleased, this,
+            &MainWindow::onVideoSliderReleased);
+    connect(m_mediaPlayer, &QMediaPlayer::positionChanged, this,
+            &MainWindow::onVideoPositionChanged);
+    connect(m_mediaPlayer, &QMediaPlayer::durationChanged, this,
+            &MainWindow::onVideoDurationChanged);
+    connect(videoWidget, &QVideoWidget::customContextMenuRequested, this,
+            &MainWindow::onVideoContextMenu);
+    connect(m_vpreviousButton, &QPushButton::clicked, this,
+        &MainWindow::playPreviousTrack);
+    connect(m_vnextButton, &QPushButton::clicked, this,
+        &MainWindow::playNextTrack);
+    connect(m_vvolumeSlider, &QSlider::valueChanged, this,
+            &MainWindow::onMusicVolumeChanged);
+    connect(m_loadVideoButton, &QPushButton::clicked, this,
+            &MainWindow::onLoadMusicClicked);
+
+    QString toolbarStyle =
+            "#videoToolbar {"
+            "    background-color: rgba(0, 0, 0, 220);" // was 180
+            "    border-top: 1px solid rgba(255, 255, 255, 50);"
+            "    /* Remove opacity from main toolbar to keep text fully visible */"
+            "}"
+            "/* Make the entire toolbar thinner by reducing padding */"
+            "#videoToolbar {"
+            "    padding: 2px 8px; /* Reduced vertical padding */"
+            "    spacing: 4px; /* Reduced spacing between items */"
+            "}"
+            "/* Ensure all QLabel text is white */"
+            "#videoToolbar QLabel {"
+            "    color: white;"
+            "    font-size: 12px;"
+            "}"
+            "#videoToolbar QPushButton {"
+            "    color: white;"
+            "    background-color: rgba(255, 255, 255, 30);"
+            "    border: none;"
+            "    border-radius: 3px; /* Slightly smaller radius for thinner look */"
+            "    padding: 4px 8px; /* Reduced button padding */"
+            "    font-size: 13px; /* Slightly smaller font */"
+            "    min-height: 24px; /* Reduced minimum height */"
+            "}"
+            "#videoToolbar QPushButton:hover {"
+            "    background-color: rgba(255, 255, 255, 50);"
+            "}"
+            "#videoToolbar QPushButton:pressed {"
+            "    background-color: rgba(255, 255, 255, 70);"
+            "}"
+            "#videoToolbar QSlider {"
+            "    height: 18px; /* Reduced from 20px */"
+            "}"
+            "#videoToolbar QSlider::groove:horizontal {"
+            "    height: 3px; /* Thinner groove */"
+            "    background: rgba(255, 255, 255, 50);"
+            "    border-radius: 1.5px;"
+            "}"
+            "#videoToolbar QSlider::handle:horizontal {"
+            "    background: white;"
+            "    width: 10px; /* Smaller handle */"
+            "    height: 10px;"
+            "    margin: -3.5px 0; /* Adjusted for new height */"
+            "    border-radius: 5px;"
+            "}";
+
+    m_videoToolbar->setStyleSheet(toolbarStyle);
+}
+
+void MainWindow::showVideoToolbar() {
+    if (!m_videoToolbar->isVisible()) {
+        m_videoToolbar->show();
+    }
+}
+
+bool MainWindow::eventFilter(QObject *watched, QEvent *event) {
+    // Handle mouse movement for video player area
+    if (watched == m_videoPlayerContainer || watched == videoWidget ||
+            watched == m_videoToolbar) {
+
+        // Handle left mouse button CLICK (not press, but release)
+        if (event->type() == QEvent::MouseButtonRelease) {
+            QMouseEvent *mouseEvent = static_cast<QMouseEvent *>(event);
+
+            // Check if it's LEFT button
+            if (mouseEvent->button() == Qt::LeftButton) {
+
+                // TOGGLE toolbar visibility
+                if (m_videoToolbar->isVisible()) {
+                    m_videoToolbar->hide();
+                } else {
+                    m_videoToolbar->show();
+                }
+                return true; // Event handled
+            }
+        }
+    }
+    return QMainWindow::eventFilter(watched, event);
+}
+
+// Example slot implementations (you'll need to implement these based on your
+// media player)
+void MainWindow::onPlayClicked() { m_playMusicButton->click(); }
+
+void MainWindow::onPauseClicked() { m_pauseMusicButton->click(); }
+
+void MainWindow::onStopClicked() {
+    m_stopMusicButton->click();
+    m_progressSlider->setValue(0);
+    m_timeLabel->setText("00:00 / 00:00");
+}
+
+void MainWindow::onFullscreenClicked() {
+    // Toggle fullscreen logic here
+}
+
+void MainWindow::onVideoPositionChanged(qint64 position) {
+    // Don't update slider if user is dragging it
+    if (m_progressSlider->isSliderDown()) {
+        return;
+    }
+
+    // Update time display
+    updateVideoTimeDisplay(position, m_mediaPlayer->duration());
+
+    // Update slider position
+    m_progressSlider->setValue(position / 1000);
+}
+
+void MainWindow::onVideoDurationChanged(qint64 duration) {
+    // Update slider maximum
+    m_progressSlider->setMaximum(static_cast<int>(duration / 1000));
+
+    // Update time display if duration is valid
+    if (duration > 0) {
+        updateVideoTimeDisplay(m_mediaPlayer->position(), duration);
+    } else {
+        // Reset to default
+        m_timeLabel->setText("00:00 / 00:00");
+    }
+}
+
+void MainWindow::toggleFullScreen() {
+    if (videoWidget) {
+        if (m_videoPlayerContainer->isFullScreen()) {
+            // EXIT FULLSCREEN
+
+            // 1. Store the container's current geometry
+            QRect containerGeometry = m_videoPlayerContainer->geometry();
+
+            // 2. Restore to Widget (NOT Window)
+            m_videoPlayerContainer->setWindowFlags(Qt::Widget);
+            m_videoPlayerContainer->showNormal();
+
+            // 3. RE-PARENT back to tab widget (CRITICAL!)
+            if (m_videoOriginalTabIndex >= 0) {
+                // Remove from whatever parent it has
+                m_videoPlayerContainer->setParent(nullptr);
+
+                // Add back to the tab widget
+                m_playlistTabs->insertTab(m_videoOriginalTabIndex, m_videoPlayerContainer, "Video Player");
+                m_playlistTabs->setCurrentIndex(m_videoOriginalTabIndex);
+                m_playlistTabs->tabBar()->setTabButton(m_videoOriginalTabIndex, QTabBar::RightSide, nullptr);
+                // Make sure tab is visible
+                m_playlistTabs->tabBar()->setTabVisible(m_videoOriginalTabIndex, true);
+            }
+
+            // Reset stored index
+            m_videoOriginalTabIndex = -1;
+
+        } else {
+            // ENTER FULLSCREEN
+
+            // 1. Store which tab we're in
+            m_videoOriginalTabIndex = m_playlistTabs->currentIndex();
+
+            // 2. Remove from tab widget BEFORE changing window flags
+            m_playlistTabs->removeTab(m_videoOriginalTabIndex);
+
+            // 3. Change to Window flag and go fullscreen
+            m_videoPlayerContainer->setWindowFlags(Qt::Window |
+                                                   Qt::FramelessWindowHint);
+            m_videoPlayerContainer->showFullScreen();
+
+            // 4. Show toolbar
+            m_videoToolbar->show();
         }
     }
 }
 
+void MainWindow::onVideoSliderReleased() {
+    int value = m_progressSlider->value();
+    m_mediaPlayer->setPosition(value * 1000);
+}
 
+void MainWindow::updateVideoTimeDisplay(qint64 position, qint64 duration) {
+    // Format position
+    int posSeconds = position / 1000;
+    int posMinutes = posSeconds / 60;
+    int posSecs = posSeconds % 60;
 
+    // Format duration
+    int durSeconds = duration / 1000;
+    int durMinutes = durSeconds / 60;
+    int durSecs = durSeconds % 60;
+
+    // Create time string
+    QString timeText = QString("%1:%2 / %3:%4")
+            .arg(posMinutes, 2, 10, QChar('0'))
+            .arg(posSecs, 2, 10, QChar('0'))
+            .arg(durMinutes, 2, 10, QChar('0'))
+            .arg(durSecs, 2, 10, QChar('0'));
+
+    m_timeLabel->setText(timeText);
+}

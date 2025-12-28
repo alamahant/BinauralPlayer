@@ -32,12 +32,20 @@
         <file>icons/minus.svg</file>
         <file>icons/minus-square.svg</file>
         <file>icons/layers.svg</file>
-
         <file>favicon/android-chrome-512x512.png</file>
         <file>files/AmbientNatureSounds.txt</file>
         <file>files/FrequencyList.txt</file>
         <file>files/README.txt</file>
         <file>files/MUSIC.txt</file>
-        
+        <file>icons/maximize-2.svg</file>
+        <file>icons-white/maximize-2.svg</file>
+        <file>icons-white/pause.svg</file>
+        <file>icons-white/play.svg</file>
+        <file>icons-white/square.svg</file>
+        <file>icons-white/activity.svg</file>
+        <file>icons-white/skip-back.svg</file>
+        <file>icons-white/skip-forward.svg</file>
+        <file>icons-white/folder.svg</file>
+        <file>icons/check.svg</file>
     </qresource>
 </RCC>

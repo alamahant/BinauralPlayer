@@ -30,6 +30,8 @@
 #include"sessiondialog.h"
 #include<QTimer>
 #include"cuesheetdialog.h"
+#include<QVideoWidget>
+#include<QPoint>
 
 class MainWindow : public QMainWindow
 {
@@ -395,5 +397,56 @@ private:
     QPushButton *tbarOpenPlaylistButton;
     QPushButton *tbarSavePlaylistButton;
     QPushButton *tbarSaveAllPlaylistsButton;
+
+    //video
+    QVideoWidget *videoWidget;
+    QPushButton *openVideoButton;
+    bool m_isVideoEnabled =false;
+    QWidget* m_videoOriginalParent = nullptr;
+    int m_videoOriginalTabIndex = -1;
+    QListWidget *videoPlaylist;
+private slots:
+    void onVideoContextMenu(const QPoint &pos);
+
+    //video toolbar
+private:
+    void setupVideoPlayer();
+
+    // Video player members
+    QWidget *m_videoToolbar;
+    QWidget *m_videoPlayerContainer;
+
+    // Toolbar controls
+    QPushButton *m_playButton;
+    QPushButton *m_pauseButton;
+    QPushButton *m_stopButton;
+    QSlider *m_progressSlider;
+    QPushButton *m_fullscreenButton;
+    QLabel *m_timeLabel;
+    void createVideoToolbar();
+    void updateVideoTimeDisplay(qint64 position, qint64 duration);
+    QPushButton *m_vnextButton;
+    QPushButton *m_vpreviousButton;
+    QSlider *m_vvolumeSlider;
+    QLabel *m_volShowLabel;
+    // Video playback state
+   QString m_lastVideoPlaylistName;  // Which video playlist was last playing
+   int m_lastVideoTrackIndex = -1;   // Track position in that playlist
+   QListWidget *m_lastVideoPlaylist = nullptr;
+private slots:
+    void showVideoToolbar();
+    bool eventFilter(QObject *watched, QEvent *event) override;
+    void onPlayClicked();
+    void onPauseClicked();
+    void onStopClicked();
+    void onFullscreenClicked();
+
+    void onVideoPositionChanged(qint64 position);
+    void onVideoSliderReleased();
+    void onVideoDurationChanged(qint64 duration);
+    void toggleFullScreen();
+private:
+    QPushButton* m_loadVideoButton;
+
 };
 #endif // MAINWINDOW_H

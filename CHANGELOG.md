@@ -1,5 +1,15 @@
 # Changelog
 
+## [2025-12-28] - Release v1.4.0
+
+### Added
+- **Full-featured video player**: Play video files with a beautiful media player and dedicated video playlist
+
+### Changed
+- Various code improvements and UI polish
+
+---
+
 ## [2025-12-21] - Release v1.3.0
 
 ### Added

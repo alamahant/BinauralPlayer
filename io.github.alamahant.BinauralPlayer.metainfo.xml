@@ -71,6 +71,18 @@
 
   <releases>
 
+
+<release version="1.4.0" date="2025-12-28">
+      <description>
+        <p>Release v1.4.0:</p>
+        <ul>
+          <li>Added a full-featured video player with a dedicated video playlist</li>
+          <li>Performed Various code improvements and UI polish</li>
+        </ul>
+      </description>
+</release>
+
+
 <release version="1.3.0" date="2025-12-21">
       <description>
         <p>Release v1.3.0:</p>

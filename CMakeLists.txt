@@ -15,8 +15,8 @@ if(FLATPAK_BUILD)
     add_compile_definitions(FLATPAK_BUILD)
 endif()
 
-find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets Qt6Multimedia)
-find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets Multimedia)
+find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets Multimedia MultimediaWidgets)
+find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets Multimedia MultimediaWidgets)
 
 set(PROJECT_SOURCES
         main.cpp
@@ -60,8 +60,8 @@ else()
     endif()
 endif()
 
-target_link_libraries(BinauralPlayer PRIVATE Qt${QT_VERSION_MAJOR}::Widgets Qt${QT_VERSION_MAJOR}::Multimedia)
-target_link_libraries(BinauralPlayer PRIVATE Qt6::Core Qt6::Multimedia)
+target_link_libraries(BinauralPlayer PRIVATE Qt${QT_VERSION_MAJOR}::Widgets Qt${QT_VERSION_MAJOR}::Multimedia Qt${QT_VERSION_MAJOR}::MultimediaWidgets)
+target_link_libraries(BinauralPlayer PRIVATE Qt6::Core Qt6::Multimedia Qt6::MultimediaWidgets)
 target_link_libraries(BinauralPlayer PRIVATE Qt6::Core)
 
 # Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.
