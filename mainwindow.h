@@ -30,7 +30,8 @@
 #include"sessiondialog.h"
 #include<QTimer>
 #include"cuesheetdialog.h"
-#include<QVideoWidget>
+//#include<QVideoWidget>
+#include<QtMultimediaWidgets/QVideoWidget>
 #include<QPoint>
 
 class MainWindow : public QMainWindow
