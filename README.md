@@ -4,6 +4,9 @@
 
 A sophisticated desktop application for multimedia playback, binaural/isochronic tone generation, and brainwave entrainment, built with **Qt 6** and **C++17**.
 
+Available in Flathub:
+https://flathub.org/en/apps/search?q=alamahant
+
 ![Qt](https://img.shields.io/badge/Qt-6.0%2B-green)
 ![C++17](https://img.shields.io/badge/C%2B%2B-17-blue)
 
