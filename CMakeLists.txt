@@ -57,21 +57,30 @@ install(TARGETS BinauralPlayer
 )
 
 if(FLATPAK_BUILD)
-    install(FILES io.github.alamahant.BinauralPlayer.desktop
-            DESTINATION share/applications)
-    install(FILES io.github.alamahant.BinauralPlayer.metainfo.xml
-            DESTINATION share/metainfo)
-    foreach(SIZE 16x16 32x32 192x192 512x512)
-        install(FILES favicon/favicon-${SIZE}.png
-                DESTINATION share/icons/hicolor/${SIZE}/apps
-                RENAME io.github.alamahant.BinauralPlayer.png)
-    endforeach()
-    install(FILES favicon/android-chrome-192x192.png
-            DESTINATION share/icons/hicolor/192x192/apps
-            RENAME io.github.alamahant.BinauralPlayer.png)
-    install(FILES favicon/android-chrome-512x512.png
-            DESTINATION share/icons/hicolor/512x512/apps
-            RENAME io.github.alamahant.BinauralPlayer.png)
-endif()
+    # Install desktop file
+    install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/io.github.alamahant.BinauralPlayer.desktop"
+            DESTINATION "share/applications")
 
+    # Install metainfo file
+    install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/io.github.alamahant.BinauralPlayer.metainfo.xml"
+            DESTINATION "share/metainfo")
+
+    # Install icons from favicon directory
+    install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/favicon/android-chrome-192x192.png"
+            DESTINATION "share/icons/hicolor/192x192/apps"
+            RENAME "io.github.alamahant.BinauralPlayer.png")
+
+    install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/favicon/android-chrome-512x512.png"
+            DESTINATION "share/icons/hicolor/512x512/apps"
+            RENAME "io.github.alamahant.BinauralPlayer.png")
+
+    install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/favicon/favicon-16x16.png"
+            DESTINATION "share/icons/hicolor/16x16/apps"
+            RENAME "io.github.alamahant.BinauralPlayer.png")
+
+    install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/favicon/favicon-32x32.png"
+            DESTINATION "share/icons/hicolor/32x32/apps"
+            RENAME "io.github.alamahant.BinauralPlayer.png")
+
+endif()
 qt_finalize_executable(BinauralPlayer)
