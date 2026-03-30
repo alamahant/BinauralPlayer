@@ -1,5 +1,15 @@
 # Changelog
 
+## [2026-03-30] - Release v1.5.0
+### Added
+- **Visual Brainwave Entrainment**: OpenGL-powered flicker engine runs directly on the video screen, pulsing at the active beat frequency for simultaneous audiovisual stimulation
+- **Customisable flicker colors**: Pick any on/off color combination for the flicker cycle via the color picker
+- **Brightness envelope sync**: Sine, square and sawtooth envelopes sync automatically to the active audio waveform with optional independent override
+- **Frequency sync with override**: Flicker frequency locks to the active beat by default, with an optional override spinbox and live brainwave band label (delta / theta / alpha / beta / gamma)
+- **Subliminal text overlay**: Display affirmations or intention-setting text during a session — configurable display mode (flash with beat / always / off), font size, foreground color and background color with full alpha support
+- **Visual stimulation control panel**: Accessible directly from the video toolbar via the ✦ button
+---
+
 ## [2025-12-28] - Release v1.4.0
 
 ### Added

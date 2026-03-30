@@ -360,6 +360,70 @@ QString HelpMenuDialog::getWhatsNewContent()
         <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #2c3e50;">
             <h1 style="color: #8e44ad; text-align: center; margin-bottom: 20px;">🌳 What's New - Dynamic Audio Engine & Enhanced Features</h1>
 
+            <div style="background-color: #f5eef8; padding: 15px; border-radius: 8px; margin-bottom: 25px; border-left: 5px solid #8e44ad;">
+                <h2 style="color: #8e44ad; margin-top: 0;">✦ Visual Brainwave Entrainment — Version 1.5.0 <span style="font-size: 0.75em; background-color: #8e44ad; color: white; padding: 2px 8px; border-radius: 12px; vertical-align: middle;">NEW</span></h2>
+                <p>Version 1.5.0 introduces a full audiovisual entrainment system, adding an OpenGL-powered flicker engine directly on the video screen to reinforce your audio sessions through sight as well as sound.</p>
+
+                <div style="background-color: #ede7f6; padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #7b1fa2;">
+                    <h3 style="color: #7b1fa2; margin-top: 0;">🖥️ OpenGL Flicker Engine</h3>
+                    <p>A real-time OpenGL renderer pulses the video screen at the active beat frequency, creating simultaneous audiovisual stimulation that targets the same brainwave band through both hearing and sight.</p>
+                    <ul>
+                        <li><strong>Zero-latency rendering</strong> locked to the active beat frequency</li>
+                        <li><strong>Runs directly on the video screen</strong> — no separate window needed</li>
+                        <li><strong>Accessible via the ✦ button</strong> on the video toolbar</li>
+                    </ul>
+                </div>
+
+                <div style="background-color: #fce4ec; padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #e91e63;">
+                    <h3 style="color: #c2185b; margin-top: 0;">🎨 Customisable Flicker Colors</h3>
+                    <p>Pick any on/off color combination for the flicker cycle using the built-in color picker. Choose deep red on black for a warm, low-stimulation session, or white on black for maximum contrast.</p>
+                </div>
+
+                <div style="background-color: #e8f5e9; padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #43a047;">
+                    <h3 style="color: #2e7d32; margin-top: 0;">〜 Brightness Envelope Sync</h3>
+                    <p>The flicker envelope automatically mirrors the active audio waveform — sine, square, or sawtooth — for a fully coherent audiovisual experience.</p>
+                    <ul>
+                        <li><strong>Auto-sync:</strong> Envelope matches the audio waveform by default</li>
+                        <li><strong>Override mode:</strong> Decouple the flicker shape and choose sine (smooth), square (hard cut), or sawtooth (ramp) independently</li>
+                    </ul>
+                </div>
+
+                <div style="background-color: #e3f2fd; padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #1e88e5;">
+                    <h3 style="color: #1565c0; margin-top: 0;">📡 Frequency Sync with Override</h3>
+                    <p>The flicker frequency locks to the active beat by default. An optional override spinbox lets you set an independent flicker frequency, with a live brainwave band label (delta / theta / alpha / beta / gamma) updating as you adjust.</p>
+                    <ul>
+                        <li><strong>Default:</strong> Locked to the audio beat frequency</li>
+                        <li><strong>Override:</strong> Set any frequency independently for advanced cross-frequency protocols</li>
+                        <li><strong>Live band label</strong> updates in real time</li>
+                    </ul>
+                </div>
+
+                <div style="background-color: #fff8e1; padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #ffa000;">
+                    <h3 style="color: #e65100; margin-top: 0;">💬 Subliminal Text Overlay</h3>
+                    <p>Display an affirmation or intention-setting message on the flicker screen during your session. The receptive mental state induced by entrainment may enhance absorption of a positive message.</p>
+                    <ul>
+                        <li><strong>Display modes:</strong> Flash (synced with each pulse), Always (visible throughout), or Off</li>
+                        <li><strong>Configurable styling:</strong> Font size, foreground color, and background color with full alpha transparency support</li>
+                        <li><strong>Live preview</strong> in the control panel shows exactly how the text will appear</li>
+                    </ul>
+                </div>
+
+                <div style="background-color: #fff3e0; border: 3px solid #e65100; padding: 15px; border-radius: 8px; margin: 15px 0;">
+                    <h3 style="color: #bf360c; text-align: center; margin-top: 0;">⚠️ CRITICAL — Exiting Fullscreen During Flicker</h3>
+                    <p style="font-weight: bold; color: #bf360c; text-align: center;">
+                        When the flicker is running in fullscreen mode the screen may be difficult or disorienting to look at.<br>
+                        You can exit fullscreen at any time using either of these methods:
+                    </p>
+                    <ul style="color: #bf360c; padding-left: 20px;">
+                        <li><strong>Press the Esc key</strong> — immediately exits fullscreen and stops the flicker</li>
+                        <li><strong>Right-click anywhere on the screen</strong> — opens the context menu, from which you can exit fullscreen or stop the session</li>
+                    </ul>
+                    <p style="color: #bf360c;"><strong>Remember these controls before entering fullscreen,</strong> especially if you are using high-intensity settings or are new to visual entrainment.</p>
+                </div>
+
+                <p><strong>User Workflow:</strong> Start a binaural or isochronic session → Open the video player → Click ✦ → Configure colors, envelope, and frequency → Press ▶ Start → The screen pulses in sync with your beat</p>
+            </div>
+
             <div style="background-color: #f0f0f5; padding: 15px; border-radius: 8px; margin-bottom: 25px;">
                 <h2 style="color: #8e44ad; margin-top: 0;">⚡ Major Feature Additions - Version 1.3.0</h2>
 
@@ -521,6 +585,7 @@ QString HelpMenuDialog::getWhatsNewContent()
                     <li><strong>Use digital seek</strong> for precise time jumping within tracks</li>
                     <li><strong>Create multi-stage sessions</strong> for programmable tone sequences</li>
                     <li><strong>Mix with ambient sounds</strong> for layered audio environments</li>
+                    <li><strong>Enable visual entrainment</strong> via the ✦ button for full audiovisual stimulation</li>
                 </ol>
 
                 <h3 style="color: #1abc9c;">⚡ Getting Started</h3>
@@ -560,17 +625,17 @@ QString HelpMenuDialog::getWhatsNewContent()
                     <li>Combine binaural beats with ambient sounds for enhanced meditation</li>
                     <li>Create multi-stage sessions for guided audio therapy sequences</li>
                     <li>Use CUE sheets for seamless album or long-track navigation</li>
+                    <li>Add visual entrainment with the ✦ flicker panel for a deeper audiovisual session</li>
                 </ul>
             </div>
 
             <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; text-align: center; margin-top: 30px;">
                 <h3 style="color: #2c3e50; margin-top: 0;">🌟 Transform Your Audio Environment</h3>
-                <p style="margin-bottom: 0;">BinauralPlayer now offers comprehensive audio control: from dynamic tone generation and programmable multi-stage sessions to ambient sound mixing and precise file navigation. Create your perfect audio environment for relaxation, focus, meditation, or therapeutic purposes with our complete toolkit!</p>
+                <p style="margin-bottom: 0;">BinauralPlayer now offers comprehensive audio control: from dynamic tone generation and programmable multi-stage sessions to ambient sound mixing, precise file navigation, and full OpenGL-powered audiovisual brainwave entrainment. Create your perfect audio environment for relaxation, focus, meditation, or therapeutic purposes with our complete toolkit!</p>
             </div>
         </div>
     )";
 }
-
 
 QString HelpMenuDialog::getShortcutsContent()
 {
@@ -685,10 +750,50 @@ QString HelpMenuDialog::getFeaturesContent()
                 <p>Optional auto-stop timer from 1–45 minutes with visual countdown.</p>
             </div>
 
+            <h2 style="color: #e67e22; border-bottom: 2px solid #e67e22; padding-bottom: 5px;">✦ Visual Brainwave Entrainment</h2>
+
+            <div style="margin: 20px 0;">
+                <h3 style="color: #e67e22;">🖥 OpenGL Flicker Engine</h3>
+                <p>The video screen pulses at the active beat frequency using a GPU-accelerated OpenGL renderer,
+                creating simultaneous audiovisual stimulation that reinforces the target brainwave band.</p>
+
+                <h3 style="color: #e67e22;">🎨 Customisable Flicker Colors</h3>
+                <p>The on and off states of each flicker cycle can be set to any color via the color picker.
+                Choose classic high-contrast black and white, soft colored pulses, or any combination
+                that suits your session or protocol.</p>
+
+                <h3 style="color: #e67e22;">〰 Brightness Envelope</h3>
+                <p>The shape of each flicker pulse — sine (smooth fade), square (hard cut), or sawtooth
+                (gradual ramp with sharp reset) — syncs automatically to the active audio waveform.
+                An independent override lets you decouple the visual envelope from the audio waveform.</p>
+
+                <h3 style="color: #e67e22;">🔁 Frequency Sync with Override</h3>
+                <p>The flicker frequency locks to the active beat by default, with a live brainwave band
+                label (delta / theta / alpha / beta / gamma) always visible. An override spinbox
+                (0.5–100 Hz) allows the visual stimulus to target a different band than the audio —
+                useful for advanced cross-frequency AVE protocols.</p>
+
+                <h3 style="color: #e67e22;">💬 Subliminal Text Overlay</h3>
+                <p>Display an affirmation or intention-setting message on the flicker screen during your
+                session. The receptive mental state induced by brainwave entrainment may enhance
+                absorption of the message. Three display modes are available: flash in sync with the
+                flicker pulse, always visible, or off. Font size, text foreground color, and background
+                color (with full alpha/transparency support) are all configurable via the color picker.</p>
+
+                <h3 style="color: #e67e22;">🎛 Control Panel</h3>
+                <p>All visual entrainment settings are accessible from the ✦ button on the video toolbar.
+                The non-modal control panel stays open alongside your session so adjustments can be
+                made at any time without interrupting playback.</p>
+
+                <h3 style="color: #e67e22;">⚠ Safety</h3>
+                <p>A photosensitivity warning is shown on first use. Intensity defaults to a conservative
+                level. Users with a history of photosensitive epilepsy, seizures, or light sensitivity
+                should not use this feature.</p>
+            </div>
+
             <h2 style="color: #27ae60; border-bottom: 2px solid #27ae60; padding-bottom: 5px;">📋 Playlist Management</h2>
 
             <div style="margin: 20px 0;">
-
                 <h3 style="color: #27ae60;">💽 JSON Playlist Storage</h3>
                 <p>Save and load playlists with persistent, readable JSON files.</p>
 
@@ -704,8 +809,6 @@ QString HelpMenuDialog::getFeaturesContent()
 
                 <h3 style="color: #e74c3c;">📊 Split Status Bar</h3>
                 <p>Playback info on the left, binaural engine status on the right.</p>
-
-
 
                 <h3 style="color: #e74c3c;">🪟 Responsive Layout</h3>
                 <p>UI adapts cleanly to window resizing.</p>
@@ -729,7 +832,7 @@ QString HelpMenuDialog::getFeaturesContent()
 
             <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; text-align: center; margin-top: 30px;">
                 <h3 style="color: #2c3e50; margin-top: 0;">🌟 Harmony of Technology & Sound</h3>
-                <p style=\"margin-bottom: 0;\">BinauralPlayer blends powerful multimedia features with real-time
+                <p style="margin-bottom: 0;">BinauralPlayer blends powerful multimedia features with real-time
                 audio synthesis for meditation, concentration, and audio experimentation.</p>
             </div>
         </div>
@@ -911,6 +1014,63 @@ QString HelpMenuDialog::getInstructionsContent()
         </ul>
     </div>
 
+    <h2 style=\"color: #e67e22; border-bottom: 2px solid #e67e22; padding-bottom: 5px;\">✦ Step 5: Visual Brainwave Entrainment</h2>
+
+    <div style=\"background-color: #fff8e1; padding: 15px; border-radius: 8px; margin: 15px 0;\">
+        <h3 style=\"color: #e67e22; margin-top: 0;\">What is Visual Entrainment?</h3>
+        <p>Visual entrainment reinforces your audio session by flickering the video screen at the same
+        frequency as the playing beat. The combined audiovisual stimulus targets the same brainwave band
+        simultaneously through both hearing and sight, which may deepen the entrainment effect.</p>
+        <p><strong>Requires:</strong> The video player must be open (use the Video button on the main toolbar).</p>
+    </div>
+
+    <h3 style=\"color: #e67e22;\">Getting Started:</h3>
+    <ol style=\"padding-left: 25px;\">
+        <li>Start a binaural or isochronic session as normal</li>
+        <li>Enable the video player using the <strong>Video</strong> button on the main toolbar</li>
+        <li>Click the <strong>✦</strong> button on the video toolbar to open the Visual Stimulation panel</li>
+        <li>The frequency and envelope sync badges will show the active beat values automatically</li>
+        <li>Press <strong>▶ Start</strong> to begin the flicker — the video screen will pulse at the beat frequency</li>
+    </ol>
+
+    <div style=\"background-color: #e8f6f3; padding: 15px; border-radius: 8px; margin: 15px 0;\">
+        <h3 style=\"color: #1abc9c; margin-top: 0;\">🎨 Customising the Flicker</h3>
+        <ul style=\"padding-left: 20px;\">
+            <li><strong>On/Off colors:</strong> Click the color swatches to set the screen color at the peak and rest of each cycle. Try deep red on black for a warm low-stimulation session, or white on black for maximum contrast</li>
+            <li><strong>Intensity:</strong> Controls peak brightness. Start low and increase gradually to a comfortable level</li>
+            <li><strong>Envelope override:</strong> Check to decouple the flicker shape from the audio waveform and choose sine (smooth), square (hard cut), or sawtooth (ramp) independently</li>
+            <li><strong>Frequency override:</strong> Check to set a different flicker frequency than the audio beat — useful for advanced cross-frequency protocols. The band label updates live as you adjust the spinbox</li>
+        </ul>
+    </div>
+
+    <div style=\"background-color: #f5eef8; padding: 15px; border-radius: 8px; margin: 15px 0;\">
+        <h3 style=\"color: #8e44ad; margin-top: 0;\">💬 Using the Subliminal Text Overlay</h3>
+        <p>The text overlay lets you display an affirmation or intention-setting message on the flicker screen
+        during your session. The idea is that the receptive mental state induced by entrainment may enhance
+        the absorption of a positive message.</p>
+        <ol style=\"padding-left: 20px;\">
+            <li>Type your message in the <strong>Message</strong> box</li>
+            <li>Choose a display mode: <strong>Flash</strong> (appears in sync with each pulse), <strong>Always</strong> (visible throughout), or <strong>Off</strong></li>
+            <li>Set font size, foreground color, and background color (background supports full transparency via the alpha slider in the color picker)</li>
+            <li>The preview in the panel shows how the text will appear against a dark background</li>
+        </ol>
+        <p><strong>Tip:</strong> Flash mode at low intensity with a large font and transparent background creates a
+        genuinely subliminal effect — the message appears briefly at each pulse but is not consciously readable.</p>
+    </div>
+
+    <div style=\"background-color: #fff3e0; border: 3px solid #e65100; padding: 20px; border-radius: 8px; margin: 15px 0;\">
+        <h3 style=\"color: #bf360c; text-align: center; margin-top: 0;\">⚠️ CRITICAL — Exiting Fullscreen During Flicker</h3>
+        <p style=\"font-weight: bold; color: #bf360c; text-align: center;\">
+            When the flicker is running in fullscreen mode, the screen may be difficult or disorienting to look at.<br>
+            You can exit fullscreen at any time using either of these methods:
+        </p>
+        <ul style=\"padding-left: 20px; color: #bf360c;\">
+            <li><strong>Press the Esc key</strong> — immediately exits fullscreen and stops the flicker</li>
+            <li><strong>Right-click anywhere on the screen</strong> — opens the context menu, from which you can exit fullscreen or stop the session</li>
+        </ul>
+        <p style=\"color: #bf360c;\"><strong>Remember these controls before entering fullscreen,</strong> especially if you are using high-intensity settings or are new to visual entrainment.</p>
+    </div>
+
     <h2 style=\"color: #e74c3c; border-bottom: 2px solid #e74c3c; padding-bottom: 5px;\">⚠️ Safety & Responsibility</h2>
 
     <div style=\"background-color: #ffebee; border: 2px solid #f44336; padding: 20px; border-radius: 8px; margin-bottom: 25px;\">
@@ -924,6 +1084,7 @@ QString HelpMenuDialog::getInstructionsContent()
             <li>Do NOT use while driving, operating machinery, or in unsafe environments</li>
             <li>If you have epilepsy or neurological conditions, consult a doctor first</li>
             <li>These audios may induce relaxation, drowsiness, or altered consciousness</li>
+            <li><strong>Visual entrainment:</strong> Do not use the flicker feature if you have a history of photosensitive epilepsy, seizures, or sensitivity to flashing lights</li>
         </ul>
     </div>
 
@@ -939,7 +1100,7 @@ QString HelpMenuDialog::getInstructionsContent()
 
     <div style=\"text-align: center; margin: 30px 0; padding: 20px; background-color: #f8f9fa; border-radius: 8px;\">
         <h3 style=\"color: #495057; margin-top: 0;\">🌟 Complete Audio Toolkit</h3>
-        <p style=\"margin-bottom: 0;\">BinauralPlayer offers everything from basic binaural beats to advanced multi-stage sessions and structured audio navigation. Combine features for powerful meditation, focus, or therapeutic audio experiences. Always use responsibly and enjoy your journey into audio-based brainwave entrainment.</p>
+        <p style=\"margin-bottom: 0;\">BinauralPlayer offers everything from basic binaural beats to advanced multi-stage sessions, structured audio navigation, and now full audiovisual brainwave entrainment. Combine features for powerful meditation, focus, or therapeutic experiences. Always use responsibly and enjoy your journey into audio-based brainwave entrainment.</p>
     </div>
 </div>
     )";

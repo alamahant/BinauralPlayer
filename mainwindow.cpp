@@ -44,7 +44,8 @@ MainWindow::MainWindow(QWidget *parent)
       m_naturePowerButton(nullptr),
       m_sessionManagerDialog(new SessionDialog(this)),
       m_cueDialog(new CueSheetDialog(this)),
-      videoWidget(new QVideoWidget(this)) {
+      videoWidget(new QVideoWidget(this))
+{
     // Window properties
     setWindowTitle("Binaural Media Player");
     setMinimumSize(900, 700);
@@ -533,6 +534,42 @@ QToolBar *MainWindow::createBinauralToolbarExt() {
 
     toolbar->addWidget(m_openSessionManagerButton);
 
+    //visualstimulation
+    toolbar->addSeparator();
+    m_visStimButton = new QPushButton("Visual", toolbar);
+    m_visStimButton->setCheckable(true);
+    //m_visStimButton->setFixedSize(38, 32);
+    m_visStimButton->setToolTip("Visual Stimulation");
+
+
+
+    connect(m_visStimButton, &QPushButton::toggled, this, [this](bool checked) {
+        if (checked) {
+            // Show the flicker tab instead of dialog
+            showFlickerTab();
+            // Optionally still show dialog for controls
+            if (m_visStimDialog) {
+                m_visStimDialog->show();
+                m_visStimDialog->raise();
+            }
+        } else {
+            // Stop flicker and hide tab
+            if (m_flickerWidget) {
+                m_flickerWidget->stopFlicker();
+            }
+            // Hide the tab but keep it for next time
+            if (m_flickerOriginalTabIndex != -1) {
+                m_playlistTabs->tabBar()->setTabVisible(m_flickerOriginalTabIndex, false);
+            }
+            if (m_visStimDialog) {
+                m_visStimDialog->hide();
+            }
+
+        }
+    });
+
+    toolbar->addWidget(m_visStimButton);
+
     return toolbar;
 }
 
@@ -894,6 +931,7 @@ void MainWindow::setupConnections() {
     // video
     connect(openVideoButton, &QPushButton::clicked, this, [this](bool checked) {
         if (checked) {
+            if(m_visStimButton->isChecked() && m_visStimDialog && m_flickerContainer) m_visStimButton->setChecked(false);
             const QString VIDEO_TAB_NAME = "Video Player";
             const QString VPLAYLIST_TAB_NAME = "Video Playlist";
 
@@ -1000,6 +1038,12 @@ void MainWindow::setupConnections() {
     connect(m_pulseFreqLabel, &QDoubleSpinBox::valueChanged, [this](double hz) {
         m_binauralEngine->setPulseFrequency(hz);
         m_binauralStatusLabel->setText(formatBinauralString());
+        ConstantGlobals::currentIsonFreq = hz;
+
+        if(m_flickerWidget && ConstantGlobals::currentToneType == ToneType::ISOCHRONIC){
+           if (m_visStimDialog) m_visStimDialog->syncFrequency(hz);
+            m_flickerWidget->setFrequency(hz);
+        }
     });
     // sessions
     connect(m_openSessionManagerButton, &QPushButton::clicked, this,
@@ -1424,6 +1468,13 @@ void MainWindow::onLeftFrequencyChanged(double value) {
     m_binauralEngine->setLeftFrequency(value);
     updateBinauralBeatDisplay();
     m_binauralStatusLabel->setText(formatBinauralString());
+
+    if(ConstantGlobals::currentToneType == ToneType::BINAURAL || ConstantGlobals::currentToneType == ToneType::GENERATOR){
+        double visualFrequency = std::abs(value - m_rightFreqInput->value());
+        ConstantGlobals::currentBinFreq = visualFrequency;
+        if (m_visStimDialog) m_visStimDialog->syncFrequency(visualFrequency);
+        if(m_flickerWidget) m_flickerWidget->setFrequency(visualFrequency);
+    }
 }
 
 void MainWindow::onRightFrequencyChanged(double value) {
@@ -1440,6 +1491,14 @@ void MainWindow::onRightFrequencyChanged(double value) {
     m_binauralEngine->setRightFrequency(value);
     updateBinauralBeatDisplay();
     m_binauralStatusLabel->setText(formatBinauralString());
+
+    if(ConstantGlobals::currentToneType == ToneType::BINAURAL || ConstantGlobals::currentToneType == ToneType::GENERATOR){
+        double visualFrequency = std::abs(value - m_leftFreqInput->value());
+        ConstantGlobals::currentBinFreq = visualFrequency;
+        if (m_visStimDialog) m_visStimDialog->syncFrequency(visualFrequency);
+
+        if(m_flickerWidget) m_flickerWidget->setFrequency(visualFrequency);
+    }
 }
 
 void MainWindow::onWaveformChanged(int index) {
@@ -1448,7 +1507,11 @@ void MainWindow::onWaveformChanged(int index) {
     m_binauralEngine->setWaveform(waveform);
     // m_binauralStatusLabel->setText(waveform == DynamicEngine::SINE_WAVE ?
     //                       "Waveform: Sine" : "Waveform: Square");
+    //m_visStimDialog->syncWaveType(waveform);
     m_binauralStatusLabel->setText(formatBinauralString());
+
+    if (index >= 0 && index < 4)
+          m_visStimDialog->syncWaveType(index);
 }
 
 void MainWindow::onBinauralVolumeChanged(double value) {
@@ -2248,6 +2311,7 @@ void MainWindow::onToneTypeComboIndexChanged(int index) {
         m_rightFreqInput->setValue(367.83);
         m_pulseFreqLabel->setDisabled(true);
         m_binauralStatusLabel->setText(formatBinauralString());
+        if (m_flickerWidget) m_flickerWidget->setFrequency(ConstantGlobals::currentBinFreq);
         break;
     case ISOCHRONIC:
         // squareWaveItem->setEnabled(true);
@@ -2258,6 +2322,7 @@ void MainWindow::onToneTypeComboIndexChanged(int index) {
         m_rightFreqInput->setDisabled(true);
         m_pulseFreqLabel->setEnabled(true);
         m_binauralStatusLabel->setText(formatBinauralString());
+        if (m_flickerWidget) m_flickerWidget->setFrequency(ConstantGlobals::currentIsonFreq);
 
         break;
 
@@ -2271,6 +2336,7 @@ void MainWindow::onToneTypeComboIndexChanged(int index) {
         m_rightFreqInput->setEnabled(true);
         m_pulseFreqLabel->setDisabled(true);
         m_binauralStatusLabel->setText(formatBinauralString());
+        if (m_flickerWidget) m_flickerWidget->setFrequency(ConstantGlobals::currentBinFreq);
 
         break;
 
@@ -4806,6 +4872,8 @@ void MainWindow::setupVideoPlayer() {
     // Create video player container
     m_videoPlayerContainer = new QWidget();
     m_videoPlayerContainer->setObjectName("videoPlayerContainer");
+
+
     QVBoxLayout *containerLayout = new QVBoxLayout(m_videoPlayerContainer);
     containerLayout->setContentsMargins(0, 0, 0, 0);
     containerLayout->setSpacing(0);
@@ -4844,6 +4912,9 @@ void MainWindow::setupVideoPlayer() {
     // show toolbar initially
     m_videoToolbar->show();
 }
+
+
+
 
 void MainWindow::createVideoToolbar() {
     // Create toolbar widget
@@ -4919,6 +4990,7 @@ void MainWindow::createVideoToolbar() {
     m_fullscreenButton->setIcon(QIcon(":/icons-white/maximize-2.svg"));
     m_fullscreenButton->setFixedSize(32, 32);
     //m_fullscreenButton->setToolTip("Fullscreen");
+
 
     // Add widgets to toolbar layout
     toolbarLayout->addWidget(m_loadVideoButton);
@@ -5018,25 +5090,33 @@ void MainWindow::showVideoToolbar() {
     }
 }
 
+
+
 bool MainWindow::eventFilter(QObject *watched, QEvent *event) {
+
+    if (watched == m_flickerContainer) {
+        if (event->type() == QEvent::KeyPress) {
+            QKeyEvent *keyEvent = static_cast<QKeyEvent *>(event);
+            if (keyEvent->key() == Qt::Key_Escape) {
+                toggleFlickerFullscreen();
+                return true;
+            }
+        }
+    }
+
     // Handle mouse movement for video player area
     if (watched == m_videoPlayerContainer || watched == videoWidget ||
             watched == m_videoToolbar) {
 
-        // Handle left mouse button CLICK (not press, but release)
         if (event->type() == QEvent::MouseButtonRelease) {
             QMouseEvent *mouseEvent = static_cast<QMouseEvent *>(event);
-
-            // Check if it's LEFT button
             if (mouseEvent->button() == Qt::LeftButton) {
-
-                // TOGGLE toolbar visibility
                 if (m_videoToolbar->isVisible()) {
                     m_videoToolbar->hide();
                 } else {
                     m_videoToolbar->show();
                 }
-                return true; // Event handled
+                return true;
             }
         }
     }
@@ -5085,49 +5165,28 @@ void MainWindow::onVideoDurationChanged(qint64 duration) {
     }
 }
 
+
 void MainWindow::toggleFullScreen() {
     if (videoWidget) {
         if (m_videoPlayerContainer->isFullScreen()) {
             // EXIT FULLSCREEN
-
-            // 1. Store the container's current geometry
-            QRect containerGeometry = m_videoPlayerContainer->geometry();
-
-            // 2. Restore to Widget (NOT Window)
             m_videoPlayerContainer->setWindowFlags(Qt::Widget);
             m_videoPlayerContainer->showNormal();
 
-            // 3. RE-PARENT back to tab widget (CRITICAL!)
             if (m_videoOriginalTabIndex >= 0) {
-                // Remove from whatever parent it has
                 m_videoPlayerContainer->setParent(nullptr);
-
-                // Add back to the tab widget
                 m_playlistTabs->insertTab(m_videoOriginalTabIndex, m_videoPlayerContainer, "Video Player");
                 m_playlistTabs->setCurrentIndex(m_videoOriginalTabIndex);
                 m_playlistTabs->tabBar()->setTabButton(m_videoOriginalTabIndex, QTabBar::RightSide, nullptr);
-                // Make sure tab is visible
                 m_playlistTabs->tabBar()->setTabVisible(m_videoOriginalTabIndex, true);
             }
-
-            // Reset stored index
             m_videoOriginalTabIndex = -1;
-
         } else {
             // ENTER FULLSCREEN
-
-            // 1. Store which tab we're in
             m_videoOriginalTabIndex = m_playlistTabs->currentIndex();
-
-            // 2. Remove from tab widget BEFORE changing window flags
             m_playlistTabs->removeTab(m_videoOriginalTabIndex);
-
-            // 3. Change to Window flag and go fullscreen
-            m_videoPlayerContainer->setWindowFlags(Qt::Window |
-                                                   Qt::FramelessWindowHint);
+            m_videoPlayerContainer->setWindowFlags(Qt::Window | Qt::FramelessWindowHint);
             m_videoPlayerContainer->showFullScreen();
-
-            // 4. Show toolbar
             m_videoToolbar->show();
         }
     }
@@ -5157,4 +5216,111 @@ void MainWindow::updateVideoTimeDisplay(qint64 position, qint64 duration) {
             .arg(durSecs, 2, 10, QChar('0'));
 
     m_timeLabel->setText(timeText);
+}
+
+////////////////////
+
+void MainWindow::setupFlickerTab() {
+    // Create container (this is the tab widget) - like m_videoPlayerContainer
+    m_flickerContainer = new QWidget();
+    m_flickerContainer->installEventFilter(this);
+
+    QVBoxLayout *flickerLayout = new QVBoxLayout(m_flickerContainer);
+    flickerLayout->setContentsMargins(0, 0, 0, 0);
+    flickerLayout->setSpacing(0);
+
+    // Create flicker widget
+    if (!m_flickerWidget) {
+        m_flickerWidget = new FlickerWidget(m_flickerContainer);
+        m_flickerWidget->setAttribute(Qt::WA_TranslucentBackground);
+        m_flickerWidget->setStyleSheet("background: transparent;");
+
+        connect(m_flickerWidget, &FlickerWidget::toggleFullscreenRequested,
+                this, &MainWindow::toggleFlickerFullscreen);
+        connect(m_flickerWidget, &FlickerWidget::toggleDialogRequested,
+                this, [this]() {
+            if (m_visStimDialog) {
+                if (m_visStimDialog->isVisible()) {
+                    m_visStimDialog->hide();
+                } else {
+                    m_visStimDialog->show();
+                    m_visStimDialog->raise();
+                }
+            }
+        });
+    } else {
+        m_flickerWidget->setParent(m_flickerContainer);
+    }
+
+    flickerLayout->addWidget(m_flickerWidget);
+
+    // Create dialog
+    if (!m_visStimDialog) {
+        //m_visStimDialog = new VisStimDialog(m_flickerWidget, this);
+        m_visStimDialog = new VisStimDialog(m_flickerWidget, m_flickerContainer);
+    }
+
+    // Add as new tab
+    m_flickerOriginalTabIndex = m_playlistTabs->addTab(m_flickerContainer, "Visual Stimulation");
+
+    // Remove close button
+    m_playlistTabs->tabBar()->setTabButton(m_flickerOriginalTabIndex, QTabBar::RightSide, nullptr);
+
+    // Hide by default, show only when needed
+    m_playlistTabs->tabBar()->setTabVisible(m_flickerOriginalTabIndex, false);
+}
+
+void MainWindow::showFlickerTab() {
+    // Create tab if it doesn't exist
+    if (m_flickerOriginalTabIndex == -1) {
+        setupFlickerTab();
+    }
+
+    // Show and switch to the tab
+    m_playlistTabs->tabBar()->setTabVisible(m_flickerOriginalTabIndex, true);
+    m_playlistTabs->setCurrentIndex(m_flickerOriginalTabIndex);
+
+    // Start flickering (commented as before)
+    if (m_flickerWidget) {
+    }
+}
+
+
+void MainWindow::toggleFlickerFullscreen()
+{
+    if (!m_flickerContainer) return;
+
+    if (m_flickerContainer->isFullScreen()) {
+        // EXIT FULLSCREEN
+        // Reparent dialog back to container
+        if (m_visStimDialog) {
+            m_visStimDialog->setParent(m_flickerContainer);
+           // m_visStimDialog->startStopBtn()->setEnabled(true);
+        }
+
+        m_flickerContainer->setWindowFlags(Qt::Widget);
+        m_flickerContainer->showNormal();
+
+        m_flickerContainer->setParent(m_playlistTabs);
+        m_playlistTabs->insertTab(m_flickerOriginalTabIndex, m_flickerContainer, "Visual Stimulation");
+        m_playlistTabs->tabBar()->setTabButton(m_flickerOriginalTabIndex, QTabBar::RightSide, nullptr);
+        m_playlistTabs->tabBar()->setTabVisible(m_flickerOriginalTabIndex, true);
+        m_playlistTabs->setCurrentIndex(m_flickerOriginalTabIndex);
+
+    } else {
+        // ENTER FULLSCREEN
+        // Reparent dialog to fullscreen container (flickerContainer itself)
+        if (m_visStimDialog) {
+            m_visStimDialog->setParent(m_flickerContainer);
+            //m_visStimDialog->startStopBtn()->setEnabled(false);
+
+        }
+
+        m_flickerOriginalTabIndex = m_playlistTabs->currentIndex();
+        m_playlistTabs->removeTab(m_flickerOriginalTabIndex);
+
+        m_flickerContainer->setParent(nullptr);
+        m_flickerContainer->setWindowFlags(Qt::Window | Qt::FramelessWindowHint);
+        m_flickerContainer->showFullScreen();
+    }
 }

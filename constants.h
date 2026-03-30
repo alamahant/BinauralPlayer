@@ -15,6 +15,9 @@ extern const QString ambientPresetFilePath;
 extern int currentToneType;
 extern QMediaPlayer::PlaybackState playbackState;
 extern QString lastMusicDirPath;
+extern double currentBinFreq;
+extern double currentIsonFreq;
+
 }
 
 

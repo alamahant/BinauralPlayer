@@ -71,6 +71,19 @@
 
   <releases>
 
+<release version="1.5.0" date="2026-03-30">
+  <description>
+    <p>Release v1.5.0:</p>
+    <ul>
+      <li>Added OpenGL-powered visual brainwave entrainment — the video screen flickers at the active beat frequency for simultaneous audiovisual stimulation</li>
+      <li>Flicker on/off colors are fully customisable via the color picker</li>
+      <li>Brightness envelope (sine, square, sawtooth) syncs automatically to the active audio waveform with optional independent override</li>
+      <li>Flicker frequency syncs automatically to the active beat with optional independent override and live brainwave band display</li>
+      <li>Subliminal text overlay with configurable display mode (flash with beat / always / off), font size, foreground color and background color with alpha support</li>
+      <li>Visual stimulation control panel accessible directly from the video toolbar</li>
+    </ul>
+  </description>
+</release>
 
 <release version="1.4.0" date="2025-12-28">
       <description>

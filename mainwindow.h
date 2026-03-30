@@ -33,6 +33,8 @@
 //#include<QVideoWidget>
 #include<QtMultimediaWidgets/QVideoWidget>
 #include<QPoint>
+#include"vistimdialog.h"
+#include"flickerwidget.h"
 
 class MainWindow : public QMainWindow
 {
@@ -446,8 +448,18 @@ private slots:
     void onVideoSliderReleased();
     void onVideoDurationChanged(qint64 duration);
     void toggleFullScreen();
+    //flicker
+    void showFlickerTab();
+    void setupFlickerTab();
 private:
     QPushButton* m_loadVideoButton;
-
+    VisStimDialog* m_visStimDialog = nullptr;
+    QPushButton *m_visStimButton;
+    FlickerWidget* m_flickerWidget = nullptr;
+    QWidget *m_flickerContainer = nullptr;      // like m_videoPlayerContainer
+    int m_flickerOriginalTabIndex = -1;
+    double isoFreqValue = 7.83;
+public slots:
+    void toggleFlickerFullscreen();
 };
 #endif // MAINWINDOW_H

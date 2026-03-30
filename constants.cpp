@@ -11,5 +11,6 @@ const QString ambientPresetFilePath = appDirPath + "/ambient-presets";
 int currentToneType = 0;
 QMediaPlayer::PlaybackState playbackState = QMediaPlayer::StoppedState;
 QString lastMusicDirPath;
-
+double currentBinFreq = 7.83;
+double currentIsonFreq = 7.83;
 }
