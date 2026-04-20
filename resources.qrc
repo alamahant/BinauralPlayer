@@ -47,5 +47,40 @@
         <file>icons-white/skip-forward.svg</file>
         <file>icons-white/folder.svg</file>
         <file>icons/check.svg</file>
+        <file>icons-white/activity.svg</file>
+        <file>icons-white/fast-forward.svg</file>
+        <file>icons-white/folder.svg</file>
+        <file>icons-white/music.svg</file>
+        <file>icons-white/pause.svg</file>
+        <file>icons-white/play.svg</file>
+        <file>icons-white/repeat.svg</file>
+        <file>icons-white/rewind.svg</file>
+        <file>icons-white/save.svg</file>
+        <file>icons-white/shuffle.svg</file>
+        <file>icons-white/skip-back.svg</file>
+        <file>icons-white/skip-forward.svg</file>
+        <file>icons-white/square.svg</file>
+        <file>icons-white/volume-2.svg</file>
+        <file>icons-white/volume-x.svg</file>
+        <file>icons-white/copy.svg</file>
+        <file>icons-white/settings.svg</file>
+        <file>icons-white/power.svg</file>
+        <file>icons-white/rss.svg</file>
+        <file>icons-white/target.svg</file>
+        <file>icons-white/hash.svg</file>
+        <file>icons-white/info.svg</file>
+        <file>icons-white/plus.svg</file>
+        <file>icons-white/eye.svg</file>
+        <file>icons-white/edit.svg</file>
+        <file>icons-white/refresh-cw.svg</file>
+        <file>icons-white/file-minus.svg</file>
+        <file>icons-white/folder-minus.svg</file>
+        <file>icons-white/folder-plus.svg</file>
+        <file>icons-white/minus.svg</file>
+        <file>icons-white/minus-square.svg</file>
+        <file>icons-white/layers.svg</file>
+        <file>icons-white/maximize-2.svg</file>
+        <file>icons-white/check.svg</file>
+        <file>files/dark-theme.css</file>
     </qresource>
 </RCC>

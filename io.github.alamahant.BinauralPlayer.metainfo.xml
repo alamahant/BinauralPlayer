@@ -71,6 +71,19 @@
 
   <releases>
 
+<release version="1.5.1" date="2026-04-20">
+  <description>
+    <p>Release v1.5.1:</p>
+    <ul>
+      <li>Added dark theme mode with View → Dark Theme toggle for reduced eye strain in low-light environments</li>
+      <li>Theme preference persists across application restarts via user settings</li>
+      <li>Comprehensive dark styling applied to main window, all dialogs, splitter handles, buttons, and text editors</li>
+      <li>Fixed theme toggle persistence issue when switching themes from dialog windows</li>
+      <li>Optimized contrast ratios for readability in dark mode</li>
+    </ul>
+  </description>
+</release>
+
 <release version="1.5.0" date="2026-03-30">
   <description>
     <p>Release v1.5.0:</p>

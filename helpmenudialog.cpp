@@ -357,6 +357,47 @@ QString HelpMenuDialog::getWhatsNewContent()
 QString HelpMenuDialog::getWhatsNewContent()
 {
     return R"(
+
+            <div style="background-color: #f5eef8; padding: 15px; border-radius: 8px; margin-bottom: 25px; border-left: 5px solid #8e44ad;">
+                <h2 style="color: #8e44ad; margin-top: 0;">🌙 Dark Theme — Version 1.5.1 <span style="font-size: 0.75em; background-color: #8e44ad; color: white; padding: 2px 8px; border-radius: 12px; vertical-align: middle;">NEW</span></h2>
+                <p>Version 1.5.1 introduces a full dark theme mode, reducing eye strain during extended sessions and providing a sleek, modern interface for low-light environments.</p>
+
+                <div style="background-color: #ede7f6; padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #7b1fa2;">
+                    <h3 style="color: #7b1fa2; margin-top: 0;">🎨 Theme Toggle</h3>
+                    <p>Switch seamlessly between light and dark themes via the View menu. The theme preference persists across application restarts.</p>
+                    <ul>
+                        <li><strong>View → Dark Theme</strong> menu option with checkmark indicator</li>
+                        <li><strong>Persistent setting</strong> saved to user preferences</li>
+                        <li><strong>Instant application</strong> without restart required</li>
+                    </ul>
+                </div>
+
+                <div style="background-color: #fce4ec; padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #e91e63;">
+                    <h3 style="color: #c2185b; margin-top: 0;">🖥️ Comprehensive Dark Styling</h3>
+                    <p>All interface elements adapt to the dark theme for a cohesive visual experience:</p>
+                    <ul>
+                        <li><strong>Main window</strong> with dark background and reduced glare</li>
+                        <li><strong>All dialogs</strong> (Help, Donation, Settings) with dark styling</li>
+                        <li><strong>Splitter handles</strong> with subtle beige-yellow accents</li>
+                        <li><strong>Buttons and controls</strong> with dark-appropriate colors</li>
+                        <li><strong>Text editors and previews</strong> with reduced brightness</li>
+                    </ul>
+                </div>
+
+                <div style="background-color: #e8f5e9; padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #43a047;">
+                    <h3 style="color: #2e7d32; margin-top: 0;">👁️ Eye Comfort Features</h3>
+                    <p>Designed for extended use with reduced blue light emission and optimized contrast ratios:</p>
+                    <ul>
+                        <li><strong>Reduced luminance</strong> across all UI components</li>
+                        <li><strong>High contrast text</strong> for readability</li>
+                        <li><strong>Subtle accent colors</strong> that don't cause eye fatigue</li>
+                        <li><strong>Consistent dark palette</strong> throughout the application</li>
+                    </ul>
+                </div>
+
+                <p><strong>User Workflow:</strong> Open View menu → Check "Dark Theme" → Interface instantly switches to dark mode → Preference saved for future sessions</p>
+            </div>
+
         <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #2c3e50;">
             <h1 style="color: #8e44ad; text-align: center; margin-bottom: 20px;">🌳 What's New - Dynamic Audio Engine & Enhanced Features</h1>
 

@@ -1,0 +1,101 @@
+cmake_minimum_required(VERSION 3.16)
+
+project(BinauralPlayer VERSION 0.1 LANGUAGES CXX)
+
+set(CMAKE_AUTOUIC ON)
+set(CMAKE_AUTOMOC ON)
+set(CMAKE_AUTORCC ON)
+
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+#flatpak
+option(FLATPAK_BUILD "Build for Flathub/Flatpak" OFF)
+if(FLATPAK_BUILD)
+    add_compile_definitions(FLATPAK_BUILD)
+endif()
+
+# Find and link Qt 6 components
+find_package(Qt6 REQUIRED COMPONENTS 
+    Core 
+    Widgets 
+    Multimedia 
+    MultimediaWidgets
+)
+
+set(PROJECT_SOURCES
+    main.cpp
+    mainwindow.cpp
+    mainwindow.h
+    mainwindow.ui
+    binauralengine.h binauralengine.cpp
+    resources.qrc
+    constants.h constants.cpp
+    dynamicengine.cpp dynamicengine.h
+    helpmenudialog.h helpmenudialog.cpp 
+    donationdialog.h donationdialog.cpp
+    ambientplayer.h ambientplayer.cpp
+    ambientplayerdialog.h ambientplayerdialog.cpp
+    sessiondialog.h sessiondialog.cpp
+    cuesheetdialog.h cuesheetdialog.cpp
+)
+
+qt_add_executable(BinauralPlayer
+    MANUAL_FINALIZATION
+    ${PROJECT_SOURCES}
+)
+
+# Link Qt 6 libraries
+target_link_libraries(BinauralPlayer PRIVATE 
+    Qt6::Core 
+    Qt6::Widgets 
+    Qt6::Multimedia 
+    Qt6::MultimediaWidgets
+)
+
+# Platform-specific properties
+set_target_properties(BinauralPlayer PROPERTIES
+    MACOSX_BUNDLE_BUNDLE_VERSION ${PROJECT_VERSION}
+    MACOSX_BUNDLE_SHORT_VERSION_STRING ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}
+    MACOSX_BUNDLE TRUE
+    WIN32_EXECUTABLE TRUE
+)
+
+# Installation
+include(GNUInstallDirs)
+install(TARGETS BinauralPlayer
+    BUNDLE DESTINATION .
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+)
+
+# Flatpak-specific installation
+if(FLATPAK_BUILD)
+    # Install desktop file
+    install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/io.github.alamahant.BinauralPlayer.desktop"
+            DESTINATION "share/applications")
+
+    # Install metainfo file
+    install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/io.github.alamahant.BinauralPlayer.metainfo.xml"
+            DESTINATION "share/metainfo")
+
+    # Install icons from favicon directory
+    install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/favicon/android-chrome-192x192.png"
+            DESTINATION "share/icons/hicolor/192x192/apps"
+            RENAME "io.github.alamahant.BinauralPlayer.png")
+
+    install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/favicon/android-chrome-512x512.png"
+            DESTINATION "share/icons/hicolor/512x512/apps"
+            RENAME "io.github.alamahant.BinauralPlayer.png")
+
+    install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/favicon/favicon-16x16.png"
+            DESTINATION "share/icons/hicolor/16x16/apps"
+            RENAME "io.github.alamahant.BinauralPlayer.png")
+
+    install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/favicon/favicon-32x32.png"
+            DESTINATION "share/icons/hicolor/32x32/apps"
+            RENAME "io.github.alamahant.BinauralPlayer.png")
+endif()
+
+# Finalize the executable (required for Qt 6)
+qt_finalize_executable(BinauralPlayer)

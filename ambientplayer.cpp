@@ -226,7 +226,7 @@ QMediaPlayer::PlaybackState AmbientPlayer::playbackState() const
 /*
 void AmbientPlayer::setVolume(int volume)
 {
-    // Your new two-tier implementation
+    // new two-tier implementation
     volume = qBound(0, volume, 100);
     if (m_baseVolume != volume) {
         m_baseVolume = volume;

@@ -459,6 +459,17 @@ private:
     QWidget *m_flickerContainer = nullptr;      // like m_videoPlayerContainer
     int m_flickerOriginalTabIndex = -1;
     double isoFreqValue = 7.83;
+    bool isDarkTheme = false;
+    void toggleTheme(bool enableDark);
+    QAction* enableDarkThemeAction;
+    QLabel *beatLabel;
+    QLabel *volLabel;
+    QLabel *volumeLabel;
+    QLabel *searchLabel;
+    QLineEdit *searchEdit;
+    QPushButton *searchButton;
+    QLabel *ambientTitleLabel;
+    QHBoxLayout *playlistButtonLayout;
 public slots:
     void toggleFlickerFullscreen();
 };

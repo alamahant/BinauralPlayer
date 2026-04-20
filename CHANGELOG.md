@@ -1,5 +1,13 @@
 # Changelog
 
+## [2026-04-20] - Release v1.5.1
+### Added
+- **Dark Theme Mode**: Full dark theme support with View → Dark Theme toggle for reduced eye strain in low-light environments
+- **Persistent Theme Preference**: Theme setting saved to user preferences and restored on application restart
+- **Comprehensive Dark Styling**: Dark theme applied consistently across main window, all dialogs, splitter handles, buttons, and text editor
+
+---
+
 ## [2026-03-30] - Release v1.5.0
 ### Added
 - **Visual Brainwave Entrainment**: OpenGL-powered flicker engine runs directly on the video screen, pulsing at the active beat frequency for simultaneous audiovisual stimulation

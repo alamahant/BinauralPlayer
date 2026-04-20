@@ -123,6 +123,12 @@ MainWindow::MainWindow(QWidget *parent)
     m_fadeTimer.setInterval(50);
 
     setupVideoPlayer();
+
+    isDarkTheme = settings.value("isdarktheme", false).toBool();
+    blockSignals(true);
+    enableDarkThemeAction->setChecked(isDarkTheme);
+    blockSignals(false);
+    toggleTheme(isDarkTheme);
 }
 
 MainWindow::~MainWindow() {
@@ -274,15 +280,14 @@ QToolBar *MainWindow::createMediaToolbar() {
     timeEdit->setPlaceholderText("hh:mm:ss");
     timeEdit->setToolTip("Format: hh:mm:ss or mm:ss");
     QRegularExpression timeRegex("^([0-9]{1,2}:)?[0-5]?[0-9]:[0-5][0-9]$");
-    QRegularExpressionValidator *validator =
-            new QRegularExpressionValidator(timeRegex, timeEdit);
+    QRegularExpressionValidator *validator = new QRegularExpressionValidator(timeRegex, timeEdit);
     timeEdit->setValidator(validator);
     toolbar->addWidget(timeEditButton);
     toolbar->addWidget(timeEdit);
 
     // cue importer
     openCueButton = new QPushButton("Cue", toolbar);
-    openCueButton->setMaximumWidth(32);
+    openCueButton->setMaximumWidth(50);
     openCueButton->setToolTip("Open Cue file importer");
     openCueButton->setCheckable(true);
     openCueButton->setChecked(false);
@@ -322,12 +327,11 @@ QToolBar *MainWindow::createBinauralToolbar() {
     m_binauralPowerButton->setMaximumWidth(30);
     toolbar->addWidget(m_binauralPowerButton);
 
-    // toolbar->addSeparator();
+    toolbar->addSeparator();
 
     // Left frequency
     QLabel *leftLabel = new QLabel("L:", toolbar);
     toolbar->addWidget(leftLabel);
-
     m_leftFreqInput = new QDoubleSpinBox(toolbar);
     m_leftFreqInput->setRange(20.0, 20000.0);
     m_leftFreqInput->setValue(360.0);
@@ -353,7 +357,7 @@ QToolBar *MainWindow::createBinauralToolbar() {
     toolbar->addWidget(m_rightFreqInput);
 
     // Beat frequency display
-    QLabel *beatLabel = new QLabel("BIN:", toolbar);
+    beatLabel = new QLabel("BIN:", toolbar);
     toolbar->addWidget(beatLabel);
 
     m_beatFreqLabel = new QLabel("7.83 Hz", toolbar);
@@ -391,7 +395,7 @@ QToolBar *MainWindow::createBinauralToolbar() {
     // toolbar->addSeparator();
 
     // Volume control
-    QLabel *volLabel = new QLabel("Vol:", toolbar);
+    volLabel = new QLabel("Vol:", toolbar);
     toolbar->addWidget(volLabel);
 
     m_binauralVolumeInput = new QDoubleSpinBox(toolbar);
@@ -579,9 +583,9 @@ QToolBar *MainWindow::createNatureToolbar() {
     toolbar->setIconSize(QSize(24, 24));
     // toolbar->setMinimumHeight(40);
     //  ----- SECTION 1: TITLE -----
-    QLabel *titleLabel = new QLabel("🌳 AMBIENCE", toolbar);
-    titleLabel->setStyleSheet("QLabel { font-weight: bold; color: #2E8B57; }");
-    toolbar->addWidget(titleLabel);
+    ambientTitleLabel = new QLabel("🌳 AMBIENCE", toolbar);
+    ambientTitleLabel->setStyleSheet("QLabel { font-weight: bold; color: #2E8B57; }");
+    toolbar->addWidget(ambientTitleLabel);
     toolbar->addSeparator();
 
     // ----- POWER BUTTON (ADD THIS SECTION) -----
@@ -644,7 +648,8 @@ QToolBar *MainWindow::createNatureToolbar() {
     m_masterPlayButton->setEnabled(false);
     toolbar->addWidget(m_masterPlayButton);
 
-    m_masterPauseButton = new QPushButton("❚❚", toolbar);
+    m_masterPauseButton = new QPushButton("||", toolbar);
+    //m_masterPauseButton->setText("⏸");  // Change from "❚❚" to "⏸"
     m_masterPauseButton->setToolTip("Pause all ON nature sounds");
     m_masterPauseButton->setMaximumWidth(30);
     m_masterPauseButton->setStyleSheet(
@@ -691,7 +696,7 @@ QToolBar *MainWindow::createNatureToolbar() {
     toolbar->addSeparator();
 
     // ----- SECTION 4: MASTER VOLUME -----
-    QLabel *volumeLabel = new QLabel("VOL:", toolbar);
+    volumeLabel = new QLabel("VOL:", toolbar);
     volumeLabel->setVisible(false);
     toolbar->addWidget(volumeLabel);
 
@@ -743,16 +748,16 @@ void MainWindow::setupLayout() {
     addPlaylistBtn->setMaximumWidth(80);
     addPlaylistBtn->setToolTip("Add New Playlist");
     renamePlaylistBtn->setMaximumWidth(80);
-    QLabel *searchLabel = new QLabel("Search: ", this);
-    QLineEdit *searchEdit = new QLineEdit(this);
+    searchLabel = new QLabel("Search: ", this);
+    searchEdit = new QLineEdit(this);
     searchEdit->setMaximumWidth(120);
     searchEdit->setEnabled(false);
 
-    QPushButton *searchButton = new QPushButton(this);
+    searchButton = new QPushButton(this);
     searchButton->setCheckable(true);
     searchButton->setChecked(false);
     connect(searchButton, &QPushButton::clicked,
-            [this, searchEdit](bool checked) {
+            [this](bool checked) {
         if (!checked) {
             searchEdit->clear();
         }
@@ -763,7 +768,7 @@ void MainWindow::setupLayout() {
 
     searchButton->setIcon(QIcon(":/icons/edit.svg"));
 
-    connect(searchEdit, &QLineEdit::textChanged, [this, searchEdit]() {
+    connect(searchEdit, &QLineEdit::textChanged, [this]() {
         QListWidget *playlist = currentPlaylistWidget();
         if (!playlist || !searchEdit->isEnabled())
             return;
@@ -807,7 +812,7 @@ void MainWindow::setupLayout() {
     addNewPlaylist("Default");
 
     // Playlist buttons (add/remove tracks)
-    QHBoxLayout *playlistButtonLayout = new QHBoxLayout();
+    playlistButtonLayout = new QHBoxLayout();
     playlistButtonLayout->setSpacing(5);
 
     m_addFilesButton = new QPushButton("Load Music", this);
@@ -1049,13 +1054,18 @@ void MainWindow::setupConnections() {
     connect(m_openSessionManagerButton, &QPushButton::clicked, this,
             [this](bool checked) {
         if (checked) {
+            if(isDarkTheme) toggleTheme(false);
             m_sessionManagerDialog->show();
         } else {
+            toggleTheme(isDarkTheme);
             m_sessionManagerDialog->hide();
         }
     });
     connect(m_sessionManagerDialog, &SessionDialog::dialogHidden, this,
-            [this] { m_openSessionManagerButton->setChecked(false); });
+            [this] {
+        toggleTheme(isDarkTheme);
+        m_openSessionManagerButton->setChecked(false);
+    });
 
     connect(m_sessionManagerDialog, &SessionDialog::stageChanged, this,
             &MainWindow::onSessionStageChanged);
@@ -1584,41 +1594,6 @@ void MainWindow::onBinauralStopClicked() {
     unlimitedDurationAction->setEnabled(true);
 }
 
-// Nature sounds slots
-/*
-void MainWindow::onNaturePowerToggled(bool checked)
-{
-
-    // Update the power state
-    updateNaturePowerState(checked);
-
-    // Update status bar
-    statusBar()->showMessage(checked ? "Nature sounds enabled" : "Nature sounds
-disabled");
-
-    // If turning ON, also update master controls appearance
-    if (checked) {
-        // Force update of master control enabled states
-        bool hasEnabledPlayers = false;
-        for (AmbientPlayer* player : std::as_const(m_ambientPlayers)) {
-            if (player && player->isEnabled()) {
-                hasEnabledPlayers = true;
-                break;
-            }
-        }
-
-        // Enable master controls if any player is enabled
-        if (m_masterPlayButton)
-m_masterPlayButton->setEnabled(hasEnabledPlayers); if (m_masterPauseButton)
-m_masterPauseButton->setEnabled(hasEnabledPlayers); if (m_masterStopButton)
-m_masterStopButton->setEnabled(hasEnabledPlayers);
-        //if (m_masterVolumeSlider)
-m_masterVolumeSlider->setEnabled(hasEnabledPlayers);
-        //if (m_masterVolumeLabel)
-m_masterVolumeLabel->setEnabled(hasEnabledPlayers);
-    }
-}
-*/
 
 void MainWindow::onNaturePowerToggled(bool checked) {
 
@@ -1841,18 +1816,36 @@ void MainWindow::updateCountdownDisplay() {
             .arg(seconds, 2, 10, QChar('0'));
 
     // Color coding for warnings
-    if (minutes == 0) {
-        m_countdownLabel->setStyleSheet(
-                    "background-color: #F8D7DA; color: #721C24; padding: 3px; "
-                    "border: 1px solid #F5C6CB; border-radius: 3px; font-weight: bold;");
-    } else if (minutes <= 5) {
-        m_countdownLabel->setStyleSheet(
-                    "background-color: #FFF3CD; color: #856404; padding: 3px; "
-                    "border: 1px solid #FFE082; border-radius: 3px;");
+    if (isDarkTheme) {
+        // DARK THEME STYLES
+        if (minutes == 0) {
+            m_countdownLabel->setStyleSheet(
+                        "background-color: #5a1a1a; color: #ff8888; padding: 3px; "
+                        "border: 1px solid #8a3a3a; border-radius: 3px; font-weight: bold;");
+        } else if (minutes <= 5) {
+            m_countdownLabel->setStyleSheet(
+                        "background-color: #5a4a1a; color: #ffcc88; padding: 3px; "
+                        "border: 1px solid #8a6a3a; border-radius: 3px;");
+        } else {
+            m_countdownLabel->setStyleSheet(
+                        "background-color: #16213e; color: #7B68EE; padding: 3px; "
+                        "border: 1px solid #0f3460; border-radius: 3px;");
+        }
     } else {
-        m_countdownLabel->setStyleSheet(
-                    "background-color: #f0f0f0; color: #7B68EE; padding: 3px; "
-                    "border: 1px solid #ccc; border-radius: 3px;");
+        // LIGHT THEME STYLES (original)
+        if (minutes == 0) {
+            m_countdownLabel->setStyleSheet(
+                        "background-color: #F8D7DA; color: #721C24; padding: 3px; "
+                        "border: 1px solid #F5C6CB; border-radius: 3px; font-weight: bold;");
+        } else if (minutes <= 5) {
+            m_countdownLabel->setStyleSheet(
+                        "background-color: #FFF3CD; color: #856404; padding: 3px; "
+                        "border: 1px solid #FFE082; border-radius: 3px;");
+        } else {
+            m_countdownLabel->setStyleSheet(
+                        "background-color: #f0f0f0; color: #7B68EE; padding: 3px; "
+                        "border: 1px solid #ccc; border-radius: 3px;");
+        }
     }
 
     m_countdownLabel->setText(timeText);
@@ -2594,6 +2587,7 @@ void MainWindow::onPlaylistTabChanged(int index) {
 }
 
 // In onLoadMusicClicked():
+
 void MainWindow::onLoadMusicClicked() {
 
     QString filter = "All Supported Media (*.mp3 *.wav *.flac *.ogg *.m4a *.mp4 "
@@ -2641,6 +2635,7 @@ void MainWindow::onLoadMusicClicked() {
                                  .arg(playlistName));
     }
 }
+
 
 void MainWindow::onRemoveTrackClicked() {
     QListWidget *playlist = currentPlaylistWidget();
@@ -3440,6 +3435,7 @@ void MainWindow::setupMenus() {
     connect(hideBinauralToolbarAction, &QAction::triggered, [this](bool checked) {
         m_binauralToolbar->setVisible(!checked);
         m_binauralToolbarExt->setVisible(!checked);
+        toggleTheme(isDarkTheme);
         settings.setValue("UI/BinauralToolbarHidden", checked);
     });
     viewMenu->addAction(hideBinauralToolbarAction);
@@ -3457,9 +3453,25 @@ void MainWindow::setupMenus() {
     // Connect the action
     connect(hideNatureToolbarAction, &QAction::triggered, [this](bool checked) {
         m_natureToolbar->setVisible(!checked);
+        toggleTheme(isDarkTheme);
+
         settings.setValue("UI/NatureToolbarHidden", checked);
     });
     viewMenu->addAction(hideNatureToolbarAction);
+
+    viewMenu->addSeparator();
+    enableDarkThemeAction = new QAction("Set Dark Theme", viewMenu);
+
+    //isDarkTheme = settings.value("isdarktheme", false).toBool();
+    enableDarkThemeAction->setCheckable(true);
+    enableDarkThemeAction->setChecked(false);
+    connect(enableDarkThemeAction, &QAction::triggered, this, [this](bool enableDark){
+
+        isDarkTheme = enableDark;
+        settings.setValue("isdarktheme", enableDark);
+        toggleTheme(enableDark);
+    });
+    viewMenu->addAction(enableDarkThemeAction);
     //
 
     // ========== Settings Menu =========
@@ -5123,7 +5135,6 @@ bool MainWindow::eventFilter(QObject *watched, QEvent *event) {
     return QMainWindow::eventFilter(watched, event);
 }
 
-// Example slot implementations (you'll need to implement these based on your
 // media player)
 void MainWindow::onPlayClicked() { m_playMusicButton->click(); }
 
@@ -5243,8 +5254,14 @@ void MainWindow::setupFlickerTab() {
                 if (m_visStimDialog->isVisible()) {
                     m_visStimDialog->hide();
                 } else {
+                    if (m_flickerContainer && ! m_flickerContainer->isFullScreen()) {
                     m_visStimDialog->show();
                     m_visStimDialog->raise();
+                    }else{
+                        //QMessageBox::information(nullptr,
+                          //                           "Full Screen Mode",
+                            //                         "Please exit full screen mode first.");
+                        }
                 }
             }
         });
@@ -5269,6 +5286,7 @@ void MainWindow::setupFlickerTab() {
     // Hide by default, show only when needed
     m_playlistTabs->tabBar()->setTabVisible(m_flickerOriginalTabIndex, false);
 }
+
 
 void MainWindow::showFlickerTab() {
     // Create tab if it doesn't exist
@@ -5322,5 +5340,142 @@ void MainWindow::toggleFlickerFullscreen()
         m_flickerContainer->setParent(nullptr);
         m_flickerContainer->setWindowFlags(Qt::Window | Qt::FramelessWindowHint);
         m_flickerContainer->showFullScreen();
+    }
+}
+
+////////////////////////
+
+void MainWindow::toggleTheme(bool enableDark)
+{
+    if (enableDark) {
+        qApp->setStyleSheet("");
+
+        // Load and apply dark theme from resource file
+        QFile styleFile(":/files/dark-theme.css");
+        if (styleFile.open(QFile::ReadOnly)) {
+            QString styleSheet = QLatin1String(styleFile.readAll());
+            qApp->setStyleSheet(styleSheet);
+            styleToolbar(m_mediaToolbar, "#0f0f15");
+            styleToolbar(m_binauralToolbar, "#0f0f15");
+            styleToolbar(m_binauralToolbarExt, "#0f0f15");
+            styleToolbar(m_natureToolbar, "#0f0f15");
+
+
+
+            // Update ALL buttons to use white icons for dark theme
+            // Media Toolbar
+            m_loadMusicButton->setIcon(QIcon(":/icons-white/music.svg"));
+            tbarOpenPlaylistButton->setIcon(QIcon(":/icons-white/folder.svg"));
+            tbarSavePlaylistButton->setIcon(QIcon(":/icons-white/save.svg"));
+            tbarSaveAllPlaylistsButton->setIcon(QIcon(":/icons-white/copy.svg"));
+            m_previousButton->setIcon(QIcon(":/icons-white/skip-back.svg"));
+            m_playMusicButton->setIcon(QIcon(":/icons-white/play.svg"));
+            m_pauseMusicButton->setIcon(QIcon(":/icons-white/pause.svg"));
+            m_stopMusicButton->setIcon(QIcon(":/icons-white/square.svg"));
+            m_nextButton->setIcon(QIcon(":/icons-white/skip-forward.svg"));
+            m_shuffleButton->setIcon(QIcon(":/icons-white/shuffle.svg"));
+            m_repeatButton->setIcon(QIcon(":/icons-white/repeat.svg"));
+            volumeIcon->setIcon(QIcon(":/icons-white/volume-2.svg"));
+            timeEditButton->setIcon(QIcon(":/icons-white/edit.svg"));
+            //openCueButton->setIcon(QIcon()); // Text button "Cue" - no icon needed
+            //openVideoButton->setIcon(QIcon()); // Text button "Video" - no icon needed
+
+            // Binaural Toolbar Ext
+            tbarOpenPresetButton->setIcon(QIcon(":/icons-white/folder.svg"));
+            tbarSavePresetButton->setIcon(QIcon(":/icons-white/save.svg"));
+            tbarResetBinauralSettingsButton->setIcon(QIcon(":/icons-white/refresh-cw.svg"));
+            m_binauralPlayButton->setIcon(QIcon(":/icons-white/play.svg"));
+            m_binauralPauseButton->setIcon(QIcon(":/icons-white/pause.svg"));
+            m_binauralStopButton->setIcon(QIcon(":/icons-white/square.svg"));
+            m_openSessionManagerButton->setIcon(QIcon(":/icons-white/layers.svg"));
+            m_visStimButton->setIcon(QIcon()); // Text button "Visual" - no icon needed
+            searchButton->setIcon(QIcon(":/icons-white/edit.svg"));
+            // Nature Toolbar
+            ambientTitleLabel->setStyleSheet("QLabel { font-weight: bold; color: #ffffff; }");
+            //m_masterPauseButton->setText("||");  // Change from "❚❚" to "⏸"
+            m_masterPauseButton->setStyleSheet(
+                            "QPushButton { font-weight: bold; color: #FF8C00; }");
+            openAmbientPresetButton->setIcon(QIcon(":/icons-white/folder.svg"));
+            saveAmbientPresetButton->setIcon(QIcon(":/icons-white/save.svg"));
+            resetPlayersButton->setIcon(QIcon(":/icons-white/refresh-cw.svg"));
+            // Master control buttons use text (▶, ❚❚, ■) - no icons needed
+            // m_masterPlayButton, m_masterPauseButton, m_masterStopButton are text buttons
+            m_beatFreqLabel->setStyleSheet(
+                "background-color: #16213e; padding: 2px; border: 1px solid #0f3460; color: #ffffff;");
+            statusBar()->showMessage("Dark theme applied", 2000);
+        } else {
+            qWarning() << "Could not load dark theme file";
+            statusBar()->showMessage("Failed to load dark theme", 2000);
+        }
+
+        m_countdownLabel->setStyleSheet(
+            "background-color: #16213e; padding: 3px; border: 1px solid #0f3460; "
+            "border-radius: 3px; color: #7B68EE;");
+
+        if (metadataBrowser) {
+            metadataBrowser->setStyleSheet("color: #ffffff; background-color: #0f0f15;");
+        }
+
+
+
+    } else {
+        // Remove stylesheet to revert to light theme
+        qApp->setStyleSheet("");
+
+
+
+        // Restore original colored icons for light theme
+        // Media Toolbar
+        m_loadMusicButton->setIcon(QIcon(":/icons/music.svg"));
+        tbarOpenPlaylistButton->setIcon(QIcon(":/icons/folder.svg"));
+        tbarSavePlaylistButton->setIcon(QIcon(":/icons/save.svg"));
+        tbarSaveAllPlaylistsButton->setIcon(QIcon(":/icons/copy.svg"));
+        m_previousButton->setIcon(QIcon(":/icons/skip-back.svg"));
+        m_playMusicButton->setIcon(QIcon(":/icons/play.svg"));
+        m_pauseMusicButton->setIcon(QIcon(":/icons/pause.svg"));
+        m_stopMusicButton->setIcon(QIcon(":/icons/square.svg"));
+        m_nextButton->setIcon(QIcon(":/icons/skip-forward.svg"));
+        m_shuffleButton->setIcon(QIcon(":/icons/shuffle.svg"));
+        m_repeatButton->setIcon(QIcon(":/icons/repeat.svg"));
+        volumeIcon->setIcon(QIcon(":/icons/volume-2.svg"));
+        timeEditButton->setIcon(QIcon(":/icons/edit.svg"));
+        searchButton->setIcon(QIcon(":/icons/edit.svg"));
+        ambientTitleLabel->setStyleSheet("QLabel { font-weight: bold; color: #2E8B57; }");
+
+        // Binaural Toolbar Ext
+
+        tbarOpenPresetButton->setIcon(QIcon(":/icons/folder.svg"));
+        tbarSavePresetButton->setIcon(QIcon(":/icons/save.svg"));
+        tbarResetBinauralSettingsButton->setIcon(QIcon(":/icons/refresh-cw.svg"));
+        m_binauralPlayButton->setIcon(QIcon(":/icons/play.svg"));
+        m_binauralPauseButton->setIcon(QIcon(":/icons/pause.svg"));
+        m_binauralStopButton->setIcon(QIcon(":/icons/square.svg"));
+        m_openSessionManagerButton->setIcon(QIcon(":/icons/layers.svg"));
+
+        // Nature Toolbar
+
+        m_masterPauseButton->setStyleSheet(
+                        "QPushButton { font-weight: bold; color: #FF8C00; }");
+        openAmbientPresetButton->setIcon(QIcon(":/icons/folder.svg"));
+        saveAmbientPresetButton->setIcon(QIcon(":/icons/save.svg"));
+        resetPlayersButton->setIcon(QIcon(":/icons/refresh-cw.svg"));
+        m_beatFreqLabel->setStyleSheet(
+                        "background-color: #f0f0f0; padding: 2px; border: 1px solid #ccc;");
+        // Re-apply toolbar colors
+        styleToolbar(m_mediaToolbar, "#4A90E2");       // Blue
+        styleToolbar(m_binauralToolbar, "#7B68EE");    // Purple
+        styleToolbar(m_binauralToolbarExt, "#7B68EE"); // Purple
+        styleToolbar(m_natureToolbar, "#32CD32");      // Green
+
+        m_countdownLabel->setStyleSheet(
+                    "background-color: #f0f0f0; padding: 3px; border: 1px solid #ccc; ");
+
+        if (metadataBrowser) {
+            metadataBrowser->setStyleSheet("");  // Reset to default
+        }
+
+
+
+        statusBar()->showMessage("Light theme restored", 2000);
     }
 }
