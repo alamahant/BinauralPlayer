@@ -19,7 +19,6 @@ CueSheetDialog::CueSheetDialog(QWidget *parent)
     setWindowTitle("CUE Sheet Import");
     setMinimumSize(500, 400);
 
-    // Create UI
     m_trackList = new QListWidget(this);
     m_trackList->setAlternatingRowColors(true);
 
@@ -30,10 +29,8 @@ CueSheetDialog::CueSheetDialog(QWidget *parent)
     m_clearButton = new QPushButton("Clear", this);
     m_statusLabel = new QLabel("No CUE file loaded", this);
 
-    // Layout
     QVBoxLayout *mainLayout = new QVBoxLayout(this);
 
-    // Button row
     QHBoxLayout *buttonLayout = new QHBoxLayout();
     buttonLayout->addWidget(m_loadButton);
     buttonLayout->addWidget(m_prevButton);
@@ -47,7 +44,6 @@ CueSheetDialog::CueSheetDialog(QWidget *parent)
     mainLayout->addWidget(m_trackList);
     mainLayout->addWidget(m_statusLabel);
 
-    // Connections
     connect(m_loadButton, &QPushButton::clicked, this, &CueSheetDialog::onLoadCue);
     connect(m_playButton, &QPushButton::clicked, this, &CueSheetDialog::onPlayTrack);
     connect(m_prevButton, &QPushButton::clicked, this, &CueSheetDialog::onPreviousTrack);
@@ -92,10 +88,8 @@ void CueSheetDialog::onLoadCue()
 
     if (cuePath.isEmpty()) return;
 
-    // Parse silently
     parseCueFile(cuePath);
 
-    // ALWAYS ask
     QMessageBox::StandardButton reply = QMessageBox::question(this,
         "Confirm CUE Loading",
         QString("Load CUE for:\n%1\n\nWith audio file:\n%2")
@@ -130,7 +124,6 @@ void CueSheetDialog::parseCueFile(const QString &cueFilePath)
     CueTrack currentTrack;
     bool inTrack = false;
 
-    // Get the directory of CUE file for relative audio paths
     QFileInfo cueInfo(cueFilePath);
     QString baseDir = cueInfo.absolutePath();
 
@@ -138,13 +131,11 @@ void CueSheetDialog::parseCueFile(const QString &cueFilePath)
         line = stream.readLine().trimmed();
 
         if (line.startsWith("FILE ")) {
-            // Extract audio file path
             int start = line.indexOf('"');
             int end = line.lastIndexOf('"');
             if (start != -1 && end != -1 && end > start + 1) {
                 QString audioFile = line.mid(start + 1, end - start - 1);
 
-                // Handle relative paths
                 if (QFileInfo(audioFile).isRelative()) {
                     m_audioFilePath = baseDir + "/" + audioFile;
                 } else {
@@ -157,11 +148,9 @@ void CueSheetDialog::parseCueFile(const QString &cueFilePath)
                 m_tracks.append(currentTrack);
             }
 
-            // Start new track
             currentTrack = CueTrack();
             inTrack = true;
 
-            // Parse track number
             QStringList parts = line.split(' ', Qt::SkipEmptyParts);
             if (parts.size() >= 2) {
                 currentTrack.number = parts[1].toInt();
@@ -196,7 +185,6 @@ void CueSheetDialog::parseCueFile(const QString &cueFilePath)
         }
     }
 
-    // Add the last track
     if (inTrack) {
         m_tracks.append(currentTrack);
     }
@@ -214,7 +202,6 @@ void CueSheetDialog::parseCueFile(const QString &cueFilePath)
 
 qint64 CueSheetDialog::timeCodeToMs(const QString &timeCode)
 {
-    // MM:SS:FF where FF = frames (1/75 second)
     QStringList parts = timeCode.split(':');
     if (parts.size() != 3) return 0;
 
@@ -222,7 +209,6 @@ qint64 CueSheetDialog::timeCodeToMs(const QString &timeCode)
     int seconds = parts[1].toInt();
     int frames = parts[2].toInt();
 
-    // Convert frames to milliseconds (1000ms / 75 frames)
     double frameMs = frames * (1000.0 / 75.0);
 
     return (minutes * 60000) + (seconds * 1000) + static_cast<qint64>(frameMs);
@@ -261,22 +247,15 @@ void CueSheetDialog::onPlayTrack()
 
     const CueTrack &track = m_tracks[m_currentTrackIndex];
 
-    // Emit signal with audio file and start position
-    // Convert ms to seconds for MainWindow's slider
     qint64 startSeconds = track.startMs / 1000;
 
     emit trackSelected(m_audioFilePath, startSeconds);
-    //emit trackPositionChanged(track.startMs);
     */
 
-    // Play the CURRENTLY SELECTED track (not next!)
 
-    // 1. Get current selection from list
     QListWidgetItem *currentItem = m_trackList->currentItem();
     if (!currentItem) {
-        // No selection - try to use stored index
         if (m_currentTrackIndex >= 0 && m_currentTrackIndex < m_tracks.size()) {
-            // Use stored index
             const CueTrack &track = m_tracks[m_currentTrackIndex];
             qint64 startSeconds = track.startMs / 1000;
             emit trackSelected(m_audioFilePath, startSeconds);
@@ -284,11 +263,9 @@ void CueSheetDialog::onPlayTrack()
         return;
     }
 
-    // 2. Get the row of selected item
     int row = m_trackList->row(currentItem);
     if (row < 0 || row >= m_tracks.size()) return;
 
-    // 3. Update stored index and play
     m_currentTrackIndex = row;
     const CueTrack &track = m_tracks[row];
     qint64 startSeconds = track.startMs / 1000;
@@ -307,7 +284,6 @@ void CueSheetDialog::onTrackDoubleClicked(QListWidgetItem *item)
         qint64 startSeconds = track.startMs / 1000;
 
         emit trackSelected(m_audioFilePath, startSeconds);
-        //emit trackPositionChanged(track.startMs);
     }
 }
 
@@ -318,11 +294,9 @@ void CueSheetDialog::onNextTrack()
     m_currentTrackIndex = (m_currentTrackIndex + 1) % m_tracks.size();
     m_trackList->setCurrentRow(m_currentTrackIndex);
 
-    //Get the track at the NEW index
     if (ConstantGlobals::playbackState == QMediaPlayer::PlayingState){
     const CueTrack &track = m_tracks[m_currentTrackIndex];
 
-    //Convert to seconds and emit
     qint64 startSeconds = track.startMs / 1000;
     emit trackSelected(m_audioFilePath, startSeconds);
     }
@@ -335,12 +309,10 @@ void CueSheetDialog::onPreviousTrack()
     m_currentTrackIndex = (m_currentTrackIndex - 1 + m_tracks.size()) % m_tracks.size();
     m_trackList->setCurrentRow(m_currentTrackIndex);
 
-    //Get the track at the NEW index
     if (ConstantGlobals::playbackState == QMediaPlayer::PlayingState){
 
     const CueTrack &track = m_tracks[m_currentTrackIndex];
 
-    //Convert to seconds and emit
     qint64 startSeconds = track.startMs / 1000;
     emit trackSelected(m_audioFilePath, startSeconds);
     }

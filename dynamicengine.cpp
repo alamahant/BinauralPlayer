@@ -6,7 +6,6 @@
 #include <QElapsedTimer>
 #include "constants.h"
 
-// =================== CONSTRUCTOR/DESTRUCTOR ===================
 DynamicEngine::DynamicEngine(QObject *parent)
     : QObject(parent)
     , m_audioOutput(nullptr)
@@ -36,7 +35,6 @@ DynamicEngine::~DynamicEngine()
     delete m_audioOutput;
 }
 
-// =================== INITIALIZATION METHODS ===================
 void DynamicEngine::initializeAudioFormat()
 {
     m_audioFormat.setSampleRate(m_sampleRate);
@@ -62,8 +60,6 @@ bool DynamicEngine::initializeAudioOutput()
     }
 
     m_audioOutput = new QAudioSink(audioDevice, m_audioFormat, this);
-    // INCREASE BUFFER SIZE (default is usually 4096-8192)
-       // We try values: 8192, 16384, 32768 (higher = more latency but stable)
        m_audioOutput->setBufferSize(32768);
     connect(m_audioOutput, &QAudioSink::stateChanged,
             this, &DynamicEngine::handleAudioStateChanged);
@@ -72,7 +68,6 @@ bool DynamicEngine::initializeAudioOutput()
     return true;
 }
 
-// =================== CORE PLAYBACK CONTROL ===================
 bool DynamicEngine::start()
 {
 
@@ -89,7 +84,6 @@ bool DynamicEngine::startDynamicPlayback()
         return false;
     }
 
-    // Create custom QIODevice for dynamic generation
     class DynamicAudioDevice : public QIODevice {
     public:
         DynamicAudioDevice(DynamicEngine* engine) 
@@ -106,11 +100,9 @@ bool DynamicEngine::startDynamicPlayback()
         
     protected:
         qint64 readData(char* data, qint64 maxlen) override {
-            // Real-time audio generation
             int16_t* samples = reinterpret_cast<int16_t*>(data);
             int sampleCount = maxlen / (2 * sizeof(int16_t)); // Stereo
             
-            // Get CURRENT values (atomic reads = immediate effect)
             double leftFreq = m_engine->m_leftFrequency.load();
             double rightFreq = m_engine->m_rightFrequency.load();
             double amplitude = m_engine->m_amplitude.load();
@@ -118,7 +110,6 @@ bool DynamicEngine::startDynamicPlayback()
             double sampleRate = m_engine->m_sampleRate;
             double pulseFreq = m_engine->m_pulseFrequency;
             
-            // Check if isochronic mode
             bool isIsochronic = (ConstantGlobals::currentToneType == 1);
             
             for (int i = 0; i < sampleCount; ++i) {
@@ -126,11 +117,9 @@ bool DynamicEngine::startDynamicPlayback()
                 double rightSample = 0.0;
                 
                 if (isIsochronic) {
-                    // ISOCHRONIC: Carrier × Pulse
                     double carrierPhaseInc = (2.0 * M_PI * leftFreq) / sampleRate;
                     double pulsePhaseInc = (2.0 * M_PI * pulseFreq) / sampleRate;
                     
-                    // Generate carrier
                     double carrier = 0.0;
                     switch (waveform) {
                         case SINE_WAVE: carrier = sin(m_phaseLeft); break;
@@ -139,17 +128,14 @@ bool DynamicEngine::startDynamicPlayback()
                         case SAWTOOTH_WAVE: carrier = m_engine->calculateSawtoothSample(m_phaseLeft); break;
                     }
                     
-                    // Generate pulse (on/off)
                     double pulse = (sin(m_phaseRight) >= 0.0) ? 1.0 : 0.0;
                     
                     leftSample = carrier * pulse * amplitude;
                     rightSample = leftSample; // Stereo identical
                     
-                    // Update phases
                     m_phaseLeft += carrierPhaseInc;
                     m_phaseRight += pulsePhaseInc;
                 } else {
-                    // BINAURAL: Separate L/R frequencies
                     double leftPhaseInc = (2.0 * M_PI * leftFreq) / sampleRate;
                     double rightPhaseInc = (2.0 * M_PI * rightFreq) / sampleRate;
                     
@@ -159,16 +145,13 @@ bool DynamicEngine::startDynamicPlayback()
                     leftSample *= amplitude;
                     rightSample *= amplitude;
                     
-                    // Update phases
                     m_phaseLeft += leftPhaseInc;
                     m_phaseRight += rightPhaseInc;
                 }
                 
-                // Convert to 16-bit
                 samples[2 * i] = static_cast<int16_t>(leftSample * 32767);
                 samples[2 * i + 1] = static_cast<int16_t>(rightSample * 32767);
                 
-                // Keep phases in range
                 if (m_phaseLeft > 2.0 * M_PI) m_phaseLeft -= 2.0 * M_PI;
                 if (m_phaseRight > 2.0 * M_PI) m_phaseRight -= 2.0 * M_PI;
             }
@@ -188,7 +171,6 @@ bool DynamicEngine::startDynamicPlayback()
         double m_phaseRight;
     };
     
-    // Create and start dynamic device
     m_dynamicDevice = new DynamicAudioDevice(this);
     m_audioOutput->start(m_dynamicDevice);
     m_isPlaying = true;
@@ -228,7 +210,6 @@ bool DynamicEngine::isPlaying() const
     return m_isPlaying;
 }
 
-// =================== FREQUENCY CONTROL ===================
 void DynamicEngine::setLeftFrequency(double hz)
 {
     if (!validateFrequency(hz)) {
@@ -237,7 +218,6 @@ void DynamicEngine::setLeftFrequency(double hz)
     }
 
     m_leftFrequency = hz;
-    // DYNAMIC: No buffer regeneration needed
     emit leftFrequencyChanged(hz);
     emit beatFrequencyChanged(getBeatFrequency());
 }
@@ -245,7 +225,6 @@ void DynamicEngine::setLeftFrequency(double hz)
 void DynamicEngine::setRightFrequency(double hz)
 {
     if (ConstantGlobals::currentToneType == 1) {
-        // Isochronic mode - use m_rightFrequency for other purposes if needed
     } else {
         if (!validateFrequency(hz)) {
             emit errorOccurred(QString("Invalid right frequency: %1 Hz").arg(hz));
@@ -290,12 +269,10 @@ double DynamicEngine::getBeatFrequency() const
     return m_rightFrequency - m_leftFrequency;
 }
 
-// =================== WAVEFORM & AUDIO CONTROL ===================
 void DynamicEngine::setWaveform(Waveform type)
 {
     if (m_currentWaveform != type) {
         m_currentWaveform = type;
-        // DYNAMIC: No buffer regeneration needed
         emit waveformChanged(type);
     }
 }
@@ -313,7 +290,6 @@ void DynamicEngine::setAmplitude(double amplitude)
     }
 
     m_amplitude = amplitude;
-    // DYNAMIC: No buffer regeneration needed
 }
 
 void DynamicEngine::setVolume(double volume)
@@ -342,7 +318,6 @@ double DynamicEngine::getVolume() const
     return m_outputVolume;
 }
 
-// =================== ENGINE CONFIGURATION ===================
 void DynamicEngine::setSampleRate(int sampleRate)
 {
     if (sampleRate < 8000 || sampleRate > 192000) {
@@ -369,7 +344,6 @@ int DynamicEngine::getBufferDuration() const
     return 0; // Dynamic engine doesn't use buffers
 }
 
-// =================== AUDIO STATE INFORMATION ===================
 double DynamicEngine::getCurrentPhaseLeft() const
 {
     return m_phaseLeft;
@@ -401,7 +375,6 @@ void DynamicEngine::setPulseFrequency(double hz)
     }
 
     m_pulseFrequency = hz;
-    // DYNAMIC: No buffer regeneration needed
 }
 
 QBuffer *DynamicEngine::audioBuffer() const
@@ -411,14 +384,10 @@ QBuffer *DynamicEngine::audioBuffer() const
 
 void DynamicEngine::forceBufferRegeneration()
 {
-    // No-op for dynamic engine
 }
 
-// =================== PRIVATE AUDIO GENERATION METHODS ===================
 void DynamicEngine::generateAudioBuffer(int durationMs)
 {
-    // Dynamic engine doesn't use buffers
-    // Create empty buffer just for interface compatibility
     Q_UNUSED(durationMs);
     
     if (m_audioBuffer) {
@@ -431,21 +400,18 @@ void DynamicEngine::generateAudioBuffer(int durationMs)
 
 void DynamicEngine::applyLoopFade(QByteArray &buffer, int durationMs)
 {
-    // No-op for dynamic
     Q_UNUSED(buffer);
     Q_UNUSED(durationMs);
 }
 
 void DynamicEngine::applyCrossfade(QByteArray &buffer, int loopDurationMs)
 {
-    // No-op for dynamic
     Q_UNUSED(buffer);
     Q_UNUSED(loopDurationMs);
 }
 
 void DynamicEngine::fillBufferWithSamples(QByteArray &buffer, int sampleCount)
 {
-    // No-op for dynamic
     Q_UNUSED(buffer);
     Q_UNUSED(sampleCount);
 }
@@ -474,22 +440,18 @@ double DynamicEngine::calculateSineSample(double phase)
 double DynamicEngine::calculateSquareSample(double phase)
 {
     if (ConstantGlobals::currentToneType == 1) {
-        // Isochronic: On/Off (0 or 1)
         return (std::sin(phase) >= 0.0) ? 1.0 : 0.0;
     } else {
-        // Binaural: +1/-1
         return (std::sin(phase) >= 0.0) ? 1.0 : -1.0;
     }
 }
 
 void DynamicEngine::applyVolumeToBuffer(QByteArray &buffer, double volume)
 {
-    // No-op for dynamic
     Q_UNUSED(buffer);
     Q_UNUSED(volume);
 }
 
-// =================== PARAMETER VALIDATION ===================
 bool DynamicEngine::validateFrequency(double hz)
 {
     return (hz >= MIN_FREQUENCY && hz <= MAX_FREQUENCY);
@@ -500,11 +462,8 @@ bool DynamicEngine::validateAmplitude(double amplitude)
     return (amplitude >= MIN_AMPLITUDE && amplitude <= MAX_AMPLITUDE);
 }
 
-// =================== INTERNAL UPDATE METHODS ===================
 void DynamicEngine::updateAudioParameters()
 {
-    // No-op for dynamic engine
-    // Frequency changes take effect immediately
 }
 
 void DynamicEngine::resetPhase()
@@ -513,7 +472,6 @@ void DynamicEngine::resetPhase()
     m_phaseRight = 0.0;
 }
 
-// =================== AUDIO STATE HANDLER ===================
 void DynamicEngine::handleAudioStateChanged(QAudio::State state)
 {
     
@@ -534,9 +492,7 @@ void DynamicEngine::handleAudioStateChanged(QAudio::State state)
         case QAudio::IdleState:
 
         /*
-            // For dynamic: restart the device
             if (m_isPlaying && m_dynamicDevice) {
-                //m_audioOutput->start(m_dynamicDevice);
             }
             */
 
@@ -546,7 +502,6 @@ void DynamicEngine::handleAudioStateChanged(QAudio::State state)
             break;
     }
     
-    // Check for errors
     if (m_audioOutput && m_audioOutput->error() != QAudio::NoError) {
         QString errorMsg;
         switch (m_audioOutput->error()) {
@@ -570,11 +525,8 @@ void DynamicEngine::handleAudioStateChanged(QAudio::State state)
     }
 }
 
-// =================== ISOCHRONIC METHODS ===================
 void DynamicEngine::generateIsochronicBuffer(int durationMs)
 {
-    // Dynamic engine doesn't use buffers
-    // Create empty buffer just for interface compatibility
     Q_UNUSED(durationMs);
     
     if (m_audioBuffer) {

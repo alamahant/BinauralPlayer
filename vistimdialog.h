@@ -20,7 +20,6 @@ class VisStimDialog : public QDialog
 public:
     explicit VisStimDialog(FlickerWidget *flicker, QWidget *parent = nullptr);
 
-    // called by MainWindow whenever beat/wave changes
     void syncFrequency(double hz);
     void syncWaveType(int type);   // 0=sine 1=square 2=sawtooth
 
@@ -47,11 +46,9 @@ private:
 
     FlickerWidget *m_flicker;
 
-    // synced values from audio engine
     double m_syncedFreq = 7.83;
     int    m_syncedWave = 1;       // 0=sine 1=square 2=sawtooth
 
-    // ── flicker controls ──────────────────────────────────────────────────
     QLabel         *m_freqSyncBadge   = nullptr;
     QCheckBox      *m_freqOverrideCb  = nullptr;
     QDoubleSpinBox *m_freqSpin        = nullptr;
@@ -69,7 +66,6 @@ private:
     QColor          m_onColor         = Qt::white;
     QColor          m_offColor        = Qt::black;
 
-    // ── subliminal controls ───────────────────────────────────────────────
     QTextEdit      *m_textEdit        = nullptr;
     QButtonGroup   *m_displayGroup    = nullptr;   // off/flash/always
     QSpinBox       *m_fontSizeSpin    = nullptr;
@@ -78,7 +74,6 @@ private:
     QColor          m_textColor       = Qt::white;
     QColor          m_textBgColor     = QColor(0, 0, 0, 0);
 
-    // ── footer ────────────────────────────────────────────────────────────
     QPushButton    *m_startStopBtn    = nullptr;
     bool            m_running         = false;
 

@@ -19,7 +19,6 @@
 #include <QtMath>
 #include "constants.h"
 
-// ── helpers ──────────────────────────────────────────────────────────────────
 
 static QString swatchStyle(const QColor &c)
 {
@@ -38,7 +37,6 @@ static QFrame *hline()
     return f;
 }
 
-// ── VisStimDialog ─────────────────────────────────────────────────────────────
 
 VisStimDialog::VisStimDialog(FlickerWidget *flicker, QWidget *parent)
     : QDialog(parent)
@@ -50,30 +48,25 @@ VisStimDialog::VisStimDialog(FlickerWidget *flicker, QWidget *parent)
     buildUi();
     updateSyncBadges();
 
-    // Connect to flicker signals to keep UI in sync
     if (m_flicker) {
         connect(m_flicker, &FlickerWidget::flickerStopped, this, [this]() {
-            // Flicker stopped externally (e.g., by main toolbar button)
             m_startStopBtn->setText("▶  Start");
             m_running = false;
         });
 
         connect(m_flicker, &FlickerWidget::flickerStarted, this, [this]() {
-            // Flicker started externally
             m_startStopBtn->setText("■  Stop");
             m_running = true;
         });
     }
 }
 
-// ── public sync API ──────────────────────────────────────────────────────────
 
 void VisStimDialog::syncFrequency(double hz)
 {
     m_syncedFreq = hz;
     updateSyncBadges();
     if (!m_freqOverrideCb->isChecked()) {
-        //m_flicker->setFrequency(hz);
         updateBandLabel(hz);
     }
 }
@@ -87,14 +80,12 @@ void VisStimDialog::syncWaveType(int type)
     }
 }
 
-// ── private slots ────────────────────────────────────────────────────────────
 
 void VisStimDialog::onFreqOverrideToggled(bool checked)
 {
     m_freqSpin->setEnabled(checked);
     m_freqSyncBadge->setEnabled(!checked);
     if (!checked) {
-        // snap spinbox back to synced value and revert flicker
         m_freqSpin->setValue(m_syncedFreq);
         m_flicker->setFrequency(m_syncedFreq);
         updateBandLabel(m_syncedFreq);
@@ -103,7 +94,6 @@ void VisStimDialog::onFreqOverrideToggled(bool checked)
 
 void VisStimDialog::onEnvOverrideToggled(bool checked)
 {
-    // enable/disable the three envelope buttons
     for (auto *btn : m_envGroup->buttons())
         btn->setEnabled(checked);
     m_envSyncBadge->setEnabled(!checked);
@@ -155,7 +145,6 @@ void VisStimDialog::onPickTextColor()
 
 void VisStimDialog::onPickTextBgColor()
 {
-    // allow alpha so user can pick transparent
     QColor c = QColorDialog::getColor(
         m_textBgColor, this, "Text background",
         QColorDialog::ShowAlphaChannel);
@@ -169,7 +158,6 @@ void VisStimDialog::onPickTextBgColor()
 void VisStimDialog::onStartStop()
 {
     if (!m_running) {
-        // photosensitivity warning on first start
         static bool warned = false;
         if (!warned) {
             QMessageBox::warning(this, "Photosensitivity warning",
@@ -206,17 +194,14 @@ void VisStimDialog::onStartStop()
     }
 }
 
-// ── private helpers ──────────────────────────────────────────────────────────
 
 void VisStimDialog::applyToFlicker()
 {
-    // frequency
     double hz = m_freqOverrideCb->isChecked()
               ? m_freqSpin->value()
               : m_syncedFreq;
     m_flicker->setFrequency(hz);
 
-    // envelope
     if (m_envOverrideCb->isChecked()) {
         int id = m_envGroup->checkedId();
         m_flicker->setEnvelope(static_cast<FlickerWidget::Envelope>(id));
@@ -224,14 +209,11 @@ void VisStimDialog::applyToFlicker()
         m_flicker->setEnvelope(static_cast<FlickerWidget::Envelope>(m_syncedWave));
     }
 
-    // intensity
     m_flicker->setIntensity(m_intensitySlider->value() / 100.0f);
 
-    // colors
     m_flicker->setOnColor(m_onColor);
     m_flicker->setOffColor(m_offColor);
 
-    // subliminal
     m_flicker->setSubliminalText(m_textEdit->toPlainText().trimmed());
     m_flicker->setSubliminalColor(m_textColor);
     m_flicker->setSubliminalBgColor(m_textBgColor);
@@ -277,7 +259,6 @@ QPushButton *VisStimDialog::startStopBtn() const
     return m_startStopBtn;
 }
 
-// ── buildUi ──────────────────────────────────────────────────────────────────
 
 void VisStimDialog::buildUi()
 {
@@ -285,20 +266,15 @@ void VisStimDialog::buildUi()
     root->setSpacing(12);
     root->setContentsMargins(16, 16, 16, 16);
 
-    // ════════════════════════════════════════════════════════════════
-    // LEFT + RIGHT side by side
-    // ════════════════════════════════════════════════════════════════
     auto *columns = new QHBoxLayout();
     columns->setSpacing(16);
     root->addLayout(columns);
 
-    // ── LEFT: flicker engine ─────────────────────────────────────────
     auto *flickerGroup = new QGroupBox("Flicker engine");
     auto *flickerLayout = new QVBoxLayout(flickerGroup);
     flickerLayout->setSpacing(10);
     columns->addWidget(flickerGroup, 1);
 
-    // — frequency row —
     {
         auto *row = new QVBoxLayout();
 
@@ -340,7 +316,6 @@ void VisStimDialog::buildUi()
 
     flickerLayout->addWidget(hline());
 
-    // — envelope row —
     {
         auto *row = new QVBoxLayout();
 
@@ -380,7 +355,6 @@ void VisStimDialog::buildUi()
 
     flickerLayout->addWidget(hline());
 
-    // — intensity —
     {
         auto *row = new QHBoxLayout();
         row->addWidget(new QLabel("Intensity"));
@@ -396,7 +370,6 @@ void VisStimDialog::buildUi()
         flickerLayout->addLayout(row);
     }
 
-    // — colors —
     {
         auto *row = new QHBoxLayout();
         row->addWidget(new QLabel("Colors"));
@@ -426,13 +399,11 @@ void VisStimDialog::buildUi()
 
     flickerLayout->addStretch();
 
-    // ── RIGHT: subliminal text ────────────────────────────────────────
     auto *subGroup = new QGroupBox("Subliminal text");
     auto *subLayout = new QVBoxLayout(subGroup);
     subLayout->setSpacing(10);
     columns->addWidget(subGroup, 1);
 
-    // — message —
     m_textEdit = new QTextEdit();
     m_textEdit->setPlaceholderText("Enter message…");
     m_textEdit->setFixedHeight(64);
@@ -441,7 +412,6 @@ void VisStimDialog::buildUi()
     });
     subLayout->addWidget(m_textEdit);
 
-    // — display mode —
     {
         auto *row = new QHBoxLayout();
         row->addWidget(new QLabel("Display"));
@@ -462,7 +432,6 @@ void VisStimDialog::buildUi()
         subLayout->addLayout(row);
     }
 
-    // — font size —
     {
         auto *row = new QHBoxLayout();
         row->addWidget(new QLabel("Font size"));
@@ -494,7 +463,6 @@ void VisStimDialog::buildUi()
         subLayout->addLayout(row);
     }
 
-    // — text colors —
     {
         auto *row = new QHBoxLayout();
         row->addWidget(new QLabel("Text color"));
@@ -524,9 +492,6 @@ void VisStimDialog::buildUi()
 
     subLayout->addStretch();
 
-    // ════════════════════════════════════════════════════════════════
-    // footer
-    // ════════════════════════════════════════════════════════════════
     root->addWidget(hline());
 
     auto *footer = new QHBoxLayout();
@@ -551,30 +516,25 @@ void VisStimDialog::buildUi()
 
 void VisStimDialog::onReset()
 {
-    // stop flicker if running
     if (m_running) {
         m_flicker->stopFlicker();
         m_startStopBtn->setText("▶  Start");
         m_running = false;
     }
 
-    // frequency
     m_freqOverrideCb->setChecked(false);
     m_freqSpin->setValue(m_syncedFreq);
     m_freqSpin->setEnabled(false);
 
-    // envelope
     m_envOverrideCb->setChecked(false);
     for (auto *btn : m_envGroup->buttons())
         btn->setEnabled(false);
     m_envGroup->button(0)->setChecked(true); // default sine
 
-    // intensity
     m_intensitySlider->setValue(40);
     m_intensityLabel->setText("40%");
     m_flicker->setIntensity(0.4f);
 
-    // colors
     m_onColor  = Qt::white;
     m_offColor = Qt::black;
     setSwatchColor(m_onColorBtn,  m_onColor);
@@ -582,7 +542,6 @@ void VisStimDialog::onReset()
     m_flicker->setOnColor(m_onColor);
     m_flicker->setOffColor(m_offColor);
 
-    // subliminal
     m_textEdit->clear();
     m_displayGroup->button(0)->setChecked(true); // Off
     m_fontSizeSpin->setValue(24);

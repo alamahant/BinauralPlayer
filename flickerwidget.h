@@ -55,18 +55,15 @@ private:
     QColor   m_onColor   = Qt::white;
     QColor   m_offColor  = Qt::black;
 
-    // subliminal
     QString  m_subliminalText;
     QColor   m_subliminalColor  = Qt::white;
     QColor   m_subliminalBg     = QColor(0, 0, 0, 0);
     int      m_subliminalFontPx = 24;
     int      m_subliminalMode   = 0;
 
-    // text texture
     GLuint   m_textTex    = 0;
     bool     m_hasTex     = false;
 
-    // shader uniform locations
     int m_uTime        = -1;
     int m_uFreq        = -1;
     int m_uIntensity   = -1;

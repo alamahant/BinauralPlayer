@@ -12,12 +12,10 @@ AmbientPlayer::AmbientPlayer(QObject *parent)
     , m_baseVolume(50)
     , m_masterRatio(1.0f)
 {
-    // Create audio player
     m_player = new QMediaPlayer(this);
     m_audioOutput = new QAudioOutput(this);
     m_player->setAudioOutput(m_audioOutput);
 
-    // Create toolbar button
     m_button = new QPushButton(m_name);
     m_button->setMinimumWidth(80);
     m_button->setMaximumWidth(100);
@@ -29,18 +27,13 @@ AmbientPlayer::AmbientPlayer(QObject *parent)
 
 AmbientPlayer::~AmbientPlayer()
 {
-    // Buttons are owned by their parent widget (MainWindow toolbar)
-    // QMediaPlayer is owned by this object (via parent hierarchy)
-    // So no manual deletion needed
 }
 
 void AmbientPlayer::setupConnections()
 {
-    // Connect player state to button updates
     connect(m_player, &QMediaPlayer::playbackStateChanged,
             this, &AmbientPlayer::updateButtonState);
 
-    // Connect button click to toggle play/pause
     connect(m_button, &QPushButton::clicked, this, [this]() {
         if (m_player->playbackState() == QMediaPlayer::PlayingState) {
             pause();
@@ -49,7 +42,6 @@ void AmbientPlayer::setupConnections()
         }
     });
 
-    // Connect errors for debugging
     connect(m_player, &QMediaPlayer::errorOccurred, this, [this]() {
         qWarning() << "AmbientPlayer error:" << m_player->errorString();
     });
@@ -73,8 +65,6 @@ void AmbientPlayer::updateButtonState()
         break;
     }
 
-    // Button shows: "Name + StateIcon"
-    // Truncate name to 10 chars for display
     QString displayName = m_name;
     if (displayName.length() > 10) {
         displayName = displayName.left(8) + "..";
@@ -88,12 +78,10 @@ void AmbientPlayer::updateButtonState()
 
 void AmbientPlayer::updatePlayerSettings()
 {
-    // Apply current settings to the player
     m_audioOutput->setVolume(m_volume);
     m_player->setLoops(m_autoRepeat ? QMediaPlayer::Infinite : 1);
 
 
-    // Visual cue for enabled/disabled
     if (!m_enabled) {
         m_button->setStyleSheet("QPushButton { color: gray; }");
     }
@@ -106,7 +94,6 @@ int AmbientPlayer::Volume() const
     return m_baseVolume;
 }
 
-// ----- SETTERS -----
 
 void AmbientPlayer::setName(const QString &name)
 {
@@ -139,8 +126,7 @@ void AmbientPlayer::setVolume(int volume)  // volume is 0-100
     volume = qBound(0, volume, 100);
     if (m_volume != volume) {
         m_volume = volume;
-        // Convert 0-100 to 0.0-1.0 for Qt6
-        m_audioOutput->setVolume(m_volume / 100.0f);  // ← FIXED!
+        m_audioOutput->setVolume(m_volume / 100.0f);
         emit needsUpdate();
     }
 }
@@ -150,7 +136,6 @@ void AmbientPlayer::applyMasterVolume(float ratio)
 {
     m_masterRatio = ratio;
 
-    // Calculate actual output: base × master × perceptual curve
     float linear = m_baseVolume * m_masterRatio / 100.0f;
     float perceptual = qPow(linear, 0.5f);  // Square root curve
 
@@ -162,7 +147,6 @@ void AmbientPlayer::setEnabled(bool enabled)
     if (m_enabled != enabled) {
         m_enabled = enabled;
 
-        // If disabling, stop playback
         if (!m_enabled && m_player->playbackState() == QMediaPlayer::PlayingState) {
             m_player->stop();
         }
@@ -181,7 +165,6 @@ void AmbientPlayer::setAutoRepeat(bool repeat)
     }
 }
 
-// ----- PLAYBACK CONTROL -----
 
 void AmbientPlayer::play()
 {
@@ -190,12 +173,10 @@ void AmbientPlayer::play()
     }
 
     if (m_filePath.isEmpty()) {
-        //qWarning() << "No audio file set for" << m_name;
         return;
     }
 
     if (m_player->playbackState() == QMediaPlayer::StoppedState) {
-        // If stopped, need to potentially reload source
         if (m_player->source().isEmpty() && !m_filePath.isEmpty()) {
             m_player->setSource(QUrl::fromLocalFile(m_filePath));
         }
@@ -226,7 +207,6 @@ QMediaPlayer::PlaybackState AmbientPlayer::playbackState() const
 /*
 void AmbientPlayer::setVolume(int volume)
 {
-    // new two-tier implementation
     volume = qBound(0, volume, 100);
     if (m_baseVolume != volume) {
         m_baseVolume = volume;

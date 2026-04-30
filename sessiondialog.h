@@ -9,7 +9,6 @@
 #include <QVector>
 #include <QString>
 
-// Forward declarations for implementation-only classes
 class QVBoxLayout;
 class QHBoxLayout;
 
@@ -19,9 +18,8 @@ struct Stage {
     double rightFreq;
     int waveform;          // 0=SINE, 1=SQUARE, 2=TRIANGLE, 3=SAWTOOTH
     int durationMinutes;
-    double pulseFreq;    // NEW: For ISOCHRONIC pulse frequency
-    double volumePercent; // NEW: Volume percentage
-    // Helper methods
+    double pulseFreq;
+    double volumePercent;
     int durationSeconds() const { return durationMinutes * 60; }
     double beatFreq() const { return rightFreq - leftFreq; }
     bool isIsochronic() const { return toneType == 1; }
@@ -35,11 +33,9 @@ public:
     explicit SessionDialog(QWidget *parent = nullptr);
     ~SessionDialog();
 
-    // Public interface
     bool isSessionActive() const { return m_sessionActive; }
     void stopSession();
 
-    // Configuration
     void setUnlimitedDuration(bool unlimited) { m_unlimitedDuration = unlimited; }
 
     QPushButton *pauseButton() const;
@@ -68,7 +64,6 @@ private slots:
     void onStageTimerTimeout();
 
 private:
-    // UI Components
     QTextEdit *m_textEdit;
     QLabel *m_statusLabel;
     QLabel *m_stageInfoLabel;
@@ -81,21 +76,17 @@ private:
     QPushButton *m_pauseButton;
     QPushButton *m_stopButton;
 
-    // Data
     QVector<Stage> m_stages;
     int m_currentStageIndex;
     int m_stageTimeRemainingSec;
     int m_totalTimeRemainingSec;
 
-    // State
     bool m_sessionActive;
     bool m_paused;
     bool m_unlimitedDuration;  // Added
 
-    // Timers
     QTimer *m_stageTimer;
 
-    // Private methods
     void setupUI();
     bool parseStagesFromText();
     Stage parseLine(const QString &line, bool &ok, QString &error);

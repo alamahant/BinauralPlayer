@@ -7,7 +7,6 @@
 #include<QTime>
 #include"constants.h"
 
-// =================== CONSTRUCTOR/DESTRUCTOR ===================
 BinauralEngine::BinauralEngine(QObject *parent)
     : QObject(parent)
     , m_audioOutput(nullptr)
@@ -35,7 +34,6 @@ BinauralEngine::~BinauralEngine()
     delete m_audioOutput;
 }
 
-// =================== INITIALIZATION METHODS ===================
 void BinauralEngine::initializeAudioFormat()
 {
     m_audioFormat.setSampleRate(m_sampleRate);
@@ -67,7 +65,6 @@ bool BinauralEngine::initializeAudioOutput()
     m_audioOutput->setVolume(m_outputVolume);
     return true;
 }
-// =================== CORE PLAYBACK CONTROL ===================
 
 bool BinauralEngine::start()
 {
@@ -80,7 +77,6 @@ bool BinauralEngine::start()
         return false;
     }
 
-    // === ONLY GENERATE BUFFER IF NEEDED ===
     if (!m_audioBuffer || m_parametersChanged) {
         generateAudioBuffer(m_bufferDurationMs);
 
@@ -95,15 +91,11 @@ bool BinauralEngine::start()
         m_parametersChanged = false; // Reset flag
     }
 
-    // === ALWAYS SEEK TO START ===
     m_audioBuffer->seek(0);
 
     m_audioOutput->start(m_audioBuffer);
     m_isPlaying = true;
 
-    // Connect to the idle state for looping
-    //connect(m_audioOutput, &QAudioSink::stateChanged,
-            //this, &BinauralEngine::handleAudioStateChanged);
 
     emit playbackStarted();
     return true;
@@ -140,7 +132,6 @@ bool BinauralEngine::isPlaying() const
 
 
 
-// =================== FREQUENCY CONTROL ===================
 void BinauralEngine::setLeftFrequency(double hz)
 {
     if (!validateFrequency(hz)) {
@@ -161,7 +152,6 @@ void BinauralEngine::setLeftFrequency(double hz)
 void BinauralEngine::setRightFrequency(double hz)
 {
         if (ConstantGlobals::currentToneType == 1) {
-            // Pulse frequency validation (e.g., 0.5-30Hz)
                     if (hz < 0.5 || hz > 30.0) {
                         emit errorOccurred(QString("Invalid pulse frequency: %1 Hz").arg(hz));
                         return;
@@ -188,7 +178,6 @@ void BinauralEngine::setRightFrequency(double hz) {
     if (ConstantGlobals::currentToneType == 1) {
 
     } else {
-        // Original binaural validation
         if (!validateFrequency(hz)) {
             emit errorOccurred(QString("Invalid right frequency: %1 Hz").arg(hz));
             return;
@@ -237,7 +226,6 @@ double BinauralEngine::getBeatFrequency() const
     return m_rightFrequency - m_leftFrequency;
 }
 
-// =================== WAVEFORM & AUDIO CONTROL ===================
 void BinauralEngine::setWaveform(Waveform type)
 {
     if (m_currentWaveform != type) {
@@ -298,7 +286,6 @@ double BinauralEngine::getVolume() const
     return m_outputVolume;
 }
 
-// =================== ENGINE CONFIGURATION ===================
 void BinauralEngine::setSampleRate(int sampleRate)
 {
     if (sampleRate < 8000 || sampleRate > 192000) {
@@ -325,7 +312,6 @@ int BinauralEngine::getBufferDuration() const
     return m_bufferDurationMs;
 }
 
-// =================== AUDIO STATE INFORMATION ===================
 double BinauralEngine::getCurrentPhaseLeft() const
 {
     return m_phaseLeft;
@@ -341,7 +327,6 @@ bool BinauralEngine::isEngineActive() const
     return m_isPlaying;
 }
 
-// =================== PRIVATE AUDIO GENERATION METHODS ===================
 
 
 void BinauralEngine::generateAudioBuffer(int durationMs)
@@ -351,52 +336,40 @@ void BinauralEngine::generateAudioBuffer(int durationMs)
            return;
        }
 
-    // STOP playback if active
         bool wasPlaying = m_isPlaying;
         if (wasPlaying && m_audioOutput) {
             m_audioOutput->stop();
-            //m_isPlaying = false;
         }
 
     if (durationMs <= 0) return;
 
-    // Generate buffer that's 4x longer for seamless looping
-    //int loopCount = 4;
-    //int totalDurationMs = durationMs * loopCount;
-    int totalDurationMs = durationMs;      // <-- USE DIRECT DURATION
+    int totalDurationMs = durationMs;
     qint64 sampleCount = (static_cast<qint64>(m_sampleRate) * totalDurationMs) / 1000;
 
     QByteArray audioData;
     audioData.resize(sampleCount * 2 * sizeof(int16_t));
     int16_t *data = reinterpret_cast<int16_t*>(audioData.data());
 
-    // Generate continuous audio without phase reset
     double leftPhaseIncrement = (2.0 * M_PI * m_leftFrequency) / m_sampleRate;
     double rightPhaseIncrement = (2.0 * M_PI * m_rightFrequency) / m_sampleRate;
 
     for (qint64 i = 0; i < sampleCount; ++i) {
-        // Calculate samples using current phase
         double leftSample = calculateSample(m_phaseLeft, m_currentWaveform);
         double rightSample = calculateSample(m_phaseRight, m_currentWaveform);
 
         leftSample *= m_amplitude;
         rightSample *= m_amplitude;
 
-        // Convert to 16-bit
         data[2 * i] = static_cast<int16_t>(leftSample * 32767);
         data[2 * i + 1] = static_cast<int16_t>(rightSample * 32767);
 
-        // Update phase continuously
         m_phaseLeft += leftPhaseIncrement;
         m_phaseRight += rightPhaseIncrement;
 
-        // Keep phase in range
         if (m_phaseLeft > 2.0 * M_PI) m_phaseLeft -= 2.0 * M_PI;
         if (m_phaseRight > 2.0 * M_PI) m_phaseRight -= 2.0 * M_PI;
     }
 
-    // Apply crossfade between loops (eliminates click)
-   // applyCrossfade(audioData, durationMs);
     applyLoopFade(audioData, durationMs);
 
     if (m_audioBuffer) {
@@ -416,16 +389,13 @@ void BinauralEngine::applyLoopFade(QByteArray &buffer, int durationMs)
     int16_t *data = reinterpret_cast<int16_t*>(buffer.data());
     int totalSamples = buffer.size() / sizeof(int16_t);
 
-    // 50ms fade at start and end
     int fadeSamples = (m_sampleRate * 50) / 1000;
 
-    // Fade IN first 50ms
     for (int i = 0; i < fadeSamples && i < totalSamples; i++) {
         float fade = static_cast<float>(i) / fadeSamples;
         data[i] = static_cast<int16_t>(data[i] * fade);
     }
 
-    // Fade OUT last 50ms
     for (int i = 0; i < fadeSamples && i < totalSamples; i++) {
         float fade = static_cast<float>(fadeSamples - i) / fadeSamples;
         int idx = totalSamples - fadeSamples + i;
@@ -440,24 +410,19 @@ void BinauralEngine::applyCrossfade(QByteArray &buffer, int loopDurationMs)
     int16_t *data = reinterpret_cast<int16_t*>(buffer.data());
     int totalSamples = buffer.size() / sizeof(int16_t);
 
-    // Crossfade duration: 20ms
     int crossfadeSamples = (m_sampleRate * 20) / 1000;
     int loopSamples = (m_sampleRate * loopDurationMs) / 1000 * 2; // ×2 for stereo
 
-    // Apply crossfade at each loop boundary
     for (int loop = 1; loop < 4; loop++) {
         int boundaryStart = loop * loopSamples;
 
         for (int i = 0; i < crossfadeSamples; i++) {
-            // Fade out previous loop
             int idxOut = boundaryStart - crossfadeSamples + i;
             float fadeOut = 1.0f - (static_cast<float>(i) / crossfadeSamples);
 
-            // Fade in next loop
             int idxIn = boundaryStart + i;
             float fadeIn = static_cast<float>(i) / crossfadeSamples;
 
-            // Mix both (crossfade)
             if (idxOut >= 0 && idxOut < totalSamples) {
                 data[idxOut] = static_cast<int16_t>(data[idxOut] * fadeOut);
             }
@@ -478,15 +443,12 @@ void BinauralEngine::fillBufferWithSamples(QByteArray &buffer, int sampleCount)
     double rightPhaseIncrement = (2.0 * M_PI * m_rightFrequency) / m_sampleRate;
 
     for (int i = 0; i < sampleCount; ++i) {
-        // Calculate left channel sample
         double leftSample = calculateSample(m_phaseLeft, m_currentWaveform);
         leftSample *= m_amplitude;
 
-        // Calculate right channel sample
         double rightSample = calculateSample(m_phaseRight, m_currentWaveform);
         rightSample *= m_amplitude;
 
-        // Convert to 16-bit and interleave (L, R, L, R...)
         data[2 * i] = static_cast<int16_t>(leftSample * 32767);
         data[2 * i + 1] = static_cast<int16_t>(rightSample * 32767);
 
@@ -521,10 +483,7 @@ double BinauralEngine::calculateSineSample(double phase)
 
 double BinauralEngine::calculateSquareSample(double phase)
 {
-    // Simple square wave: +1 when sin(phase) >= 0, -1 otherwise
-    //return (std::sin(phase) >= 0.0) ? 1.0 : -1.0;
 
-    // For ISOCHRONIC: On/Off (not +1/-1)
         if (ConstantGlobals::currentToneType == 1) {
             return (std::sin(phase) >= 0.0) ? 1.0 : 0.0;  // On/Off
         } else {
@@ -544,7 +503,6 @@ void BinauralEngine::applyVolumeToBuffer(QByteArray &buffer, double volume)
     }
 }
 
-// =================== PARAMETER VALIDATION ===================
 bool BinauralEngine::validateFrequency(double hz)
 {
     return (hz >= MIN_FREQUENCY && hz <= MAX_FREQUENCY);
@@ -555,14 +513,12 @@ bool BinauralEngine::validateAmplitude(double amplitude)
     return (amplitude >= MIN_AMPLITUDE && amplitude <= MAX_AMPLITUDE);
 }
 
-// =================== INTERNAL UPDATE METHODS ===================
 void BinauralEngine::updateAudioParameters()
 {
     if (!m_isPlaying || !m_parametersChanged) {
         return;
     }
 
-    // Regenerate buffer with new parameters
     bool wasPlaying = m_isPlaying;
     stop();
 
@@ -589,12 +545,10 @@ QAudioSink *BinauralEngine::audioOutput() const
 
 
 
-// =================== AUDIO STATE HANDLER ===================
 void BinauralEngine::handleAudioStateChanged(QAudio::State state)
 {
     switch (state) {
         case QAudio::ActiveState:
-            // Audio is playing normally
             break;
 
         case QAudio::SuspendedState:
@@ -602,19 +556,16 @@ void BinauralEngine::handleAudioStateChanged(QAudio::State state)
 
         case QAudio::StoppedState:
             if (m_isPlaying) {
-                //m_isPlaying = false;
                 emit playbackStopped();
             }
             break;
 
     case QAudio::IdleState:
-        // Buffer has been fully played
 
-            if (m_isPlaying && m_audioBuffer) {  // <-- KEEP only this check
+            if (m_isPlaying && m_audioBuffer) {
 
 
                 QTimer::singleShot(0, this, [this]() {
-                           // Now Qt has finished state transition
                            m_audioBuffer->seek(0);
                            m_audioOutput->start(m_audioBuffer);
                        });
@@ -626,7 +577,6 @@ void BinauralEngine::handleAudioStateChanged(QAudio::State state)
             break;
     }
 
-    // Check for errors
     if (m_audioOutput && m_audioOutput->error() != QAudio::NoError) {
         QString errorMsg;
         switch (m_audioOutput->error()) {
@@ -650,7 +600,6 @@ void BinauralEngine::handleAudioStateChanged(QAudio::State state)
     }
 }
 
-//ISOCHRONIC METHODS
 
 void BinauralEngine::generateIsochronicBuffer(int durationMs) {
     bool wasPlaying = m_isPlaying;
@@ -660,7 +609,6 @@ void BinauralEngine::generateIsochronicBuffer(int durationMs) {
 
     if (durationMs <= 0) return;
 
-    // Generate buffer with same duration logic
     int totalDurationMs = durationMs;
     qint64 sampleCount = (static_cast<qint64>(m_sampleRate) * totalDurationMs) / 1000;
 
@@ -668,49 +616,35 @@ void BinauralEngine::generateIsochronicBuffer(int durationMs) {
     audioData.resize(sampleCount * 2 * sizeof(int16_t));  // Stereo buffer
     int16_t *data = reinterpret_cast<int16_t*>(audioData.data());
 
-    // ISOCHRONIC LOGIC:
-    // m_leftFrequency = Carrier frequency (e.g., 200Hz)
-    // m_rightFrequency = Pulse rate (e.g., 10Hz for 10 pulses/second)
     double carrierFreq = m_leftFrequency;
     double pulseFreq = m_pulseFrequency;
 
-    // Phase increments (same as binaural but different meaning)
     double carrierPhaseIncrement = (2.0 * M_PI * carrierFreq) / m_sampleRate;
     double pulsePhaseIncrement = (2.0 * M_PI * pulseFreq) / m_sampleRate;
 
-    // Reuse existing phase variables
     double carrierPhase = m_phaseLeft;
     double pulsePhase = m_phaseRight;
 
     for (qint64 i = 0; i < sampleCount; ++i) {
-        // 1. Generate carrier wave (sine/square based on m_currentWaveform)
         double carrierSample = calculateSample(carrierPhase, m_currentWaveform);
 
-        // 2. Generate pulse wave (square wave for on/off)
-        // sin(pulsePhase) >= 0 ? 1.0 : 0.0 = Square wave, 50% duty cycle
         double pulseValue = (std::sin(pulsePhase) >= 0.0) ? 1.0 : 0.0;
 
-        // 3. Modulate: carrier × pulse
         double modulatedSample = carrierSample * pulseValue * m_amplitude;
 
-        // 4. Same signal to both ears (stereo identical)
         data[2 * i] = static_cast<int16_t>(modulatedSample * 32767);     // Left
         data[2 * i + 1] = static_cast<int16_t>(modulatedSample * 32767); // Right
 
-        // 5. Update phases (same as binaural)
         carrierPhase += carrierPhaseIncrement;
         pulsePhase += pulsePhaseIncrement;
 
-        // 6. Keep phase in range (same as binaural)
         if (carrierPhase > 2.0 * M_PI) carrierPhase -= 2.0 * M_PI;
         if (pulsePhase > 2.0 * M_PI) pulsePhase -= 2.0 * M_PI;
     }
 
-    // Save phases for continuation (same as binaural)
     m_phaseLeft = carrierPhase;
     m_phaseRight = pulsePhase;
 
-    // Apply same fade as binaural
     applyLoopFade(audioData, durationMs);
 
     if (m_audioBuffer) {
@@ -754,17 +688,12 @@ void BinauralEngine::forceBufferRegeneration() {
 }
 
 double BinauralEngine::calculateTriangleSample(double phase) {
-    // Triangle wave: linear rise/fall between -1 and +1
-    // Period is 2π, so scale phase to 0-1 range
     double normalized = phase / (2.0 * M_PI);
 
-    // Create triangle: rise for half period, fall for half period
     double triangle;
     if (normalized < 0.5) {
-        // Rising edge: 0 → 1
         triangle = 4.0 * normalized - 1.0;
     } else {
-        // Falling edge: 1 → -1
         triangle = 3.0 - 4.0 * normalized;
     }
 
@@ -772,8 +701,6 @@ double BinauralEngine::calculateTriangleSample(double phase) {
 }
 
 double BinauralEngine::calculateSawtoothSample(double phase) {
-    // Sawtooth wave: linear ramp from -1 to +1, then instant reset
-    // Formula: 2 * (phase/(2π) - floor(phase/(2π) + 0.5))
 
     double normalized = phase / (2.0 * M_PI);  // Convert to 0-1 range
     double sawtooth = 2.0 * (normalized - std::floor(normalized + 0.5));

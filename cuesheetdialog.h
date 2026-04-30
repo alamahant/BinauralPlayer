@@ -7,7 +7,6 @@
 #include<QListWidgetItem>
 #include<QLabel>
 
-// Track data structure
 struct CueTrack {
     int number;
     QString title;
@@ -26,7 +25,6 @@ public:
 protected:
     void closeEvent(QCloseEvent *event) override;
 signals:
-    // Only 2 signals to communicate with MainWindow
     void trackSelected(const QString &audioFilePath, qint64 startPositionMs);
     void needAudioFileLoaded(const QString &audioFilePath);
     void hideRequested();
@@ -44,7 +42,6 @@ private:
     qint64 timeCodeToMs(const QString &timeCode); // MM:SS:FF -> ms
     void updateTrackDisplay();
 
-    // UI
     QListWidget *m_trackList;
     QPushButton *m_loadButton;
     QPushButton *m_playButton;
@@ -52,7 +49,6 @@ private:
     QPushButton *m_nextButton;
     QLabel *m_statusLabel;
 
-    // Data
     QString m_audioFilePath; // From "FILE" command in CUE
     QList<CueTrack> m_tracks;
     int m_currentTrackIndex = -1;

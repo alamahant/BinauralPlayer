@@ -36,22 +36,17 @@ SessionDialog::SessionDialog(QWidget *parent)
     setWindowTitle("Multi-Stage Session");
     setMinimumSize(700, 600);
 
-    // Setup UI first
     setupUI();
 
-    // Create timers
     m_stageTimer = new QTimer(this);
     m_stageTimer->setInterval(1000);
 
 
 
-    // Connect all signals and slots
     setupConnections();
 
-    // Initial UI state
     updateUIFromState();
 
-    // Non-modal dialog
     setWindowFlags(windowFlags() & ~Qt::WindowContextHelpButtonHint);
 }
 
@@ -140,7 +135,6 @@ void SessionDialog::setupUI()
         "}"
     );
 
-    // Create format reminder label
     QLabel *formatLabel = new QLabel(this);
     formatLabel->setText("Format: <b>TYPE:LEFT:RIGHT:WAVE:DUR(min):[OPTIONAL] VOL(%)</b> <span style='color:#666'>(default:15%)</span>");
     formatLabel->setStyleSheet(
@@ -153,7 +147,6 @@ void SessionDialog::setupUI()
         "}"
     );
 
-    // Create text editor with placeholder
     m_textEdit = new QTextEdit(this);
     m_textEdit->setFontPointSize(14);
 
@@ -171,7 +164,6 @@ void SessionDialog::setupUI()
         "- ISOCHRONIC: RIGHT field = PULSE frequency (Hz)\n"
         "- Volume optional (0-100%, default 15%)"
     );
-    // Create control buttons
     m_parseButton = new QPushButton("&Parse Stages", this);
     m_loadButton = new QPushButton("&Load Session...", this);
     m_saveButton = new QPushButton("&Save Session...", this);
@@ -180,19 +172,15 @@ void SessionDialog::setupUI()
     m_pauseButton = new QPushButton("⏸ &Pause", this);
     m_stopButton = new QPushButton("■ &Stop", this);
 
-    // Create status labels
     m_statusLabel = new QLabel("No session loaded", this);
     m_stageInfoLabel = new QLabel("Stage: --/-- | Time: --:--/--:--", this);
     m_totalTimeLabel = new QLabel("Total: --:--", this);
 
-    // Setup layouts
     QVBoxLayout *mainLayout = new QVBoxLayout(this);
     mainLayout->addWidget(headerLabel);
     mainLayout->addWidget(formatLabel);
-    // Text editor area
     mainLayout->addWidget(m_textEdit);
 
-    // File operation buttons (first row)
     QHBoxLayout *fileButtonLayout = new QHBoxLayout();
     fileButtonLayout->addWidget(m_parseButton);
     fileButtonLayout->addWidget(m_loadButton);
@@ -201,7 +189,6 @@ void SessionDialog::setupUI()
     fileButtonLayout->addStretch();
     mainLayout->addLayout(fileButtonLayout);
 
-    // Playback buttons (second row)
     QHBoxLayout *playbackLayout = new QHBoxLayout();
     playbackLayout->addStretch();
     playbackLayout->addWidget(m_playButton);
@@ -210,7 +197,6 @@ void SessionDialog::setupUI()
     playbackLayout->addStretch();
     mainLayout->addLayout(playbackLayout);
 
-    // Status bar (third row)
     QHBoxLayout *statusLayout = new QHBoxLayout();
     statusLayout->addWidget(m_statusLabel);
     statusLayout->addStretch();
@@ -262,7 +248,6 @@ bool SessionDialog::parseStagesFromText()
         Stage stage = parseLine(line, ok, error);
 
         if (!ok) {
-            // Skip line but don't fail entire parse
             continue;
         }
 
@@ -300,13 +285,11 @@ Stage SessionDialog::parseLine(const QString &line, bool &ok, QString &error)
 
     QStringList parts = line.split(':');
 
-    // Support both 5-field (without volume) and 6-field (with volume) formats
     if (parts.size() != 5 && parts.size() != 6) {
         error = QString("Need 5 or 6 parts separated by ':' (got %1)").arg(parts.size());
         return stage;
     }
 
-    // Parse tone type FIRST
     QString typeStr = parts[0].trimmed().toUpper();
     if (typeStr == "BINAURAL") {
         stage.toneType = 0;
@@ -319,7 +302,6 @@ Stage SessionDialog::parseLine(const QString &line, bool &ok, QString &error)
         return stage;
     }
 
-    // Parse left frequency (always carrier frequency)
     bool leftFreqOk;
     stage.leftFreq = parts[1].trimmed().toDouble(&leftFreqOk);
     if (!leftFreqOk) {
@@ -327,7 +309,6 @@ Stage SessionDialog::parseLine(const QString &line, bool &ok, QString &error)
         return stage;
     }
 
-    // Parse "right" frequency - MEANING DEPENDS ON TONE TYPE
     bool rightFreqOk;
     double parsedRight = parts[2].trimmed().toDouble(&rightFreqOk);
     if (!rightFreqOk) {
@@ -335,17 +316,14 @@ Stage SessionDialog::parseLine(const QString &line, bool &ok, QString &error)
         return stage;
     }
 
-    // CRITICAL: Assign rightFreq and pulseFreq based on tone type
     if (stage.toneType == 1) { // ISOCHRONIC
         stage.rightFreq = stage.leftFreq; // Right channel = left (carrier)
         stage.pulseFreq = parsedRight;    // Pulse = parsed "right" field
     } else {
-        // For BINAURAL/GENERATOR: normal interpretation
         stage.rightFreq = parsedRight;    // Right channel frequency
         stage.pulseFreq = 7.83;           // Default pulse frequency
     }
 
-    // Parse waveform
     QString waveStr = parts[3].trimmed().toUpper();
     if (waveStr == "SINE") {
         stage.waveform = 0;
@@ -360,7 +338,6 @@ Stage SessionDialog::parseLine(const QString &line, bool &ok, QString &error)
         return stage;
     }
 
-    // Parse duration (now field 4)
     bool timeOk1;
     stage.durationMinutes = parts[4].trimmed().toInt(&timeOk1);
     if (!timeOk1) {
@@ -368,7 +345,6 @@ Stage SessionDialog::parseLine(const QString &line, bool &ok, QString &error)
         return stage;
     }
 
-    // Parse volume (field 5, optional)
     if (parts.size() == 6) {
         bool volumeOk;
         stage.volumePercent = parts[5].trimmed().toDouble(&volumeOk);
@@ -376,13 +352,11 @@ Stage SessionDialog::parseLine(const QString &line, bool &ok, QString &error)
             error = "Invalid volume number";
             return stage;
         }
-        // Validate volume range
         if (stage.volumePercent < 0.0 || stage.volumePercent > 100.0) {
             error = "Volume must be 0-100%";
             return stage;
         }
     } else {
-        // 5-field format: default volume
         stage.volumePercent = 15.0;
     }
 
@@ -392,21 +366,17 @@ Stage SessionDialog::parseLine(const QString &line, bool &ok, QString &error)
 
 bool SessionDialog::validateStage(const Stage &stage, int lineNum, QString &error)
 {
-    // Carrier frequency validation (always applies)
     if (stage.leftFreq < 20.0 || stage.leftFreq > 20000.0) {
         error = "Carrier/left frequency must be 20-20000 Hz";
         return false;
     }
 
-    // Tone-specific validations
     if (stage.toneType == 0) { // BINAURAL
-        // Right channel frequency
         if (stage.rightFreq < 20.0 || stage.rightFreq > 20000.0) {
             error = "Right frequency must be 20-20000 Hz";
             return false;
         }
 
-        // Ensure right > left for positive beat
         /*
         if (stage.rightFreq <= stage.leftFreq) {
             error = "BINAURAL requires right frequency > left frequency";
@@ -415,19 +385,16 @@ bool SessionDialog::validateStage(const Stage &stage, int lineNum, QString &erro
         */
 
     } else if (stage.toneType == 1) { // ISOCHRONIC
-        // For ISOCHRONIC: rightFreq should equal leftFreq (carrier)
         if (qAbs(stage.rightFreq - stage.leftFreq) > 0.1) {
             error = "ISOCHRONIC carrier mismatch (right should equal left)";
             return false;
         }
-        // Pulse frequency validation
         if (stage.pulseFreq < 0.5 || stage.pulseFreq > 100.0) {
             error = "ISOCHRONIC pulse must be 0.5-100 Hz";
             return false;
         }
 
     } else if (stage.toneType == 2) { // GENERATOR
-        // For GENERATOR: frequencies should match
 
         /*
         if (qAbs(stage.rightFreq - stage.leftFreq) > 0.1) {
@@ -438,20 +405,17 @@ bool SessionDialog::validateStage(const Stage &stage, int lineNum, QString &erro
 
     }
 
-    // Duration validation
     if (stage.durationMinutes < 1) {
         error = "Duration must be at least 1 minute";
         return false;
     }
 
-    // Check unlimited setting
     int maxMinutes = m_unlimitedDuration ? 360 : 45;
     if (stage.durationMinutes > maxMinutes) {
         error = QString("Duration exceeds maximum (%1 min)").arg(maxMinutes);
         return false;
     }
 
-    // Volume validation (always applies)
     if (stage.volumePercent < 0.0 || stage.volumePercent > 100.0) {
         error = "Volume must be 0-100%";
         return false;
@@ -493,16 +457,12 @@ void SessionDialog::onLoadClicked()
 
     m_textEdit->setPlainText(content);
 
-    // Auto-parse after load
-    //if (parseStagesFromText()) {
         m_parseButton->click();
         m_statusLabel->setText(QString("✓ Loaded and parsed %1 stage(s)").arg(m_stages.size()));
-    //}
 }
 
 void SessionDialog::onSaveClicked()
 {
-    // Validate before saving
     if (!parseStagesFromText()) {
         QMessageBox::warning(this, "Validation Error",
                            "Cannot save invalid session. Please fix errors first.");
@@ -520,7 +480,6 @@ void SessionDialog::onSaveClicked()
 
     if (fileName.isEmpty()) return;
 
-    // Ensure file extension
     if (!fileName.endsWith(".bsession") && !fileName.endsWith(".txt")) {
         fileName += ".bsession";
     }
@@ -582,17 +541,14 @@ void SessionDialog::startSession()
         return;
     }
 
-    // Emit signal to MainWindow that session is starting
     emit sessionStarted(m_totalTimeRemainingSec);
 
     m_sessionActive = true;
     m_paused = false;
     m_currentStageIndex = 0;
 
-    // Start first stage
     startStage(0);
 
-    // Update UI state
     updateUIFromState();
 }
 
@@ -603,18 +559,14 @@ void SessionDialog::startStage(int index)
     m_currentStageIndex = index;
     const Stage &stage = m_stages[index];
 
-    //emit syncTimersRequested(m_currentStageIndex, m_totalTimeRemainingSec);
 
-    //critical: do not delete or comment out next line
     m_stageTimeRemainingSec = stage.durationSeconds();
 
 
-    // Update parameters in MainWindow via signal
     emit stageChanged(stage.toneType, stage.leftFreq, stage.rightFreq,
                       stage.waveform, stage.pulseFreq, stage.volumePercent);
 
 
-    //dirty fix to remedy one sec diff between the timers
     if(m_currentStageIndex > 0) {
         m_stageTimeRemainingSec--;
         m_totalTimeRemainingSec--;
@@ -622,14 +574,11 @@ void SessionDialog::startStage(int index)
 
     emit fadeRequested(stage.volumePercent);
 
-    // Set stage timer
-    //m_stageTimeRemainingSec = stage.durationSeconds();
 
     if (!m_paused) {
         m_stageTimer->start();
     }
 
-    // Highlight current line
     highlightCurrentStage();
 }
 
@@ -671,7 +620,6 @@ void SessionDialog::onStopClicked()
 
 void SessionDialog::stopSession()
 {
-    // Public method called from MainWindow
     endSession();
 }
 
@@ -682,37 +630,28 @@ void SessionDialog::endSession()
     m_sessionActive = false;
     m_paused = false;
 
-    // Stop timers
     m_stageTimer->stop();
 
-    // Update UI
     updateUIFromState();
 
-    // Clear highlight
     highlightCurrentStage();
 
     m_parseButton->click();
 
-    // Emit signal to MainWindow
     emit sessionEnded();
 }
 
 void SessionDialog::onStageTimerTimeout()
 {
     if(m_stageTimeRemainingSec == 5){
-//        emit syncTimersRequested(m_currentStageIndex, m_totalTimeRemainingSec);
         emit fadeRequested(0.0);
     }
 
     if (m_stageTimeRemainingSec <= 0) {
-        // Stage completed
         if (m_currentStageIndex < m_stages.size() - 1) {
-            // Start transition to next stage
             startTransition(m_currentStageIndex, m_currentStageIndex + 1);
         } else {
-            // Last stage completed
             emit sessionEnded();
-           // endSession();
 
         }
         return;
@@ -721,7 +660,6 @@ void SessionDialog::onStageTimerTimeout()
     m_stageTimeRemainingSec--;
     m_totalTimeRemainingSec--;
 
-    // Update UI
     updateUIFromState();
 
 }
@@ -753,7 +691,6 @@ void SessionDialog::startTransition(int fromIndex, int toIndex)
 
 void SessionDialog::updateUIFromState()
 {
-    // Update button states
     bool hasStages = !m_stages.isEmpty();
 
     m_parseButton->setEnabled(!m_sessionActive);
@@ -765,7 +702,6 @@ void SessionDialog::updateUIFromState()
     m_pauseButton->setEnabled(m_sessionActive);
     m_stopButton->setEnabled(m_sessionActive);
 
-    // Update button text based on state
     if (m_sessionActive) {
         m_playButton->setText(m_paused ? "▶ &Resume" : "▶ &Playing");
         m_pauseButton->setText(m_paused ? "⏸ &Paused" : "⏸ &Pause");
@@ -774,7 +710,6 @@ void SessionDialog::updateUIFromState()
         m_pauseButton->setText("⏸ &Pause");
     }
 
-    // Update status labels
     if (m_sessionActive && m_currentStageIndex >= 0 && m_currentStageIndex < m_stages.size()) {
         const Stage &stage = m_stages[m_currentStageIndex];
 
@@ -818,7 +753,6 @@ void SessionDialog::updateUIFromState()
 
 void SessionDialog::highlightCurrentStage()
 {
-    // Clear all formatting first
     QTextCursor cursor(m_textEdit->document());
     cursor.select(QTextCursor::Document);
     QTextCharFormat defaultFormat;
@@ -828,7 +762,6 @@ void SessionDialog::highlightCurrentStage()
         return;
     }
 
-    // Find and highlight the current stage line
     QString text = m_textEdit->toPlainText();
     QStringList lines = text.split('\n');
 
@@ -861,7 +794,6 @@ void SessionDialog::highlightCurrentStage()
         highlightFormat.setFontWeight(QFont::Bold);
         highlightCursor.mergeCharFormat(highlightFormat);
 
-        // Ensure visible
         m_textEdit->setTextCursor(highlightCursor);
         m_textEdit->ensureCursorVisible();
     }

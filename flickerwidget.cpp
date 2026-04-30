@@ -10,14 +10,12 @@
 #include <QMenu>
 #include <QContextMenuEvent>
 
-// ── GLSL shaders ──────────────────────────────────────────────────────────────
 
 static const char *VERT_SRC = R"(
 #version 120
 attribute vec2 aPos;
 varying vec2 vUV;
 void main() {
-    // aPos is -1..1; convert to 0..1 UV
     vUV = aPos * 0.5 + 0.5;
     gl_Position = vec4(aPos, 0.0, 1.0);
 }
@@ -63,7 +61,6 @@ void main() {
 }
 )";
 
-// ── full-screen quad ──────────────────────────────────────────────────────────
 
 static const float QUAD[] = {
     -1.f, -1.f,
@@ -72,7 +69,6 @@ static const float QUAD[] = {
      1.f,  1.f,
 };
 
-// ── FlickerWidget ─────────────────────────────────────────────────────────────
 
 FlickerWidget::FlickerWidget(QWidget *parent)
     : QOpenGLWidget(parent)
@@ -93,7 +89,6 @@ FlickerWidget::~FlickerWidget()
     doneCurrent();
 }
 
-// ── public control ────────────────────────────────────────────────────────────
 
 void FlickerWidget::startFlicker()
 {
@@ -168,7 +163,6 @@ void FlickerWidget::setSubliminalMode(int mode)
     rebuildTextTexture();
 }
 
-// ── OpenGL ────────────────────────────────────────────────────────────────────
 
 void FlickerWidget::initializeGL()
 {
@@ -196,7 +190,6 @@ void FlickerWidget::paintGL()
     float t        = static_cast<float>(m_elapsed.elapsed()) / 1000.0f;
     float phase    = std::fmod(t * static_cast<float>(m_frequency), 1.0f);
     int   dynamicN = qMax(1, static_cast<int>(m_frequency * m_subliminalFactor));
-    //bool  texFrame = phase < (1.0f / static_cast<float>(m_subliminalEveryN));
     bool  texFrame = phase < (1.0f / static_cast<float>(dynamicN));
 
     bool  showTex  = m_hasTex && (m_subliminalMode == 1 || m_subliminalMode == 2)
@@ -234,7 +227,6 @@ void FlickerWidget::paintGL()
 }
 
 
-// ── private helpers ───────────────────────────────────────────────────────────
 
 float FlickerWidget::computeBrightness(float phase) const
 {
@@ -254,11 +246,9 @@ void FlickerWidget::setSubliminalFactor(float newSubliminalFactor)
 
 void FlickerWidget::rebuildTextTexture()
 {
-    // need a valid GL context and a real size
     if (!isValid() || width() <= 0 || height() <= 0)
         return;
 
-    // render text into a transparent pixmap matching the widget size
     QPixmap pm(width(), height());
     pm.fill(Qt::transparent);
 
@@ -287,7 +277,6 @@ void FlickerWidget::rebuildTextTexture()
         p.end();
     }
 
-    // GL expects origin at bottom-left; QImage origin is top-left → mirror
     QImage img = pm.toImage()
                    .convertToFormat(QImage::Format_RGBA8888)
                    .mirrored(false, true);
@@ -336,7 +325,6 @@ void FlickerWidget::buildShader()
     m_uFlash = m_program->uniformLocation("uFlash");
 }
 
-// ── event handling ────────────────────────────────────────────────────────────
 
 void FlickerWidget::showEvent(QShowEvent *event)
 {

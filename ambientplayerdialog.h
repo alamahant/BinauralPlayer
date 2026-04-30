@@ -14,16 +14,13 @@
 #include <QCheckBox>
 #include <QGroupBox>
 
-// Qt Dialogs
 #include <QFileDialog>
 #include <QMessageBox>
 
-// Qt Layouts
 #include <QHBoxLayout>
 #include <QVBoxLayout>
 #include <QFormLayout>
 
-// Qt Core
 #include <QCloseEvent>
 #include <QTime>
 #include <QDebug>
@@ -68,7 +65,6 @@ private:
     AmbientPlayer* m_player;
     bool m_changesMade;
 
-    // UI Widgets
     QLineEdit* m_filePathEdit;
     QLineEdit* m_nameEdit;
     QPushButton* m_browseButton;
@@ -86,10 +82,8 @@ private:
     void setupLayout();
     void setupConnections();
     void updateTimeDisplay(qint64 position, qint64 duration);
-    //QMediaPlayer::PlaybackState state;
     void seekAudio();
     QMediaPlayer::PlaybackState m_savedState = QMediaPlayer::StoppedState;
-    //void updateUI();
 
 
 };

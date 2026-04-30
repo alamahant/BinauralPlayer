@@ -21,20 +21,16 @@ int main(int argc, char *argv[])
     MainWindow w;
 
     w.show();
-    //open with
     if (argc == 2) {
             QString filePath = QString::fromLocal8Bit(argv[1]);
             QFileInfo fileInfo(filePath);
 
             if (fileInfo.isFile() && fileInfo.exists()) {
-                // Use singleShot to ensure MainWindow is fully ready
                 QTimer::singleShot(0, [&w, filePath]() {
-                    // Directly call the public slot
                     w.onFileOpened(filePath);
                 });
             }
 
    }
-    //
     return a.exec();
 }
