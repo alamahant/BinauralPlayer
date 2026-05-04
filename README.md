@@ -8,7 +8,7 @@ A sophisticated desktop application for multimedia playback, binaural/isochronic
 
 | Platform | Where to Get It |
 | :--- | :--- |
-| **Linux** | [Flathub](https://flathub.org/apps/io.github.alamahant.BinauralPlayer) |
+| **Linux** | [Flathub](https://flathub.org/en/apps/search?q=alamahant) |
 | **Windows** | [Buy on Gumroad](https://jnanadhakini.gumroad.com/l/ffllx) - Pre-compiled binary, no compilation needed |
 
 ![Qt](https://img.shields.io/badge/Qt-6.0%2B-green)
