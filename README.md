@@ -9,7 +9,8 @@ A sophisticated desktop application for multimedia playback, binaural/isochronic
 | Platform | Where to Get It |
 | :--- | :--- |
 | **Linux** | [Flathub](https://flathub.org/en/apps/search?q=alamahant) |
-| **Windows** | [Buy on Gumroad](https://jnanadhakini.gumroad.com/l/ffllx) - Pre-compiled binary, no compilation needed |
+| **Windows and Mac** | [Buy on Gumroad](https://jnanadhakini.gumroad.com/) - Pre-compiled binary, no compilation needed |
+
 
 ![Qt](https://img.shields.io/badge/Qt-6.0%2B-green)
 ![C++17](https://img.shields.io/badge/C%2B%2B-17-blue)
