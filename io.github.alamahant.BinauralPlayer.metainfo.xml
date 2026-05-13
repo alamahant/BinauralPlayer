@@ -7,6 +7,7 @@
   <summary>Full-featured media player with brainwave audio generation</summary>
   <metadata_license>CC0-1.0</metadata_license>
   <project_license>GPL-3.0-or-later</project_license>
+  <url type="vcs-browser">https://github.com/alamahant/BinauralPlayer</url>
 
   <description>
     <p>
@@ -70,6 +71,18 @@
   </screenshots>
 
   <releases>
+
+<release version="1.5.2" date="2026-05-13">
+  <description>
+    <p>Release v1.5.2:</p>
+    <ul>
+      <li>Fixed critical crash when changing waveform from Sine to Square/Triangle/Sawtooth</li>
+      <li>Added null pointer validation for visual stimulation dialog in waveform change handlers</li>
+      <li>Improved stability when switching between BINAURAL, ISOCHRONIC, and GENERATOR modes</li>
+      <li>Fixed application crash in onWaveformChanged() and onToneTypeComboIndexChanged() functions</li>
+    </ul>
+  </description>
+</release>
 
 <release version="1.5.1" date="2026-04-20">
   <description>

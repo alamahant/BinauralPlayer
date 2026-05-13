@@ -1,5 +1,19 @@
 # Changelog
 
+## [2026-05-13] - Release v1.5.2
+
+### Fixed
+- **Critical Crash**: Application no longer crashes when changing waveform from Sine to Square/Triangle/Sawtooth
+  - Root cause: Null pointer access to `m_visStimDialog` in waveform change handlers
+  - Added proper null checks before calling `syncWaveType()`
+  - Affected: `onWaveformChanged()` and `onToneTypeComboIndexChanged()`
+
+### Improved
+- Visual stimulation dialog now safely handles uninitialized states
+- Stability improvements during tone type switching (BINAURAL/ISOCHRONIC/GENERATOR)
+
+---
+
 ## [2026-04-20] - Release v1.5.1
 ### Added
 - **Dark Theme Mode**: Full dark theme support with View → Dark Theme toggle for reduced eye strain in low-light environments

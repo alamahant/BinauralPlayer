@@ -1342,8 +1342,9 @@ void MainWindow::onWaveformChanged(int index) {
     m_binauralEngine->setWaveform(waveform);
     m_binauralStatusLabel->setText(formatBinauralString());
 
-    if (index >= 0 && index < 4)
-          m_visStimDialog->syncWaveType(index);
+    if (index >= 0 && index < 4){
+        if(m_visStimDialog) { m_visStimDialog->syncWaveType(index); }
+    }
 }
 
 void MainWindow::onBinauralVolumeChanged(double value) {

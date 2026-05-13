@@ -682,12 +682,11 @@ QString HelpMenuDialog::getShortcutsContent()
 {
     return QString();  // TODO: Implement
 }
-
 QString HelpMenuDialog::getAboutContent() {
     return QString(R"(
         <div style="text-align: center; font-family: Arial, sans-serif;">
             <h1 style="color: #2c3e50; margin-bottom: 10px;">🎧 BinauralPlayer</h1>
-            <h3 style="color: #7f8c8d; margin-bottom: 20px;">Multimedia & Brainwave Audio Engine</h3>
+            <h3 style="color: #7f8f8d; margin-bottom: 20px;">Multimedia & Brainwave Audio Engine</h3>
             <p style="font-size: 16px; margin-bottom: 20px;">
                 A powerful desktop application for media playback, binaural and isochronic
                 tone generation, and real-time brainwave entrainment. Built with modern Qt 6
@@ -713,33 +712,41 @@ QString HelpMenuDialog::getAboutContent() {
                     • Safety warnings and customizable UI elements
                 </p>
 
-                <p>Available for Linux, Windows, and macOS.</p>
-<p>
-  Project Repository
-  <br>
-  <a href="https://github.com/alamahant/BinauralPlayer">https://github.com/alamahant/BinauralPlayer</a>
-</p>
+                <p><strong style="color: #27ae60;">✓ Free for Linux on Flathub</strong></p>
+
+                <p><strong>Windows & macOS Binaries:</strong><br>
+                <a href="https://jnanadhakini.gumroad.com/l/ffllx">
+                → https://jnanadhakini.gumroad.com/l/ffllx</a></p>
+
+                <p><strong>All Windows/macOS apps:</strong><br>
+                <a href="https://jnanadhakini.gumroad.com">
+                → https://jnanadhakini.gumroad.com</a></p>
+
+                <p><strong>Source Code & Linux Version:</strong><br>
+                <a href="https://github.com/alamahant/BinauralPlayer">
+                → https://github.com/alamahant/BinauralPlayer</a></p>
             </div>
 
             <hr style="margin: 30px 0; border: 1px solid #bdc3c7;">
 
             <div style="margin: 20px 0;">
-                <p style="margin: 5px 0; color: #7f8c8d;">
-                    <strong>Copyright © 2025 Dharma</strong>
+                <p style="margin: 5px 0; color: #7f8f8d;">
+                    <strong>Copyright © 2025 Alamahant</strong>
                 </p>
                 <p style="margin: 5px 0; font-size: 12px; color: #95a5a6;">
-                    All rights reserved. This software is provided as-is without warranty.
+                    This software is open source (GPL-3.0). Linux version free on Flathub.
                 </p>
             </div>
 
             <div style="margin: 20px 0;">
-                <p style="font-size: 14px; color: #7f8c8d;">
+                <p style="font-size: 14px; color: #7f8f8d;">
                     Crafted with ❤️ for audio explorers, meditators, and frequency enthusiasts
                 </p>
             </div>
         </div>
     )").arg(QApplication::applicationVersion());
 }
+
 
 QString HelpMenuDialog::getFeaturesContent()
 {
