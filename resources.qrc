@@ -82,5 +82,6 @@
         <file>icons-white/maximize-2.svg</file>
         <file>icons-white/check.svg</file>
         <file>files/dark-theme.css</file>
+        <file>icons-white/cloud-off.svg</file>
     </qresource>
 </RCC>

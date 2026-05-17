@@ -27,6 +27,7 @@
 #include <QVBoxLayout>
 #include <QVideoWidget>
 #include <QWidget>
+#include<QProcess>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent), m_binauralEngine(new DynamicEngine(this))
@@ -2271,7 +2272,7 @@ void MainWindow::onPlaylistTabChanged(int index) {
 }
 
 
-void MainWindow::onLoadMusicClicked() {
+void MainWindow::onLoadVideoClicked() {
 
     QString filter = "All Supported Media (*.mp3 *.wav *.flac *.ogg *.m4a *.mp4 "
                      "*.m4v *.avi *.mkv);;"
@@ -2314,6 +2315,86 @@ void MainWindow::onLoadMusicClicked() {
     }
 }
 
+
+void MainWindow::onLoadMusicClicked() {
+    bool wasVideoEnabled = m_isVideoEnabled;
+    if(wasVideoEnabled) { openVideoButton->click(); }
+    QString filter = "All Supported Media (*.mp3 *.wav *.flac *.ogg *.m4a *.mp4 "
+                     "*.m4v *.avi *.mkv);;"
+                     "Audio Files (*.mp3 *.wav *.flac *.ogg *.m4a);;"
+                     "Video Files (*.mp4 *.m4v *.avi *.mkv);;"
+                     "All Files (*.*)";
+
+    QStringList files = QFileDialog::getOpenFileNames(
+                this, "Select Music Files", ConstantGlobals::musicFilePath,
+                filter);
+
+    if (!files.isEmpty()) {
+        ConstantGlobals::lastMusicDirPath = QFileInfo(files.first()).absolutePath();
+
+        QListWidget *playlist = currentPlaylistWidget();
+        QString playlistName = currentPlaylistName();
+
+        // Define video extensions to check for
+        QStringList videoExtensions = {".mp4", ".m4v", ".avi", ".mkv", ".mov", ".wmv", ".flv", ".webm"};
+
+        // Check if any video files are present
+        QStringList detectedVideoFiles;
+        foreach (const QString &file, files) {
+            QString fileExtension = QFileInfo(file).suffix().toLower();
+            if (videoExtensions.contains("." + fileExtension)) {
+                detectedVideoFiles.append(QFileInfo(file).fileName());
+            }
+        }
+
+        // If video files detected, show message box and skip them
+        if (!detectedVideoFiles.isEmpty()) {
+            QString videoList = detectedVideoFiles.join("\n• ");
+            QMessageBox::warning(this, "Video Files Detected",
+                                 "Video files detected:\n\n• " + videoList +
+                                 "\n\nTo use video files, please open the Video Player "
+                                 "and use its own load button.\n\nOnly audio files will be added.");
+        }
+
+        // Filter and add only audio files
+        QStringList audioExtensions = {".mp3", ".wav", ".flac", ".ogg", ".m4a", ".aac"};
+        int addedCount = 0;
+
+        foreach (const QString &file, files) {
+            QString fileExtension = QFileInfo(file).suffix().toLower();
+
+            // Skip video files
+            if (videoExtensions.contains("." + fileExtension)) {
+                continue;
+            }
+
+            // Check if it's an audio file
+            if (!audioExtensions.contains("." + fileExtension)) {
+                statusBar()->showMessage(QString("Skipped: %1 (unsupported format)")
+                                        .arg(QFileInfo(file).fileName()), 3000);
+                continue;
+            }
+
+            QString fileName = QFileInfo(file).fileName();
+            playlist->addItem(fileName);
+            m_playlistFiles[playlistName].append(file);
+            addedCount++;
+        }
+
+        if (playlist->count() > 0 && addedCount > 0) {
+            playlist->setCurrentRow(0);
+            playlist->scrollToTop();
+            statusBar()->showMessage(QString("Added %1 audio file(s) to '%2'")
+                                     .arg(addedCount)
+                                     .arg(playlistName));
+        } else if (addedCount == 0 && !detectedVideoFiles.isEmpty()) {
+            statusBar()->showMessage("No audio files added. Only video files were selected.");
+        } else if (addedCount == 0) {
+            statusBar()->showMessage("No valid audio files were added");
+        }
+    }
+    if(wasVideoEnabled) { openVideoButton->click(); }
+}
 
 void MainWindow::onRemoveTrackClicked() {
     QListWidget *playlist = currentPlaylistWidget();
@@ -3250,17 +3331,346 @@ QString MainWindow::formatBinauralString() {
 }
 
 
+/*
 void MainWindow::onStreamFromUrl() {
     bool ok;
-    QString url = QInputDialog::getText(
-                this, "Stream from URL", "Enter audio stream URL:", QLineEdit::Normal,
-                m_currentStreamUrl.isEmpty() ? "https://"
-                                             : m_currentStreamUrl, // Default suggestion
-                &ok);
+    QString userUrl = QInputDialog::getText(
+        this, "Add Stream", "Enter URL (YouTube, Dailymotion, Rumble, Odysee, Vimeo or direct media):",
+        QLineEdit::Normal, "https://", &ok);
 
-    if (ok && !url.isEmpty()) {
-        playRemoteStream(url);
+    if (!ok || userUrl.isEmpty()) return;
+
+    // Check which site it is
+    if (userUrl.contains("youtube.com/watch") || userUrl.contains("youtu.be/") || userUrl.contains("music.youtube.com/")) {
+        // YouTube needs special handling with -f bestaudio
+        //if(!openVideoButton->isChecked()) { openVideoButton->click(); }
+
+        extractYouTubeAndAddToPlaylist(userUrl);
     }
+    else if (userUrl.contains("dailymotion.com") ||
+             userUrl.contains("rumble.com") ||
+             userUrl.contains("odysee.com") || userUrl.contains("vimeo.com")) {
+        // Dailymotion, Rumble, Odysee work with just -g
+        //if(!openVideoButton->isChecked()) { openVideoButton->click(); }
+
+        extractGenericAndAddToPlaylist(userUrl);
+    }
+    else {
+        // Direct media URL - add as-is
+        //if(!openVideoButton->isChecked()) { openVideoButton->click(); }
+        addStreamToPlaylist(userUrl, userUrl);
+    }
+}
+*/
+
+void MainWindow::onStreamFromUrl() {
+    bool ok;
+    QString userUrl = QInputDialog::getText(
+        this, "Add Stream", "Enter URL (YouTube, Dailymotion, Rumble, Odysee, Vimeo or direct media):",
+        QLineEdit::Normal, "https://", &ok);
+
+    if (!ok || userUrl.isEmpty()) return;
+
+    // Check if it's a direct media URL
+    if (userUrl.contains(".mp4") || userUrl.contains(".mkv") ||
+        userUrl.contains(".avi") || userUrl.contains(".mov") ||
+        userUrl.contains(".mp3") || userUrl.contains(".m3u8") ||
+        userUrl.contains(".ts") || userUrl.contains(".webm") ||
+        userUrl.contains(".flv") || userUrl.contains(".wmv") ||
+        userUrl.contains(".ogg") || userUrl.contains(".ogv") ||
+        userUrl.contains(".m4v") || userUrl.contains(".m4a") ||
+        userUrl.contains(".aac") || userUrl.contains(".flac") ||
+        userUrl.contains(".wav") || userUrl.contains(".opus") ||
+        userUrl.contains(".3gp") || userUrl.contains(".mpeg") ||
+        userUrl.contains(".mpg") || userUrl.contains(".m2ts") ||
+        userUrl.contains(".mts") || userUrl.contains(".vob") ||
+        userUrl.contains(".asf") || userUrl.contains(".divx") ||
+        userUrl.contains(".f4v") || userUrl.contains(".h264") ||
+        userUrl.contains(".hevc") || userUrl.contains(".m3u")) {
+        addStreamToPlaylist(userUrl, userUrl);
+    }
+    else {
+        extractAndAddToPlaylist(userUrl);  // Single unified function for everything
+    }
+}
+
+void MainWindow::extractAndAddToPlaylist(const QString &url) {
+    statusBar()->showMessage("Extracting stream URL...", 0);
+
+    // Clean up previous process if exists (add member variable m_ytProcess to your MainWindow class)
+    if (m_ytProcess) {
+        disconnect(m_ytProcess, nullptr, this, nullptr);
+        if (m_ytProcess->state() == QProcess::Running) {
+            m_ytProcess->kill();
+        }
+        m_ytProcess->deleteLater();
+        m_ytProcess = nullptr;
+    }
+
+    m_ytProcess = new QProcess(this);
+    m_outputBuffer.clear();  // Add QByteArray m_outputBuffer as member variable
+
+    QStringList args;
+
+    QString userAgent = "Mozilla/5.0 (X11; Linux x86_64) "
+                        "AppleWebKit/537.36 (KHTML, like Gecko) "
+                        "Chrome/136.0 Safari/537.36";
+
+    // Use the exact same args as your working code
+    args << "--no-progress" << "--no-playlist" << "--quiet" << "-f" << "best" << "-g" << url;
+
+    // Collect output as it comes
+    connect(m_ytProcess, &QProcess::readyReadStandardOutput, this, [this]() {
+        m_outputBuffer.append(m_ytProcess->readAllStandardOutput());
+    });
+
+    // Single timer - wait 9 seconds then get URL
+    QTimer::singleShot(9000, this, [this, url]() {
+        if (!m_ytProcess) return;
+
+        // Kill the process if still running
+        if (m_ytProcess->state() == QProcess::Running) {
+            m_ytProcess->kill();
+        }
+
+        QString output = QString::fromUtf8(m_outputBuffer);
+        QStringList lines = output.split('\n');
+
+        QString streamUrl;
+        for (const QString &line : lines) {
+            QString trimmed = line.trimmed();
+            if (trimmed.startsWith("http://") || trimmed.startsWith("https://")) {
+                streamUrl = trimmed;
+                break;
+            }
+        }
+
+        if (!streamUrl.isEmpty()) {
+            // Try to get title (optional)
+            QString title = getTitleFromUrl(url);
+
+            // Determine site for display tag
+            QString tag;
+            if (url.contains("youtube.com") || url.contains("youtu.be")) tag = "[YouTube]";
+            else if (url.contains("dailymotion.com")) tag = "[Dailymotion]";
+            else if (url.contains("rumble.com")) tag = "[Rumble]";
+            else if (url.contains("odysee.com")) tag = "[Odysee]";
+            else if (url.contains("vimeo.com")) tag = "[Vimeo]";
+            else tag = "[Stream]";
+
+            QString displayTitle = title + " " + tag;
+            addStreamToPlaylist(streamUrl, displayTitle);
+            statusBar()->showMessage("Added: " + title, 3000);
+        } else {
+            statusBar()->showMessage("Failed to get stream URL", 3000);
+        }
+
+        m_ytProcess->deleteLater();
+        m_ytProcess = nullptr;
+    });
+
+    // Handle errors
+    connect(m_ytProcess, &QProcess::errorOccurred, this, [this](QProcess::ProcessError error) {
+        statusBar()->showMessage("Extraction error", 3000);
+        if (m_ytProcess) {
+            m_ytProcess->deleteLater();
+            m_ytProcess = nullptr;
+        }
+    });
+
+    m_ytProcess->start("yt-dlp", args);
+}
+
+// Helper function to get title (non-blocking, optional)
+QString MainWindow::getTitleFromUrl(const QString &url) {
+    QProcess titleProcess;
+    QStringList titleArgs;
+    titleArgs << "--print" << "%(title)s" << "--quiet" << url;
+
+    titleProcess.start("yt-dlp", titleArgs);
+    if (titleProcess.waitForFinished(3000)) {
+        QString output = QString::fromUtf8(titleProcess.readAllStandardOutput()).trimmed();
+        if (!output.isEmpty()) {
+            return output;
+        }
+    }
+    return "Media Stream";
+}
+
+void MainWindow::extractGenericAndAddToPlaylist(const QString &url) {
+    statusBar()->showMessage("Extracting stream URL...", 0);
+
+    QProcess *process = new QProcess(this);
+
+    // Get title first
+    QStringList titleArgs;
+    titleArgs << "--print" << "%(title)s";
+    titleArgs << url;
+
+    connect(process, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished),
+        this, [this, process, url](int exitCode, QProcess::ExitStatus exitStatus) {
+
+        QString title = "Media Stream";
+
+        if (exitStatus == QProcess::NormalExit && exitCode == 0) {
+            QString output = QString::fromUtf8(process->readAllStandardOutput()).trimmed();
+            if (!output.isEmpty()) {
+                title = output;
+            }
+        }
+
+        // Now get the stream URL with just -g
+        QProcess *urlProcess = new QProcess(this);
+
+        // Use -f best for Vimeo, otherwise just -g
+        QStringList urlArgs;
+        if (url.contains("vimeo.com")) {
+            urlArgs << "--no-progress" << "-f" << "best" << "-g" << url;
+        } else {
+            urlArgs << "-g" << url;
+        }
+
+        //urlProcess->start("yt-dlp", QStringList() << "-g" << url);
+        urlProcess->start("yt-dlp", urlArgs);
+
+        connect(urlProcess, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished),
+            this, [this, urlProcess, title, url](int exitCode2, QProcess::ExitStatus exitStatus2) {
+
+            if (exitStatus2 == QProcess::NormalExit && exitCode2 == 0) {
+                QString streamUrl = QString::fromUtf8(urlProcess->readAllStandardOutput()).trimmed();
+
+                if (!streamUrl.isEmpty()) {
+                    // Determine site for display tag
+                    QString tag;
+                    if (url.contains("dailymotion.com")) tag = "[Dailymotion]";
+                    else if (url.contains("rumble.com")) tag = "[Rumble]";
+                    else if (url.contains("odysee.com")) tag = "[Odysee]";
+                    else tag = "[Stream]";
+
+                    QString displayTitle = title + " " + tag;
+                    addStreamToPlaylist(streamUrl, displayTitle);
+                    statusBar()->showMessage("Added: " + title, 3000);
+                } else {
+                    statusBar()->showMessage("Failed to get stream URL", 3000);
+                }
+            } else {
+                statusBar()->showMessage("Failed to extract stream URL", 3000);
+            }
+            urlProcess->deleteLater();
+        });
+
+        process->deleteLater();
+    });
+
+    process->start("yt-dlp", titleArgs);
+}
+
+/*
+void MainWindow::addStreamToPlaylist(const QString &streamUrl, const QString &displayTitle) {
+    QListWidget *playlist = currentPlaylistWidget();
+    QString playlistName = currentPlaylistName();
+
+    if (!playlist) {
+        statusBar()->showMessage("No active playlist", 3000);
+        return;
+    }
+
+    // Add to list widget (what user sees)
+    playlist->addItem(displayTitle);
+
+    // Store the URL (what player uses)
+    m_playlistFiles[playlistName].append(streamUrl);
+
+    // Optionally auto-select the new item
+    int newIndex = playlist->count() - 1;
+    playlist->setCurrentRow(newIndex);
+}
+*/
+
+
+void MainWindow::addStreamToPlaylist(const QString &streamUrl, const QString &displayTitle) {
+    if(!m_isVideoEnabled) { openVideoButton->click(); }
+    // Force use of Video Playlist for streams
+    QListWidget *playlist = nullptr;
+    QString playlistName = "Video Playlist";
+
+    // Find the Video Playlist tab
+    for (int i = 0; i < m_playlistTabs->count(); ++i) {
+        if (m_playlistTabs->tabText(i) == "Video Playlist") {
+            playlist = qobject_cast<QListWidget *>(m_playlistTabs->widget(i));
+            m_playlistTabs->setCurrentIndex(i);
+            break;
+        }
+    }
+
+    if (!playlist) {
+        statusBar()->showMessage("Video Playlist not found", 3000);
+        return;
+    }
+
+    // Add to list widget (what user sees)
+    playlist->addItem(displayTitle);
+
+    // Store the URL (what player uses)
+    m_playlistFiles[playlistName].append(streamUrl);
+
+    // Optionally auto-select the new item
+    int newIndex = playlist->count() - 1;
+    playlist->setCurrentRow(newIndex);
+}
+
+void MainWindow::extractYouTubeAndAddToPlaylist(const QString &youtubeUrl) {
+    statusBar()->showMessage("Extracting YouTube stream...", 0);
+
+    QProcess *process = new QProcess(this);
+
+    // Get title and duration in one command
+    QStringList args;
+    args << "--print" << "%(title)s|%(duration)s";
+    args << youtubeUrl;
+
+    connect(process, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished),
+        this, [this, process, youtubeUrl](int exitCode, QProcess::ExitStatus exitStatus) {
+
+        if (exitStatus == QProcess::NormalExit && exitCode == 0) {
+            QString output = QString::fromUtf8(process->readAllStandardOutput()).trimmed();
+            QStringList parts = output.split('|');
+
+            QString title = parts.value(0, "YouTube Video");
+            QString duration = parts.value(1, "0");
+
+            // Now get the actual stream URL
+            QProcess *urlProcess = new QProcess(this);
+            urlProcess->start("yt-dlp", QStringList() << "--no-progress" << "-f" << "best" << "-g" << youtubeUrl);
+
+            connect(urlProcess, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished),
+                this, [this, urlProcess, title, duration](int exitCode2, QProcess::ExitStatus exitStatus2) {
+
+                if (exitStatus2 == QProcess::NormalExit && exitCode2 == 0) {
+                    QString streamUrl = QString::fromUtf8(urlProcess->readAllStandardOutput()).trimmed();
+                    qDebug() << "streamurl  " << streamUrl;
+                    if (!streamUrl.isEmpty()) {
+                        // Add to playlist with custom display title
+                        QString displayTitle = title + " [YouTube]";
+                        addStreamToPlaylist(streamUrl, displayTitle);
+
+                        // Optionally store duration for later use
+                        // m_streamDurations[streamUrl] = duration.toInt();
+
+                        statusBar()->showMessage("Added: " + title, 3000);
+                    } else {
+                        statusBar()->showMessage("Failed to get stream URL", 3000);
+                    }
+                }
+                urlProcess->deleteLater();
+            });
+        } else {
+            statusBar()->showMessage("Failed to extract YouTube info", 3000);
+        }
+        process->deleteLater();
+    });
+
+    process->start("yt-dlp", args);
 }
 
 void MainWindow::playRemoteStream(const QString &urlString) {
@@ -4371,6 +4781,39 @@ void MainWindow::createVideoToolbar() {
     m_fullscreenButton->setIcon(QIcon(":/icons-white/maximize-2.svg"));
     m_fullscreenButton->setFixedSize(32, 32);
 
+    QPushButton* clearStreamButton = new QPushButton(this);
+    clearStreamButton->setFixedSize(32, 32);
+    clearStreamButton->setIcon(QIcon(":/icons-white/cloud-off.svg"));
+    clearStreamButton->setToolTip("Clear current stream - Disabled in full screen mode");
+    connect(clearStreamButton, &QPushButton::clicked, this, [this](){
+
+        if(m_videoPlayerContainer->isFullScreen()){
+            return;
+        }
+
+        QMessageBox confirmBox(this);
+        confirmBox.setWindowTitle("Clear Current Stream");
+        confirmBox.setText("Are you sure you want to clear the current stream?");
+        confirmBox.setIcon(QMessageBox::Question);
+        confirmBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+        confirmBox.setDefaultButton(QMessageBox::No);
+
+        if (confirmBox.exec() == QMessageBox::Yes) {
+            onClearStreamProcess();
+        }
+    });
+
+    QPushButton* loadStreamButton = new QPushButton(this);
+    loadStreamButton->setFixedSize(32, 32);
+
+    loadStreamButton->setIcon(QIcon(":/icons-white/rss.svg"));
+    loadStreamButton->setToolTip("Load Network Stream - Disabled in full screen mode");
+    connect(loadStreamButton, &QPushButton::clicked, this, [this](){
+        if(m_videoPlayerContainer->isFullScreen()){
+            return;
+        }
+        onStreamFromUrl();
+    });
 
     toolbarLayout->addWidget(m_loadVideoButton);
     toolbarLayout->addWidget(m_playButton);
@@ -4385,14 +4828,42 @@ void MainWindow::createVideoToolbar() {
 
     toolbarLayout->addWidget(m_progressSlider, 1); // Give slider stretch factor
     toolbarLayout->addWidget(m_timeLabel);
+    toolbarLayout->addWidget(loadStreamButton);
+    toolbarLayout->addWidget(clearStreamButton);
     toolbarLayout->addWidget(m_fullscreenButton);
 
-    connect(m_playButton, &QPushButton::clicked, this,
-            &MainWindow::onPlayClicked);
-    connect(m_pauseButton, &QPushButton::clicked, this,
-            &MainWindow::onPauseClicked);
-    connect(m_stopButton, &QPushButton::clicked, this,
-            &MainWindow::onStopClicked);
+    //connect(m_playButton, &QPushButton::clicked, this,
+      //      &MainWindow::onPlayClicked);
+    connect(m_playButton, &QPushButton::clicked, this, [this]() {
+        if (!videoPlaylist || videoPlaylist->count() == 0) {
+            return;
+        }
+
+        onPlayClicked();
+    });
+    //connect(m_pauseButton, &QPushButton::clicked, this,
+      //      &MainWindow::onPauseClicked);
+
+    connect(m_pauseButton, &QPushButton::clicked, this, [this]() {
+        if (!videoPlaylist || videoPlaylist->count() == 0) {
+            return;
+        }
+
+        onPauseClicked();
+    });
+
+
+    //connect(m_stopButton, &QPushButton::clicked, this,
+      //      &MainWindow::onStopClicked);
+
+    connect(m_stopButton, &QPushButton::clicked, this, [this]() {
+        if (!videoPlaylist || videoPlaylist->count() == 0) {
+            return;
+        }
+
+        onStopMusicClicked();
+    });
+
     connect(m_fullscreenButton, &QPushButton::clicked, this,
             &MainWindow::toggleFullScreen);
     connect(m_progressSlider, &QSlider::sliderReleased, this,
@@ -4403,14 +4874,33 @@ void MainWindow::createVideoToolbar() {
             &MainWindow::onVideoDurationChanged);
     connect(videoWidget, &QVideoWidget::customContextMenuRequested, this,
             &MainWindow::onVideoContextMenu);
-    connect(m_vpreviousButton, &QPushButton::clicked, this,
-        &MainWindow::playPreviousTrack);
-    connect(m_vnextButton, &QPushButton::clicked, this,
-        &MainWindow::playNextTrack);
+
+    //connect(m_vpreviousButton, &QPushButton::clicked, this,
+      //  &MainWindow::playPreviousTrack);
+
+    connect(m_vpreviousButton, &QPushButton::clicked, this, [this]() {
+        if (!videoPlaylist || videoPlaylist->count() == 0) {
+            return;
+        }
+
+        playPreviousTrack();
+    });
+
+    //connect(m_vnextButton, &QPushButton::clicked, this,
+      //  &MainWindow::playNextTrack);
+
+    connect(m_vnextButton, &QPushButton::clicked, this, [this]() {
+        if (!videoPlaylist || videoPlaylist->count() == 0) {
+            return;
+        }
+
+        playNextTrack();
+    });
+
     connect(m_vvolumeSlider, &QSlider::valueChanged, this,
             &MainWindow::onMusicVolumeChanged);
     connect(m_loadVideoButton, &QPushButton::clicked, this,
-            &MainWindow::onLoadMusicClicked);
+            &MainWindow::onLoadVideoClicked);
 
     QString toolbarStyle =
             "#videoToolbar {"
@@ -4793,4 +5283,29 @@ void MainWindow::toggleTheme(bool enableDark)
 
         statusBar()->showMessage("Light theme restored", 2000);
     }
+}
+
+void MainWindow::onClearStreamProcess() {
+    // Kill yt-dlp process if running
+    if (m_ytProcess && m_ytProcess->state() == QProcess::Running) {
+        m_ytProcess->kill();
+        m_ytProcess->waitForFinished(1000);
+        m_ytProcess->deleteLater();
+        m_ytProcess = nullptr;
+    }
+
+    // Clear the output buffer
+    m_outputBuffer.clear();
+
+    // Unload source from media player
+    if (m_mediaPlayer) {
+        m_mediaPlayer->stop();
+        m_mediaPlayer->setSource(QUrl());  // Clear/unload the source
+    }
+
+    // Reset stream-related variables
+    m_isStream = false;
+    m_currentStreamUrl.clear();
+
+    statusBar()->showMessage("Stream extraction cancelled and player cleared", 2000);
 }

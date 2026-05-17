@@ -279,7 +279,8 @@ void FlickerWidget::rebuildTextTexture()
 
     QImage img = pm.toImage()
                    .convertToFormat(QImage::Format_RGBA8888)
-                   .mirrored(false, true);
+                   //.mirrored(false, true);
+                   .flipped(Qt::Vertical);
 
     makeCurrent();
 

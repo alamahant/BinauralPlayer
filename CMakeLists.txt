@@ -17,6 +17,7 @@ find_package(Qt6 REQUIRED COMPONENTS
     Core Widgets Multimedia MultimediaWidgets OpenGL OpenGLWidgets)
 
 qt_add_executable(BinauralPlayer
+    MANUAL_FINALIZATION
     main.cpp
     mainwindow.cpp mainwindow.h mainwindow.ui
     binauralengine.cpp binauralengine.h
@@ -82,5 +83,7 @@ if(FLATPAK_BUILD)
             DESTINATION "share/icons/hicolor/32x32/apps"
             RENAME "io.github.alamahant.BinauralPlayer.png")
 
+
 endif()
+
 qt_finalize_executable(BinauralPlayer)

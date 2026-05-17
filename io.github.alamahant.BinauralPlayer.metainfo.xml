@@ -72,6 +72,19 @@
 
   <releases>
 
+<release version="1.5.3" date="2026-05-17">
+  <description>
+    <p>Release v1.5.3:</p>
+    <ul>
+      <li>Added YouTube, Dailymotion, Rumble, Odysee, and Vimeo links directly to playlists</li>
+      <li>Added "Add Stream" menu option with Ctrl+U shortcut</li>
+      <li>Playlists can now mix local files and internet streams seamlessly</li>
+      <li>Next/previous track works across local and streamed content</li>
+      <li>Stream pause/resume now works correctly</li>
+    </ul>
+  </description>
+</release>
+
 <release version="1.5.2" date="2026-05-13">
   <description>
     <p>Release v1.5.2:</p>

@@ -34,6 +34,7 @@
 #include<QPoint>
 #include"vistimdialog.h"
 #include"flickerwidget.h"
+#include<QProcess>
 
 class MainWindow : public QMainWindow
 {
@@ -416,5 +417,17 @@ private:
     QHBoxLayout *playlistButtonLayout;
 public slots:
     void toggleFlickerFullscreen();
+    void onLoadVideoClicked();
+    void onClearStreamProcess();
+
+private:
+    void extractYouTubeAndAddToPlaylist(const QString &youtubeUrl);
+    void addStreamToPlaylist(const QString &streamUrl, const QString &displayTitle);
+    void extractGenericAndAddToPlaylist(const QString &url);
+    QString getTitleFromUrl(const QString &url);
+    void extractAndAddToPlaylist(const QString &url);
+    QProcess *m_ytProcess = nullptr;
+    QByteArray m_outputBuffer;
+
 };
 #endif // MAINWINDOW_H

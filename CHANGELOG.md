@@ -1,5 +1,38 @@
 # Changelog
 
+## [2026-05-17] - Release v1.5.3
+
+### Added
+- **Enhanced Streaming Support for YouTube & Video Sites**
+  - Added unified stream extraction for YouTube, Dailymotion, Rumble, Odysee, and Vimeo
+  - Improved extraction reliability using timeout-based yt-dlp process with buffer accumulation
+  - Added proper process cleanup and cancellation for stream extraction
+  - Added "Clear Stream" button to cancel ongoing extraction and unload media player
+
+- **Improved "Add Stream" Feature**
+  - Menu option and shortcut (`Ctrl+U`) to add any URL
+  - Better direct media detection for common audio/video formats (.mp4, .mkv, .mp3, .m3u8, .webm, .flac, etc.)
+  - Unified extraction logic for all streaming sites (no more separate handlers)
+  - Added fullscreen prevention when loading streams
+
+- **Player Improvements**
+  - Stream extraction now uses single-process approach with 9-second timeout
+  - Proper buffer accumulation for reliable URL extraction
+  - Stream extraction can now be cancelled without restarting the app
+  - Media player properly unloads source when clearing streams
+
+### Fixed
+- Fixed crashes caused by nested yt-dlp processes
+- Fixed memory leaks from improper process cleanup
+- Fixed stream extraction hanging indefinitely on certain URLs
+
+### Changed
+- Unified YouTube and generic stream extraction into single robust function
+- Updated yt-dlp arguments to use `-f best` for all streaming sites
+- Added user-agent header for better site compatibility
+
+---
+
 ## [2026-05-13] - Release v1.5.2
 
 ### Fixed

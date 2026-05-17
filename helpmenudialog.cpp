@@ -358,6 +358,66 @@ QString HelpMenuDialog::getWhatsNewContent()
 {
     return R"(
 
+<div style="background-color: #e8f5e9; padding: 15px; border-radius: 8px; margin-bottom: 25px; border-left: 5px solid #43a047;">
+    <h2 style="color: #2e7d32; margin-top: 0;">🎬 Streaming Support — Version 1.5.3 <span style="font-size: 0.75em; background-color: #43a047; color: white; padding: 2px 8px; border-radius: 12px; vertical-align: middle;">NEW</span></h2>
+    <p>Version 1.5.3 introduces comprehensive streaming support for YouTube and major video platforms, transforming Jasmine into a true media player that handles both local files and online streams.</p>
+
+    <div style="background-color: #e8f5e9; padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #2e7d32;">
+        <h3 style="color: #2e7d32; margin-top: 0;">📺 YouTube & Streaming Sites</h3>
+        <p>Add YouTube, Dailymotion, Rumble, Odysee, and Vimeo links directly to your playlists:</p>
+        <ul>
+            <li><strong>Unified extraction</strong> using single-process yt-dlp with 9-second timeout</li>
+            <li><strong>Reliable URL retrieval</strong> with buffer accumulation</li>
+            <li><strong>Proper process cleanup</strong> preventing memory leaks and crashes</li>
+            <li><strong>Clear Stream button</strong> to cancel extraction and unload player</li>
+        </ul>
+    </div>
+
+    <div style="background-color: #fff3e0; padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #ff9800;">
+        <h3 style="color: #e65100; margin-top: 0;">🔗 Add Stream Feature (Ctrl+U)</h3>
+        <p>Enhanced URL input with broad format support:</p>
+        <ul>
+            <li><strong>Video formats:</strong> .mp4, .mkv, .webm, .avi, .mov, .flv, .mpeg</li>
+            <li><strong>Audio formats:</strong> .mp3, .flac, .wav, .aac, .opus, .ogg</li>
+            <li><strong>Playlist formats:</strong> .m3u8, .m3u, .ts</li>
+            <li>Fullscreen prevention ensures safe URL entry</li>
+        </ul>
+    </div>
+
+    <div style="background-color: #e3f2fd; padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #1565c0;">
+        <h3 style="color: #1565c0; margin-top: 0;">⚡ Technical Improvements</h3>
+        <ul>
+            <li>Single unified function replaces separate YouTube/generic handlers</li>
+            <li>User-agent header for better site compatibility</li>
+            <li>Process crashes eliminated (no more nested processes)</li>
+            <li>Stream extraction cancels instantly without restart</li>
+        </ul>
+    </div>
+</div>
+
+<div style="background-color: #fce4ec; padding: 15px; border-radius: 8px; margin-bottom: 25px; border-left: 5px solid #e91e63;">
+    <h2 style="color: #c2185b; margin-top: 0;">🔧 Stability Fix — Version 1.5.2</h2>
+
+    <div style="background-color: #fce4ec; padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #e91e63;">
+        <h3 style="color: #c2185b; margin-top: 0;">🐛 Critical Crash Fixed</h3>
+        <p>Application no longer crashes when changing waveform from Sine to Square/Triangle/Sawtooth in Visual Stimulation dialog.</p>
+        <ul>
+            <li><strong>Root cause:</strong> Null pointer access to <code>m_visStimDialog</code> in waveform change handlers</li>
+            <li><strong>Fix:</strong> Added proper null checks before calling <code>syncWaveType()</code></li>
+            <li><strong>Affected:</strong> <code>onWaveformChanged()</code> and <code>onToneTypeComboIndexChanged()</code></li>
+        </ul>
+    </div>
+
+    <div style="background-color: #fce4ec; padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #e91e63;">
+        <h3 style="color: #c2185b; margin-top: 0;">💪 Stability Improvements</h3>
+        <ul>
+            <li>Visual stimulation dialog now safely handles uninitialized states</li>
+            <li>Better stability during tone type switching (BINAURAL/ISOCHRONIC/GENERATOR)</li>
+        </ul>
+    </div>
+</div>
+
+
             <div style="background-color: #f5eef8; padding: 15px; border-radius: 8px; margin-bottom: 25px; border-left: 5px solid #8e44ad;">
                 <h2 style="color: #8e44ad; margin-top: 0;">🌙 Dark Theme — Version 1.5.1 <span style="font-size: 0.75em; background-color: #8e44ad; color: white; padding: 2px 8px; border-radius: 12px; vertical-align: middle;">NEW</span></h2>
                 <p>Version 1.5.1 introduces a full dark theme mode, reducing eye strain during extended sessions and providing a sleek, modern interface for low-light environments.</p>
