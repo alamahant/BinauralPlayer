@@ -1,5 +1,56 @@
 # Changelog
 
+## [2026-06-01] - Release v1.6.0
+
+### Added
+- **Decoupled Video & Flicker Widgets from Tab System**
+  - Video player now opens in independent floating window (no tab embedding)
+  - Visual Stimulation (Flicker) now opens in independent floating window
+  - Video and Flicker can be used simultaneously without mode switching
+  - Removed all `m_isVideoEnabled` conditional logic
+
+- **Playlist Track Persistence**
+  - Each playlist now remembers its last selected track when switching tabs
+  - Restores selection after tab switching, track removal, and playlist operations
+  - Uses `QMap<QString, int>` to store last track index per playlist
+
+- **Unified File Extension System**
+  - Single master list `ConstantGlobals::allMediaExtensions` for all media formats
+  - Duplicate file detection using `QSet` prevents adding same file twice
+  - User feedback dialogs for unsupported formats and duplicates
+  - Applies to: Load Music, Drag & Drop, File Association, and Streams
+
+- **Improved Playlist Management**
+  - Load playlist directly into current tab with confirmation before overwriting
+  - Save All Playlists now provides detailed success/error summary with playlist names
+  - Auto-selects first track after loading a playlist
+
+- **Flicker Window Improvements**
+  - Fullscreen mode removes titlebar for immersive experience
+  - VisStimDialog correctly reappears when window is reopened
+  - Window opens larger (1024x600) and remembers size after fullscreen exit
+
+### Fixed
+- Fixed duplicate file detection inconsistencies between file dialog and drag & drop
+- Fixed event filter crash when accessing null `m_videoPlayerContainer`
+- Fixed playlist tab close confirmation removing map entries before user confirmation
+- Fixed missing map entry rename when renaming playlists
+- Fixed `onRemoveTrackClicked` using wrong track index variable
+
+### Changed
+- Simplified `loadPlaylistFromFile` to load into current tab (no automatic new tab creation)
+- Removed redundant extension validation in `processDroppedFiles` (dragEnterEvent handles it)
+- Cleaned up `onSaveAllPlaylistsClicked` with better user messaging
+- Removed overcomplicated `QLocalServer` single-instance code (back to simple multi-instance)
+
+### Removed
+- `m_isVideoEnabled` and all related conditional logic
+- Video Player and Video Playlist tabs from tab widget
+- `m_flickerOriginalTabIndex` and tab visibility code
+- Hardcoded extension lists replaced with `allMediaExtensions`
+
+---
+
 ## [2026-05-17] - Release v1.5.3
 
 ### Added

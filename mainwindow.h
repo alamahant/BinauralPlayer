@@ -357,15 +357,13 @@ private:
     bool m_isVideoEnabled =false;
     QWidget* m_videoOriginalParent = nullptr;
     int m_videoOriginalTabIndex = -1;
-    QListWidget *videoPlaylist;
 private slots:
     void onVideoContextMenu(const QPoint &pos);
 
 private:
     void setupVideoPlayer();
 
-    QWidget *m_videoToolbar;
-    QWidget *m_videoPlayerContainer;
+    QWidget *m_videoToolbar = nullptr;
 
     QPushButton *m_playButton;
     QPushButton *m_pauseButton;
@@ -379,9 +377,7 @@ private:
     QPushButton *m_vpreviousButton;
     QSlider *m_vvolumeSlider;
     QLabel *m_volShowLabel;
-   QString m_lastVideoPlaylistName;  // Which video playlist was last playing
-   int m_lastVideoTrackIndex = -1;   // Track position in that playlist
-   QListWidget *m_lastVideoPlaylist = nullptr;
+
 private slots:
     void showVideoToolbar();
     bool eventFilter(QObject *watched, QEvent *event) override;
@@ -394,15 +390,13 @@ private slots:
     void onVideoSliderReleased();
     void onVideoDurationChanged(qint64 duration);
     void toggleFullScreen();
-    void showFlickerTab();
-    void setupFlickerTab();
+    void setupFlickerWindow();
 private:
     QPushButton* m_loadVideoButton;
     VisStimDialog* m_visStimDialog = nullptr;
     QPushButton *m_visStimButton;
     FlickerWidget* m_flickerWidget = nullptr;
     QWidget *m_flickerContainer = nullptr;
-    int m_flickerOriginalTabIndex = -1;
     double isoFreqValue = 7.83;
     bool isDarkTheme = false;
     void toggleTheme(bool enableDark);
@@ -417,7 +411,6 @@ private:
     QHBoxLayout *playlistButtonLayout;
 public slots:
     void toggleFlickerFullscreen();
-    void onLoadVideoClicked();
     void onClearStreamProcess();
 
 private:
@@ -428,6 +421,13 @@ private:
     void extractAndAddToPlaylist(const QString &url);
     QProcess *m_ytProcess = nullptr;
     QByteArray m_outputBuffer;
+    // track currently selected
 
+    //QMap<QString, int> m_playlistLastIndex;
+    QWidget* m_videoFloatingWindow = nullptr;
+    QWidget* m_flickerFloatingWindow = nullptr;  // Instead of using tab
+
+    //preserveindex
+    QMap<QString, int> m_playlistLastTrackIndex;
 };
 #endif // MAINWINDOW_H

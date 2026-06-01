@@ -487,22 +487,28 @@ QToolBar *MainWindow::createBinauralToolbarExt() {
 
     connect(m_visStimButton, &QPushButton::toggled, this, [this](bool checked) {
         if (checked) {
-            showFlickerTab();
+
+            if (!m_flickerFloatingWindow) {
+                setupFlickerWindow();
+            }
+            m_flickerFloatingWindow->show();
+            m_flickerFloatingWindow->raise();
+            if (m_flickerWidget) {
+                //m_flickerWidget->startFlicker();
+            }
             if (m_visStimDialog) {
                 m_visStimDialog->show();
-                m_visStimDialog->raise();
             }
         } else {
-            if (m_flickerWidget) {
-                m_flickerWidget->stopFlicker();
-            }
-            if (m_flickerOriginalTabIndex != -1) {
-                m_playlistTabs->tabBar()->setTabVisible(m_flickerOriginalTabIndex, false);
+            if (m_flickerFloatingWindow) {
+                if (m_flickerWidget) {
+                    m_flickerWidget->stopFlicker();
+                }
+                m_flickerFloatingWindow->hide();
             }
             if (m_visStimDialog) {
                 m_visStimDialog->hide();
             }
-
         }
     });
 
@@ -769,10 +775,7 @@ void MainWindow::setupConnections() {
             &MainWindow::onRepeatClicked);
 
     connect(m_shuffleButton, &QPushButton::clicked, [this](bool checked) {
-        if (m_isVideoEnabled) {
-            m_shuffleButton->setChecked(false);
-            return;
-        }
+
         if (checked) {
             m_shuffleButton->setToolTip("Shuffle: ON");
         } else {
@@ -824,76 +827,20 @@ void MainWindow::setupConnections() {
     });
     connect(timeEdit, &QLineEdit::returnPressed, this, &MainWindow::onSeekTrack);
 
+
     connect(openVideoButton, &QPushButton::clicked, this, [this](bool checked) {
         if (checked) {
-            if(m_visStimButton->isChecked() && m_visStimDialog && m_flickerContainer) m_visStimButton->setChecked(false);
-            const QString VIDEO_TAB_NAME = "Video Player";
-            const QString VPLAYLIST_TAB_NAME = "Video Playlist";
 
-            int videoTabIndex = -1;
-            int vplaylistTabIndex = -1;
-
-            for (int i = 0; i < m_playlistTabs->count(); ++i) {
-                QString tabName = m_playlistTabs->tabText(i);
-                if (tabName == VIDEO_TAB_NAME) {
-                    videoTabIndex = i;
-                } else if (tabName == VPLAYLIST_TAB_NAME) {
-                    vplaylistTabIndex = i;
-                }
+            if (!m_videoFloatingWindow) {
+                setupVideoPlayer();
             }
-
-            if (videoTabIndex == -1) {
-                if (!videoWidget) {
-                    videoWidget = new QVideoWidget();
-                }
-                videoTabIndex = m_playlistTabs->addTab(videoWidget, VIDEO_TAB_NAME);
-            }
-
-            if (vplaylistTabIndex == -1) {
-                QWidget *vplaylistWidget = new QWidget();
-                vplaylistTabIndex =
-                        m_playlistTabs->addTab(vplaylistWidget, VPLAYLIST_TAB_NAME);
-            }
-
-            m_playlistTabs->tabBar()->setTabVisible(videoTabIndex, true);
-            m_playlistTabs->tabBar()->setTabVisible(vplaylistTabIndex, true);
-
-            m_playlistTabs->setCurrentIndex(videoTabIndex);
-
-            m_binauralToolbar->setVisible(false);
-            m_binauralToolbarExt->setVisible(false);
-            m_natureToolbar->setVisible(false);
-
-            statusBar()->showMessage("Mouse Left -> show/hide playbar, Mouse Right -> context menu");
-
-            m_isVideoEnabled = true;
+            m_videoFloatingWindow->show();
+            m_videoFloatingWindow->raise();
+            //m_mediaPlayer->setVideoOutput(videoWidget);
         } else {
-            for (int i = 0; i < m_playlistTabs->count(); ++i) {
-                QString tabName = m_playlistTabs->tabText(i);
-                if (tabName == "Video Player" || tabName == "Video Playlist") {
-                    m_playlistTabs->tabBar()->setTabVisible(i, false);
-                }
+            if (m_videoFloatingWindow) {
+                m_videoFloatingWindow->hide();
             }
-
-            for (int i = 0; i < m_playlistTabs->count(); ++i) {
-                QString tabName = m_playlistTabs->tabText(i);
-                if (tabName != "Video Player" && tabName != "Video Playlist") {
-                    m_playlistTabs->setCurrentIndex(i);
-                    break;
-                }
-            }
-
-            bool isBinauralToolbarHidden =
-                    settings.value("UI/BinauralToolbarHidden", false).toBool();
-            bool isNatureToolbarHidden =
-                    settings.value("UI/NatureToolbarHidden", false).toBool();
-
-            m_binauralToolbar->setVisible(!isBinauralToolbarHidden);
-            m_binauralToolbarExt->setVisible(!isBinauralToolbarHidden);
-            m_natureToolbar->setVisible(!isNatureToolbarHidden);
-
-            m_isVideoEnabled = false;
-
         }
     });
 
@@ -1187,8 +1134,7 @@ void MainWindow::onPauseMusicClicked() {
         }
     }
 
-    if (m_isVideoEnabled)
-        m_currentPlaylistName = "Video Playlist";
+
 
     if (!m_currentPlaylistName.isEmpty() && m_currentTrackIndex >= 0 &&
             m_currentTrackIndex < m_playlistFiles[m_currentPlaylistName].size()) {
@@ -1214,8 +1160,7 @@ void MainWindow::onStopMusicClicked() {
     }
 
 
-    if (m_isVideoEnabled)
-        m_currentPlaylistName = m_lastVideoPlaylistName;
+
 
     if (!m_currentPlaylistName.isEmpty() && m_currentTrackIndex >= 0 &&
             m_currentTrackIndex < m_playlistFiles[m_currentPlaylistName].size()) {
@@ -1729,13 +1674,7 @@ void MainWindow::playNextTrack() {
     QListWidget *playlist = currentPlaylistWidget();
     QString playlistName = currentPlaylistName();
 
-    if (m_isVideoEnabled) {
-        playlist = m_lastVideoPlaylist;
 
-        playlistName = m_lastVideoPlaylistName;
-        m_currentPlaylistName = m_lastVideoPlaylistName;
-
-    }
 
     if (!playlist || playlistName.isEmpty() ||
             m_playlistFiles[playlistName].isEmpty())
@@ -1743,22 +1682,16 @@ void MainWindow::playNextTrack() {
 
     int nextIndex = m_currentTrackIndex + 1;
 
-    if (m_isVideoEnabled)
-        nextIndex = m_lastVideoTrackIndex + 1;
 
     if (nextIndex >= m_playlistFiles[playlistName].size()) {
         nextIndex = 0;
     }
 
     m_currentPlaylistName = playlistName;
-    if (m_isVideoEnabled)
-        m_currentPlaylistName = m_lastVideoPlaylistName;
     m_currentTrackIndex = nextIndex;
-    m_lastVideoTrackIndex = nextIndex;
-
+    m_playlistLastTrackIndex[playlistName] = nextIndex;
     playlist->setCurrentRow(nextIndex);
-    if (m_isVideoEnabled)
-        playlist->setCurrentRow(m_lastVideoTrackIndex);
+
 
     QString filePath = m_playlistFiles[playlistName].at(nextIndex);
     m_mediaPlayer->setSource(QUrl::fromLocalFile(filePath));
@@ -1795,21 +1728,8 @@ void MainWindow::onPlayMusicClicked() {
     QListWidget *playlist = currentPlaylistWidget();
     QString playlistName = currentPlaylistName();
 
-    if (m_isVideoEnabled) {
-        if (playlistName != "Video Playlist") {
-            for (int i = 0; i < m_playlistTabs->count(); ++i) {
-                if (m_playlistTabs->tabText(i) == "Video Playlist") {
-                    playlist = qobject_cast<QListWidget *>(m_playlistTabs->widget(i));
-                    m_lastVideoPlaylist = playlist;
-                    playlistName = "Video Playlist";
-                    m_currentPlaylistName = "Video Playlist";
-                    break;
-                }
-            }
-        }
-    }
 
-       if (m_isVideoEnabled) m_lastVideoPlaylist = playlist;
+
 
     if (!playlist || playlistName.isEmpty() ||
             !m_playlistFiles.contains(playlistName) ||
@@ -1822,14 +1742,14 @@ void MainWindow::onPlayMusicClicked() {
 
     if (selectedRow >= 0 && selectedRow < m_playlistFiles[playlistName].size()) {
         m_currentTrackIndex = selectedRow;
-        m_lastVideoTrackIndex = selectedRow;
         m_currentPlaylistName = playlistName;
-        m_lastVideoPlaylistName = playlistName;
+        m_playlistLastTrackIndex[playlistName] = selectedRow;
     }
     else if (m_currentTrackIndex == -1 || m_currentPlaylistName != playlistName) {
         m_currentTrackIndex = 0;
         m_currentPlaylistName = playlistName;
         playlist->setCurrentRow(0);
+        m_playlistLastTrackIndex[playlistName] = 0;
     }
 
     QString filePath = m_playlistFiles[playlistName].at(m_currentTrackIndex);
@@ -1869,6 +1789,8 @@ void MainWindow::onPlayMusicClicked() {
     statusBar()->showMessage("Playing: " + QFileInfo(filePath).fileName());
 }
 
+
+
 void MainWindow::onPlaylistItemClicked(QListWidgetItem *item) {
     QListWidget *playlist = currentPlaylistWidget();
     QString playlistName = currentPlaylistName();
@@ -1879,9 +1801,10 @@ void MainWindow::onPlaylistItemClicked(QListWidgetItem *item) {
 
     int index = playlist->row(item);
     m_currentTrackIndex = index;
-    m_currentPlaylistName =
-            playlistName; // Track which playlist this selection belongs to
+    m_currentPlaylistName = playlistName;
 
+    // Store the selected track index for this playlist
+    m_playlistLastTrackIndex[playlistName] = index;
 }
 
 void MainWindow::onDurationChanged(qint64 durationMs) {
@@ -1952,21 +1875,14 @@ void MainWindow::playPreviousTrack() {
     QListWidget *playlist = currentPlaylistWidget();
     QString playlistName = currentPlaylistName();
 
-    if (m_isVideoEnabled) {
-        playlist = m_lastVideoPlaylist;
 
-        playlistName = m_lastVideoPlaylistName;
-        m_currentPlaylistName = m_lastVideoPlaylistName;
-
-    }
 
     if (!playlist || playlistName.isEmpty() ||
             m_playlistFiles[playlistName].isEmpty())
         return;
 
     int prevIndex = m_currentTrackIndex - 1;
-    if (m_isVideoEnabled)
-        prevIndex = m_lastVideoTrackIndex - 1;
+
 
     if (prevIndex < 0) {
         prevIndex = m_playlistFiles[playlistName].size() - 1;
@@ -1974,15 +1890,12 @@ void MainWindow::playPreviousTrack() {
 
     m_currentPlaylistName = playlistName;
 
-    if (m_isVideoEnabled)
-        m_currentPlaylistName = m_lastVideoPlaylistName;
+
 
     m_currentTrackIndex = prevIndex;
-    m_lastVideoTrackIndex = prevIndex;
-
+    m_playlistLastTrackIndex[playlistName] = prevIndex;
     playlist->setCurrentRow(prevIndex);
-    if (m_isVideoEnabled)
-        playlist->setCurrentRow(m_lastVideoTrackIndex);
+
 
     QString filePath = m_playlistFiles[playlistName].at(prevIndex);
     m_mediaPlayer->setSource(QUrl::fromLocalFile(filePath));
@@ -1997,10 +1910,6 @@ void MainWindow::playPreviousTrack() {
 }
 
 void MainWindow::onRepeatClicked() {
-    if (m_isVideoEnabled) {
-        m_repeatButton->setChecked(false);
-        return;
-    }
 
     if (m_repeatButton->isChecked()) {
         m_isRepeat = true;
@@ -2105,7 +2014,7 @@ void MainWindow::playRandomTrack() {
     } while (randomIndex == m_currentTrackIndex && files.size() > 1);
 
     m_currentTrackIndex = randomIndex;
-
+    m_playlistLastTrackIndex[playlistName] = randomIndex;
     QListWidget *playlist = currentPlaylistWidget();
     if (playlist && m_currentPlaylistName == playlistName) {
         playlist->setCurrentRow(randomIndex);
@@ -2136,19 +2045,20 @@ QString MainWindow::currentPlaylistName() const {
     return m_playlistTabs->tabText(m_playlistTabs->currentIndex());
 }
 
+
 void MainWindow::addNewPlaylist(const QString &name) {
 
-    if (name == "Video Playlist")
-        return;
+
 
     QListWidget *newPlaylist = new QListWidget();
     newPlaylist->setAlternatingRowColors(true);
     newPlaylist->setSelectionMode(QAbstractItemView::SingleSelection);
     QString playlistName =
-            name.isEmpty() ? QString("Playlist %1").arg(m_playlistTabs->count() - 1)
-                           : name; // was +1 changed to -1 to disregard video tabs
+            name.isEmpty() ? QString("Playlist %1").arg(m_playlistTabs->count())
+                           : name;
 
     m_playlistFiles[playlistName] = QStringList();
+    m_playlistLastTrackIndex[playlistName] = -1;
     m_playlistTabs->addTab(newPlaylist, playlistName);
     m_playlistTabs->setCurrentWidget(newPlaylist);
 
@@ -2164,6 +2074,9 @@ void MainWindow::addNewPlaylist(const QString &name) {
     }
 }
 
+
+
+
 void MainWindow::updateCurrentPlaylistReference() {
     m_currentPlaylistWidget = currentPlaylistWidget();
 }
@@ -2173,39 +2086,44 @@ void MainWindow::onAddNewPlaylistClicked() {
     QString name = QInputDialog::getText(
                 this, "New Playlist", "Enter playlist name:", QLineEdit::Normal,
                 QString("Playlist %1")
-                .arg(m_playlistTabs->count() -
-                     1), // was +1 changed to -1 to disregard video tabs
+                .arg(m_playlistTabs->count()),
                 &ok);
     if (ok && !name.isEmpty()) {
         addNewPlaylist(name);
         updatePlaylistButtonsState();
+        m_playlistLastTrackIndex[name] = -1;
         statusBar()->showMessage("Created new playlist: " + name);
     }
 }
 
-void MainWindow::onRenamePlaylistClicked() {
 
+void MainWindow::onRenamePlaylistClicked() {
     QListWidget *widget = currentPlaylistWidget();
     if (!widget)
         return;
 
     QString oldName = currentPlaylistName();
 
-    if (oldName == "Video Playlist" || oldName == "Video Player")
-        return;
-
     bool ok;
-    QString newName =
-            QInputDialog::getText(this, "Rename Playlist",
+    QString newName = QInputDialog::getText(this, "Rename Playlist",
                                   "Enter new name:", QLineEdit::Normal, oldName, &ok);
     if (ok && !newName.isEmpty() && newName != oldName) {
         int currentIndex = m_playlistTabs->currentIndex();
         m_playlistTabs->setTabText(currentIndex, newName);
 
+        // Rename in files map
         if (m_playlistFiles.contains(oldName)) {
             m_playlistFiles[newName] = m_playlistFiles.take(oldName);
         }
 
+        // Rename in track index map
+        if (m_playlistLastTrackIndex.contains(oldName)) {
+            int savedIndex = m_playlistLastTrackIndex[oldName];
+            m_playlistLastTrackIndex[newName] = savedIndex;
+            m_playlistLastTrackIndex.remove(oldName);
+        }
+
+        // Update current playlist name if needed
         if (m_currentPlaylistName == oldName) {
             m_currentPlaylistName = newName;
         }
@@ -2214,6 +2132,7 @@ void MainWindow::onRenamePlaylistClicked() {
     }
 }
 
+
 void MainWindow::onClosePlaylistTab(int index) {
     if (m_playlistTabs->count() <= 1) {
         QMessageBox::warning(this, "Cannot Close",
@@ -2221,19 +2140,10 @@ void MainWindow::onClosePlaylistTab(int index) {
         return;
     }
 
-    QString tabName = m_playlistTabs->tabText(index);
-
-    if (tabName == "Video Player" || tabName == "Video Playlist") {
-        QMessageBox::information(
-                    this, "Cannot Close",
-        "Video tabs cannot be closed. Use the video toggle button instead.");
-        return; // Exit without closing
-    }
-
     QString playlistName = m_playlistTabs->tabText(index);
 
-    QListWidget *playlist =
-            qobject_cast<QListWidget *>(m_playlistTabs->widget(index));
+    // First, check if playlist has tracks and confirm with user
+    QListWidget *playlist = qobject_cast<QListWidget *>(m_playlistTabs->widget(index));
     if (playlist && playlist->count() > 0) {
         QMessageBox::StandardButton reply;
         reply = QMessageBox::question(
@@ -2243,11 +2153,12 @@ void MainWindow::onClosePlaylistTab(int index) {
                     .arg(playlist->count()),
                     QMessageBox::Yes | QMessageBox::No);
         if (reply == QMessageBox::No)
-            return;
+            return;  // User cancelled - don't remove anything
     }
 
+    // User confirmed (or playlist empty) - now remove from maps and tabs
+    m_playlistLastTrackIndex.remove(playlistName);
     m_playlistFiles.remove(playlistName);
-
     m_playlistTabs->removeTab(index);
 
     updateCurrentPlaylistReference();
@@ -2255,79 +2166,50 @@ void MainWindow::onClosePlaylistTab(int index) {
 }
 
 void MainWindow::onPlaylistTabChanged(int index) {
+    // Save current playlist's track index BEFORE switching
+    if (!m_currentPlaylistName.isEmpty() && m_currentTrackIndex >= 0) {
+        m_playlistLastTrackIndex[m_currentPlaylistName] = m_currentTrackIndex;
+    }
+
     updateCurrentPlaylistReference();
+
+    // Get new playlist name
+    QString newPlaylistName = currentPlaylistName();
+
+    // Reset to -1 initially
     m_currentTrackIndex = -1;
+    m_currentPlaylistName = newPlaylistName;
+
+    // Restore saved track index for new playlist if it exists and is valid
+    if (m_playlistLastTrackIndex.contains(newPlaylistName)) {
+        int savedIndex = m_playlistLastTrackIndex[newPlaylistName];
+        // Check if saved index is within bounds of current playlist
+        if (savedIndex >= 0 && savedIndex < m_playlistFiles[newPlaylistName].size()) {
+            m_currentTrackIndex = savedIndex;
+            // Also highlight the selected track in the UI
+            QListWidget *playlist = currentPlaylistWidget();
+            if (playlist) {
+                playlist->setCurrentRow(m_currentTrackIndex);
+            }
+        }
+    }
 
     updatePlaylistButtonsState();
 
-    QString playlistName = currentPlaylistName();
-    if (!playlistName.isEmpty()) {
-        int trackCount = m_playlistFiles.value(playlistName).size();
+    if (!newPlaylistName.isEmpty()) {
+        int trackCount = m_playlistFiles.value(newPlaylistName).size();
         statusBar()->showMessage(QString("Switched to '%1' (%2 tracks)")
-                                 .arg(playlistName)
+                                 .arg(newPlaylistName)
                                  .arg(trackCount),
                                  2000);
-    }
-
-}
-
-
-void MainWindow::onLoadVideoClicked() {
-
-    QString filter = "All Supported Media (*.mp3 *.wav *.flac *.ogg *.m4a *.mp4 "
-                     "*.m4v *.avi *.mkv);;"
-                     "Audio Files (*.mp3 *.wav *.flac *.ogg *.m4a);;"
-                     "Video Files (*.mp4 *.m4v *.avi *.mkv);;"
-                     "All Files (*.*)";
-    QStringList files = QFileDialog::getOpenFileNames(
-                this, "Select Music Files", ConstantGlobals::musicFilePath,
-                filter);
-    if (!files.isEmpty()) {
-
-        ConstantGlobals::lastMusicDirPath = QFileInfo(files.first()).absolutePath();
-
-        QListWidget *playlist = currentPlaylistWidget();
-        QString playlistName = currentPlaylistName();
-
-        if (m_isVideoEnabled) {
-            for (int i = 0; i < m_playlistTabs->count(); ++i) {
-                if (m_playlistTabs->tabText(i) == "Video Playlist") {
-                    playlist = qobject_cast<QListWidget *>(m_playlistTabs->widget(i));
-                    playlistName = "Video Playlist";
-                    m_playlistTabs->setCurrentIndex(i);
-                    break;
-                }
-            }
-        }
-
-        foreach (const QString &file, files) {
-            QString fileName = QFileInfo(file).fileName();
-            playlist->addItem(fileName);
-            m_playlistFiles[playlistName].append(file);
-        }
-        if (playlist->count() > 0) {
-            playlist->setCurrentRow(0); // This highlights and selects the first item
-            playlist->scrollToTop();
-        }
-        statusBar()->showMessage(QString("Added %1 file(s) to '%2'")
-                                 .arg(files.size())
-                                 .arg(playlistName));
     }
 }
 
 
 void MainWindow::onLoadMusicClicked() {
-    bool wasVideoEnabled = m_isVideoEnabled;
-    if(wasVideoEnabled) { openVideoButton->click(); }
-    QString filter = "All Supported Media (*.mp3 *.wav *.flac *.ogg *.m4a *.mp4 "
-                     "*.m4v *.avi *.mkv);;"
-                     "Audio Files (*.mp3 *.wav *.flac *.ogg *.m4a);;"
-                     "Video Files (*.mp4 *.m4v *.avi *.mkv);;"
-                     "All Files (*.*)";
-
     QStringList files = QFileDialog::getOpenFileNames(
-                this, "Select Music Files", ConstantGlobals::musicFilePath,
-                filter);
+        this, "Select Media Files", ConstantGlobals::musicFilePath,
+        ConstantGlobals::getAllMediaFilterString());
 
     if (!files.isEmpty()) {
         ConstantGlobals::lastMusicDirPath = QFileInfo(files.first()).absolutePath();
@@ -2335,65 +2217,96 @@ void MainWindow::onLoadMusicClicked() {
         QListWidget *playlist = currentPlaylistWidget();
         QString playlistName = currentPlaylistName();
 
-        // Define video extensions to check for
-        QStringList videoExtensions = {".mp4", ".m4v", ".avi", ".mkv", ".mov", ".wmv", ".flv", ".webm"};
+        // Remember if playlist was empty before adding
+        bool wasEmpty = (playlist->count() == 0);
 
-        // Check if any video files are present
-        QStringList detectedVideoFiles;
+        // Create QSet of existing file paths for duplicate checking
+        QSet<QString> existingFiles;
+        for (const QString &existingPath : m_playlistFiles[playlistName]) {
+            existingFiles.insert(existingPath);
+        }
+
+        QStringList validFiles;
+        QStringList skippedFiles;
+        QStringList duplicateFiles;
+
+        // Validate each file against allowed extensions and check for duplicates
         foreach (const QString &file, files) {
             QString fileExtension = QFileInfo(file).suffix().toLower();
-            if (videoExtensions.contains("." + fileExtension)) {
-                detectedVideoFiles.append(QFileInfo(file).fileName());
+            QString filePath = QFileInfo(file).absoluteFilePath();
+
+            // Check if file is supported
+            if (ConstantGlobals::allMediaExtensions.contains("." + fileExtension)) {
+                // Check for duplicate
+                if (existingFiles.contains(filePath)) {
+                    duplicateFiles.append(QFileInfo(file).fileName());
+                } else {
+                    validFiles.append(file);
+                    existingFiles.insert(filePath); // Add to set for future duplicate checks within this batch
+                }
+            } else {
+                skippedFiles.append(QFileInfo(file).fileName());
             }
         }
 
-        // If video files detected, show message box and skip them
-        if (!detectedVideoFiles.isEmpty()) {
-            QString videoList = detectedVideoFiles.join("\n• ");
-            QMessageBox::warning(this, "Video Files Detected",
-                                 "Video files detected:\n\n• " + videoList +
-                                 "\n\nTo use video files, please open the Video Player "
-                                 "and use its own load button.\n\nOnly audio files will be added.");
+        // Show duplicate files notice if any
+        if (!duplicateFiles.isEmpty()) {
+            QString duplicateList = duplicateFiles.join("\n• ");
+            QMessageBox::information(this, "Duplicate Files Skipped",
+                QString("The following %1 file(s) are already in the playlist and were skipped:\n\n• %2")
+                .arg(duplicateFiles.size())
+                .arg(duplicateList));
         }
 
-        // Filter and add only audio files
-        QStringList audioExtensions = {".mp3", ".wav", ".flac", ".ogg", ".m4a", ".aac"};
-        int addedCount = 0;
+        // Show unsupported files notice if any
+        if (!skippedFiles.isEmpty()) {
+            QString skippedList = skippedFiles.join("\n• ");
+            QMessageBox::information(this, "Unsupported Files Skipped",
+                QString("The following %1 file(s) are not supported and were skipped:\n\n• %2\n\n"
+                        "Supported formats are defined in ConstantGlobals::allMediaExtensions.\n"
+                        "Common formats include: MP3, WAV, FLAC, OGG, M4A, MP4, AVI, MKV, MOV, WEBM.")
+                .arg(skippedFiles.size())
+                .arg(skippedList));
+        }
 
-        foreach (const QString &file, files) {
-            QString fileExtension = QFileInfo(file).suffix().toLower();
-
-            // Skip video files
-            if (videoExtensions.contains("." + fileExtension)) {
-                continue;
-            }
-
-            // Check if it's an audio file
-            if (!audioExtensions.contains("." + fileExtension)) {
-                statusBar()->showMessage(QString("Skipped: %1 (unsupported format)")
-                                        .arg(QFileInfo(file).fileName()), 3000);
-                continue;
-            }
-
+        // Add valid files to playlist
+        foreach (const QString &file, validFiles) {
             QString fileName = QFileInfo(file).fileName();
             playlist->addItem(fileName);
             m_playlistFiles[playlistName].append(file);
-            addedCount++;
         }
 
-        if (playlist->count() > 0 && addedCount > 0) {
-            playlist->setCurrentRow(0);
-            playlist->scrollToTop();
-            statusBar()->showMessage(QString("Added %1 audio file(s) to '%2'")
-                                     .arg(addedCount)
-                                     .arg(playlistName));
-        } else if (addedCount == 0 && !detectedVideoFiles.isEmpty()) {
-            statusBar()->showMessage("No audio files added. Only video files were selected.");
-        } else if (addedCount == 0) {
-            statusBar()->showMessage("No valid audio files were added");
+        // Update UI and status bar
+        if (!validFiles.isEmpty()) {
+            // ONLY select the first new item if the playlist was EMPTY before adding
+            if (wasEmpty && playlist->count() > 0) {
+                playlist->setCurrentRow(0);
+                playlist->scrollToItem(playlist->item(0));
+                // Store the selected track index
+                m_playlistLastTrackIndex[playlistName] = 0;
+                m_currentTrackIndex = 0;
+                m_currentPlaylistName = playlistName;
+            }
+            // Otherwise do nothing - keep existing selection
+
+            QString message = QString("Added %1 file(s) to '%2'")
+                .arg(validFiles.size())
+                .arg(playlistName);
+            if (!skippedFiles.isEmpty()) {
+                message += QString(" (%1 unsupported skipped)").arg(skippedFiles.size());
+            }
+            if (!duplicateFiles.isEmpty()) {
+                message += QString(" (%1 duplicates skipped)").arg(duplicateFiles.size());
+            }
+            statusBar()->showMessage(message, 3000);
+        } else {
+            if (!duplicateFiles.isEmpty() || !skippedFiles.isEmpty()) {
+                statusBar()->showMessage("No new valid media files were added", 5000);
+            } else {
+                statusBar()->showMessage("No valid media files were added", 5000);
+            }
         }
     }
-    if(wasVideoEnabled) { openVideoButton->click(); }
 }
 
 void MainWindow::onRemoveTrackClicked() {
@@ -2403,32 +2316,46 @@ void MainWindow::onRemoveTrackClicked() {
     if (!playlist || playlistName.isEmpty())
         return;
 
-    int playingIndex = m_playingTrackIndex;
-
     int selectedRow = playlist->currentRow();
     if (selectedRow >= 0 && selectedRow < m_playlistFiles[playlistName].size()) {
 
-        if (playlistName == m_currentPlaylistName && selectedRow == playingIndex) {
-            QMessageBox::warning(
-                        this, "Cannot Remove Track",
-                        "Cannot remove the currently playing track. Stop playback first.");
-            return;
-        }
+        // FIXED: Use m_currentTrackIndex instead of playingIndex
+        //if (playlistName == m_currentPlaylistName && selectedRow == m_currentTrackIndex) {
+          //  QMessageBox::warning(
+            //            this, "Cannot Remove Track",
+              //          "Cannot remove the currently playing track. Stop playback first.");
+            //return;
+       // }
 
+        // Remove the track
         QListWidgetItem *item = playlist->takeItem(selectedRow);
         delete item;
-
         m_playlistFiles[playlistName].removeAt(selectedRow);
 
+        // Update current track index if this is the current playlist
         if (playlistName == m_currentPlaylistName) {
-            if (selectedRow < playingIndex) {
-                m_playingTrackIndex = playingIndex - 1;
+            if (selectedRow < m_currentTrackIndex) {
+                // Removed track is BEFORE current selection - decrement index
+                m_currentTrackIndex--;
             }
+            // If selectedRow > m_currentTrackIndex, index unchanged
+            // If selectedRow == m_currentTrackIndex, already handled above
 
-            m_currentTrackIndex = m_playingTrackIndex;
+            // Update the map with new index
+            m_playlistLastTrackIndex[playlistName] = m_currentTrackIndex;
 
-            if (m_playingTrackIndex >= 0) {
-                playlist->setCurrentRow(m_playingTrackIndex);
+            // Update UI selection
+            if (m_currentTrackIndex >= 0 && m_currentTrackIndex < playlist->count()) {
+                playlist->setCurrentRow(m_currentTrackIndex);
+            } else if (playlist->count() > 0) {
+                // If current index is now invalid, select first track
+                playlist->setCurrentRow(0);
+                m_currentTrackIndex = 0;
+                m_playlistLastTrackIndex[playlistName] = 0;
+            } else {
+                // Playlist is empty
+                m_currentTrackIndex = -1;
+                m_playlistLastTrackIndex[playlistName] = -1;
             }
         }
 
@@ -2459,9 +2386,18 @@ void MainWindow::onClearPlaylistClicked() {
         playlist->clear();
         m_playlistFiles[playlistName].clear();
 
+        /*
+        if (playlistName == m_currentPlaylistName) {
+            m_currentTrackIndex = -1;
+            m_playlistLastTrackIndex[playlistName] = -1;
+        }
+        */
+
+        m_playlistLastTrackIndex[playlistName] = -1;
         if (playlistName == m_currentPlaylistName) {
             m_currentTrackIndex = -1;
         }
+
 
         statusBar()->showMessage("Playlist cleared");
     }
@@ -2470,8 +2406,7 @@ void MainWindow::onClearPlaylistClicked() {
 
 void MainWindow::onPlaylistItemDoubleClicked(QListWidgetItem *item) {
 
-    if (m_isVideoEnabled)
-        return;
+
 
     QListWidget *playlist = qobject_cast<QListWidget *>(sender());
     if (!playlist) {
@@ -2487,6 +2422,8 @@ void MainWindow::onPlaylistItemDoubleClicked(QListWidgetItem *item) {
     if (index >= 0 && index < m_playlistFiles[playlistName].size()) {
         m_currentPlaylistName = playlistName;
         m_currentTrackIndex = index;
+        // Store the selected track index for this playlist
+        m_playlistLastTrackIndex[playlistName] = index;
         QString filePath = m_playlistFiles[playlistName][index];
         m_mediaPlayer->setSource(QUrl::fromLocalFile(filePath));
         m_mediaPlayer->play();
@@ -2768,8 +2705,6 @@ QList<MainWindow::BrainwavePreset> MainWindow::loadAllPresets() {
 
 void MainWindow::onOpenPlaylistClicked() {
 
-    if (m_isVideoEnabled) {
-    }
 
     QString filename = QFileDialog::getOpenFileName(
                 this, "Open Playlist", ConstantGlobals::playlistFilePath,
@@ -2789,11 +2724,9 @@ void MainWindow::onOpenPlaylistClicked() {
 
 void MainWindow::onSaveCurrentPlaylistClicked() {
 
-    if (m_isVideoEnabled) {
-    }
+
 
     QString playlistName = currentPlaylistName();
-    if (playlistName == "Video Playlist")
     if (playlistName.isEmpty()) {
         QMessageBox::warning(this, "Save Error", "No active playlist.");
         return;
@@ -2819,12 +2752,8 @@ void MainWindow::onSaveCurrentPlaylistAsClicked() {
 
     QString playlistName = currentPlaylistName();
 
-    if (playlistName == "Video Playlist") {
-        onSaveCurrentPlaylistClicked();
-        return;
-    }
-    if (playlistName == "Video Player")
-        return;
+
+
 
     if (playlistName.isEmpty()) {
         QMessageBox::warning(this, "Save Error", "No active playlist.");
@@ -2848,7 +2777,7 @@ void MainWindow::onSaveCurrentPlaylistAsClicked() {
                              "Failed to save playlist to file.");
     }
 }
-
+/*
 void MainWindow::onSaveAllPlaylistsClicked() {
 
     int successCount = 0;
@@ -2893,6 +2822,101 @@ void MainWindow::onSaveAllPlaylistsClicked() {
                     .arg(failCount));
     }
 }
+*/
+
+void MainWindow::onSaveAllPlaylistsClicked() {
+    // First, warn about overwriting
+    QMessageBox::StandardButton confirm = QMessageBox::question(
+        this, "Confirm Save All",
+        "This will save ALL playlists to:\n" + ConstantGlobals::playlistFilePath + "\n\n"
+        "WARNING: Existing playlist files with the same name WILL BE OVERWRITTEN.\n\n"
+        "Continue?",
+        QMessageBox::Yes | QMessageBox::No,
+        QMessageBox::No);
+
+    if (confirm != QMessageBox::Yes) {
+        return;
+    }
+
+    int successCount = 0;
+    int failCount = 0;
+    int emptyCount = 0;
+    int errorCount = 0;
+    QStringList failedPlaylists;
+    QStringList emptyPlaylists;
+
+    if (!ensureDirectoryExists(ConstantGlobals::playlistFilePath)) {
+        QMessageBox::warning(this, "Save Error",
+                             "Cannot create playlists directory:\n" + ConstantGlobals::playlistFilePath);
+        return;
+    }
+
+    for (int i = 0; i < m_playlistTabs->count(); ++i) {
+        QString playlistName = m_playlistTabs->tabText(i);
+
+
+        m_playlistTabs->setCurrentIndex(i);
+        updateCurrentPlaylistReference();
+
+        QListWidget *playlist = currentPlaylistWidget();
+
+        // Check for empty playlist
+        if (!playlist || playlist->count() == 0) {
+            emptyCount++;
+            emptyPlaylists.append(playlistName);
+            continue;
+        }
+
+        QString filename = ConstantGlobals::playlistFilePath + "/" + playlistName + ".json";
+
+        if (savePlaylistToFile(filename, playlistName)) {
+            successCount++;
+        } else {
+            failCount++;
+            errorCount++;
+            failedPlaylists.append(playlistName);
+        }
+    }
+
+    // Build detailed result message
+    QString resultMessage;
+    if (failCount == 0 && emptyCount == 0) {
+        resultMessage = QString("✓ All %1 playlist(s) saved successfully!").arg(successCount);
+        statusBar()->showMessage(resultMessage, 3000);
+    }
+    else if (successCount > 0 && emptyCount > 0 && failCount == 0) {
+        resultMessage = QString("✓ Saved %1 playlist(s).\n\n⚠ %2 empty playlist(s) were skipped:\n• %3")
+                        .arg(successCount)
+                        .arg(emptyCount)
+                        .arg(emptyPlaylists.join("\n• "));
+        QMessageBox::information(this, "Save Complete (Some Skipped)", resultMessage);
+    }
+    else if (failCount > 0) {
+        resultMessage = QString("Saved: %1 playlist(s)\n")
+                        .arg(successCount);
+
+        if (emptyCount > 0) {
+            resultMessage += QString("\n⚠ Skipped (empty): %1 playlist(s)\n• %2")
+                            .arg(emptyCount)
+                            .arg(emptyPlaylists.join("\n• "));
+        }
+
+        if (errorCount > 0) {
+            resultMessage += QString("\n\n❌ Failed to save: %1 playlist(s)\n• %2")
+                            .arg(errorCount)
+                            .arg(failedPlaylists.join("\n• "));
+        }
+
+        QMessageBox::warning(this, "Save Complete with Errors", resultMessage);
+    }
+
+    // Status bar summary
+    QString statusMsg = QString("Saved: %1").arg(successCount);
+    if (emptyCount > 0) statusMsg += QString(", Empty: %1").arg(emptyCount);
+    if (errorCount > 0) statusMsg += QString(", Failed: %1").arg(errorCount);
+    statusBar()->showMessage(statusMsg, 5000);
+}
+
 
 bool MainWindow::savePlaylistToFile(const QString &filename,
                                     const QString &playlistName) {
@@ -2939,7 +2963,22 @@ bool MainWindow::savePlaylistToFile(const QString &filename,
     return true;
 }
 
+
 bool MainWindow::loadPlaylistFromFile(const QString &filename) {
+
+    // Show warning dialog before loading
+    QMessageBox::StandardButton confirm = QMessageBox::question(
+        this, "Confirm Load Playlist",
+        "This will load the playlist into the CURRENT tab.\n\n"
+        "WARNING: All tracks in the current tab will be OVERWRITTEN!\n\n"
+        "If you want to keep the current playlist, create a new tab first.\n\n"
+        "Proceed?",
+        QMessageBox::Yes | QMessageBox::No,
+        QMessageBox::No);
+
+    if (confirm != QMessageBox::Yes) {
+        return false;
+    }
 
     QFile file(filename);
     if (!file.open(QIODevice::ReadOnly)) {
@@ -2972,8 +3011,7 @@ bool MainWindow::loadPlaylistFromFile(const QString &filename) {
 
     for (int i = 0; i < m_playlistTabs->count(); ++i) {
 
-        if (m_playlistTabs->tabText(i) == playlistName &&
-                m_playlistTabs->tabText(i) == "Video Playlist") {
+        if (m_playlistTabs->tabText(i) == playlistName) {
             m_playlistTabs->setCurrentIndex(i);
             updateCurrentPlaylistReference();
             m_playlistFiles[playlistName].clear();
@@ -3024,6 +3062,9 @@ bool MainWindow::loadPlaylistFromFile(const QString &filename) {
         m_playlistTabs->setTabText(currentIndex, playlistName);
     }
 
+
+    // INITIALIZE MAP ENTRY FOR THIS PLAYLIST
+    m_playlistLastTrackIndex[playlistName] = -1;
     QListWidget *playlist = currentPlaylistWidget();
     playlist->clear();
     m_playlistFiles[playlistName].clear();
@@ -3037,10 +3078,20 @@ bool MainWindow::loadPlaylistFromFile(const QString &filename) {
         m_playlistFiles[playlistName].append(track.filePath);
     }
 
+    // AUTO-SELECT THE FIRST TRACK IF PLAYLIST IS NOT EMPTY
+    if (playlist->count() > 0) {
+        playlist->setCurrentRow(0);
+        m_playlistLastTrackIndex[playlistName] = 0;
+        m_currentTrackIndex = 0;
+        m_currentPlaylistName = playlistName;
+    }
+
     updatePlaylistButtonsState();
 
     return true;
 }
+
+
 
 void MainWindow::updatePlaylistFromCurrentTab(const QString &filename) {
     QString playlistName = currentPlaylistName();
@@ -3331,38 +3382,6 @@ QString MainWindow::formatBinauralString() {
 }
 
 
-/*
-void MainWindow::onStreamFromUrl() {
-    bool ok;
-    QString userUrl = QInputDialog::getText(
-        this, "Add Stream", "Enter URL (YouTube, Dailymotion, Rumble, Odysee, Vimeo or direct media):",
-        QLineEdit::Normal, "https://", &ok);
-
-    if (!ok || userUrl.isEmpty()) return;
-
-    // Check which site it is
-    if (userUrl.contains("youtube.com/watch") || userUrl.contains("youtu.be/") || userUrl.contains("music.youtube.com/")) {
-        // YouTube needs special handling with -f bestaudio
-        //if(!openVideoButton->isChecked()) { openVideoButton->click(); }
-
-        extractYouTubeAndAddToPlaylist(userUrl);
-    }
-    else if (userUrl.contains("dailymotion.com") ||
-             userUrl.contains("rumble.com") ||
-             userUrl.contains("odysee.com") || userUrl.contains("vimeo.com")) {
-        // Dailymotion, Rumble, Odysee work with just -g
-        //if(!openVideoButton->isChecked()) { openVideoButton->click(); }
-
-        extractGenericAndAddToPlaylist(userUrl);
-    }
-    else {
-        // Direct media URL - add as-is
-        //if(!openVideoButton->isChecked()) { openVideoButton->click(); }
-        addStreamToPlaylist(userUrl, userUrl);
-    }
-}
-*/
-
 void MainWindow::onStreamFromUrl() {
     bool ok;
     QString userUrl = QInputDialog::getText(
@@ -3565,12 +3584,12 @@ void MainWindow::extractGenericAndAddToPlaylist(const QString &url) {
     process->start("yt-dlp", titleArgs);
 }
 
-/*
+
 void MainWindow::addStreamToPlaylist(const QString &streamUrl, const QString &displayTitle) {
     QListWidget *playlist = currentPlaylistWidget();
     QString playlistName = currentPlaylistName();
 
-    if (!playlist) {
+    if (!playlist || playlistName.isEmpty()) {
         statusBar()->showMessage("No active playlist", 3000);
         return;
     }
@@ -3581,42 +3600,13 @@ void MainWindow::addStreamToPlaylist(const QString &streamUrl, const QString &di
     // Store the URL (what player uses)
     m_playlistFiles[playlistName].append(streamUrl);
 
-    // Optionally auto-select the new item
+    // Auto-select the new item
     int newIndex = playlist->count() - 1;
+
+    m_playlistLastTrackIndex[playlistName] = newIndex;
     playlist->setCurrentRow(newIndex);
-}
-*/
 
-
-void MainWindow::addStreamToPlaylist(const QString &streamUrl, const QString &displayTitle) {
-    if(!m_isVideoEnabled) { openVideoButton->click(); }
-    // Force use of Video Playlist for streams
-    QListWidget *playlist = nullptr;
-    QString playlistName = "Video Playlist";
-
-    // Find the Video Playlist tab
-    for (int i = 0; i < m_playlistTabs->count(); ++i) {
-        if (m_playlistTabs->tabText(i) == "Video Playlist") {
-            playlist = qobject_cast<QListWidget *>(m_playlistTabs->widget(i));
-            m_playlistTabs->setCurrentIndex(i);
-            break;
-        }
-    }
-
-    if (!playlist) {
-        statusBar()->showMessage("Video Playlist not found", 3000);
-        return;
-    }
-
-    // Add to list widget (what user sees)
-    playlist->addItem(displayTitle);
-
-    // Store the URL (what player uses)
-    m_playlistFiles[playlistName].append(streamUrl);
-
-    // Optionally auto-select the new item
-    int newIndex = playlist->count() - 1;
-    playlist->setCurrentRow(newIndex);
+    statusBar()->showMessage(QString("Stream added to '%1'").arg(playlistName), 2000);
 }
 
 void MainWindow::extractYouTubeAndAddToPlaylist(const QString &youtubeUrl) {
@@ -3710,6 +3700,7 @@ void MainWindow::playRemoteStream(const QString &urlString) {
     statusBar()->showMessage("Streaming: " + displayName);
 }
 
+/*
 void MainWindow::onFileOpened(const QString &filePath) {
     QFileInfo fileInfo(filePath);
     if (!fileInfo.exists() || !fileInfo.isFile()) {
@@ -3728,11 +3719,57 @@ void MainWindow::onFileOpened(const QString &filePath) {
     QString playlistName = currentPlaylistName();
     QString fileName = fileInfo.fileName();
 
+    // Add to playlist
     currentPlaylistWidget()->addItem(fileName);
-
     m_playlistFiles[playlistName].append(filePath);
 
+    // Select the newly added item
+    int newIndex = currentPlaylistWidget()->count() - 1;
+    currentPlaylistWidget()->setCurrentRow(newIndex);
 
+    // Store in map and update current track
+    m_playlistLastTrackIndex[playlistName] = newIndex;
+    m_currentTrackIndex = newIndex;
+    m_currentPlaylistName = playlistName;
+
+    // Play the file
+    m_playMusicButton->click();
+    statusBar()->showMessage("Opened: " + fileName, 3000);
+}
+*/
+
+
+void MainWindow::onFileOpened(const QString &filePath) {
+    QFileInfo fileInfo(filePath);
+    if (!fileInfo.exists() || !fileInfo.isFile()) {
+        return;
+    }
+
+    QString suffix = fileInfo.suffix().toLower();
+    QString fileName = fileInfo.fileName();
+
+    // Use constants for supported extensions
+    if (!ConstantGlobals::allMediaExtensions.contains("." + suffix)) {
+        statusBar()->showMessage("Unsupported file format: ." + suffix, 3000);
+        return;
+    }
+
+    QString playlistName = currentPlaylistName();
+
+    // Add to playlist
+    currentPlaylistWidget()->addItem(fileName);
+    m_playlistFiles[playlistName].append(filePath);
+
+    // Select the newly added item
+    int newIndex = currentPlaylistWidget()->count() - 1;
+    currentPlaylistWidget()->setCurrentRow(newIndex);
+
+    // Store in map and update current track
+    m_playlistLastTrackIndex[playlistName] = newIndex;
+    m_currentTrackIndex = newIndex;
+    m_currentPlaylistName = playlistName;
+
+    // Play the file
     m_playMusicButton->click();
     statusBar()->showMessage("Opened: " + fileName, 3000);
 }
@@ -4456,7 +4493,6 @@ void MainWindow::onCueTrackSelected(const QString &audioFile,
     }
 }
 
-
 void MainWindow::dragEnterEvent(QDragEnterEvent *event) {
     if (event->mimeData()->hasUrls()) {
         QList<QUrl> urls = event->mimeData()->urls();
@@ -4466,9 +4502,8 @@ void MainWindow::dragEnterEvent(QDragEnterEvent *event) {
             QString filePath = url.toLocalFile();
             QString suffix = QFileInfo(filePath).suffix().toLower();
 
-            if (!(suffix == "mp3" || suffix == "wav" || suffix == "flac" ||
-                  suffix == "ogg" || suffix == "m4a" || suffix == "mp4" ||
-                  suffix == "m4v" || suffix == "avi" || suffix == "mkv")) {
+            // Check if extension is in the allowed media extensions list
+            if (!ConstantGlobals::allMediaExtensions.contains("." + suffix)) {
                 allSupported = false;
                 break;
             }
@@ -4494,57 +4529,84 @@ void MainWindow::dropEvent(QDropEvent *event) {
     event->acceptProposedAction();
 }
 
-void MainWindow::processDroppedFiles(const QStringList &filePaths) {
-    if (filePaths.isEmpty())
-        return;
 
-    ConstantGlobals::lastMusicDirPath =
-            QFileInfo(filePaths.first()).absolutePath();
+void MainWindow::processDroppedFiles(const QStringList &filePaths) {
+    if (filePaths.isEmpty()) return;
+
+    ConstantGlobals::lastMusicDirPath = QFileInfo(filePaths.first()).absolutePath();
 
     QString playlistName = currentPlaylistName();
     QListWidget *playlist = currentPlaylistWidget();
 
-    if (m_isVideoEnabled) {
-        for (int i = 0; i < m_playlistTabs->count(); ++i) {
-            if (m_playlistTabs->tabText(i) == "Video Playlist") {
-                playlist = qobject_cast<QListWidget *>(m_playlistTabs->widget(i));
-                playlistName = "Video Playlist";
-                m_playlistTabs->setCurrentIndex(i);
-                break;
-            }
+    // Remember if playlist was empty before adding
+    bool wasEmpty = (playlist->count() == 0);
+
+    // Create QSet of existing file paths for duplicate checking
+    QSet<QString> existingFiles;
+    for (const QString &existingPath : m_playlistFiles[playlistName]) {
+        existingFiles.insert(existingPath);
+    }
+
+    QStringList validFiles;
+    QStringList duplicateFiles;
+
+    // Only check for duplicates - extension already validated by dragEnterEvent
+    foreach (const QString &filePath, filePaths) {
+        QString absolutePath = QFileInfo(filePath).absoluteFilePath();
+
+        // Check for duplicate
+        if (existingFiles.contains(absolutePath)) {
+            duplicateFiles.append(QFileInfo(filePath).fileName());
+        } else {
+            validFiles.append(filePath);
+            existingFiles.insert(absolutePath); // Add to set for future duplicate checks within this batch
         }
     }
 
-    int addedCount = 0;
+    // Show duplicate files notice if any
+    if (!duplicateFiles.isEmpty()) {
+        QString duplicateList = duplicateFiles.join("\n• ");
+        QMessageBox::information(this, "Duplicate Files Skipped",
+            QString("The following %1 file(s) are already in the playlist and were skipped:\n\n• %2")
+            .arg(duplicateFiles.size())
+            .arg(duplicateList));
+    }
 
-    foreach (const QString &filePath, filePaths) {
+    // Add valid files to playlist
+    foreach (const QString &filePath, validFiles) {
         QString fileName = QFileInfo(filePath).fileName();
-
         playlist->addItem(fileName);
-
         m_playlistFiles[playlistName].append(filePath);
-
-        addedCount++;
     }
 
-    if (playlist->count() > 0) {
-        playlist->setCurrentRow(0); // This highlights and selects the first item
-        playlist->scrollToTop();    // Optional: Ensure first item is visible
+    // Update UI and status bar
+    if (!validFiles.isEmpty()) {
+        // Only select the first new item if the playlist was EMPTY before adding
+        if (wasEmpty && playlist->count() > 0) {
+            playlist->setCurrentRow(0);
+            playlist->scrollToItem(playlist->item(0));
+            m_playlistLastTrackIndex[playlistName] = 0;
+            m_currentTrackIndex = 0;
+            m_currentPlaylistName = playlistName;
+        }
+        // Otherwise do nothing - keep existing selection
+
+        QString message = QString("Added %1 file(s) to '%2' via drag & drop")
+            .arg(validFiles.size())
+            .arg(playlistName);
+        if (!duplicateFiles.isEmpty()) {
+            message += QString(" (%1 duplicates skipped)").arg(duplicateFiles.size());
+        }
+        statusBar()->showMessage(message, 3000);
+    } else {
+        if (!duplicateFiles.isEmpty()) {
+            statusBar()->showMessage("No new valid media files were added via drag & drop (all duplicates)", 5000);
+        } else {
+            statusBar()->showMessage("No valid media files were added via drag & drop", 5000);
+        }
     }
-
-    statusBar()->showMessage(QString("Added %1 file(s) to '%2' via drag & drop")
-                             .arg(addedCount)
-                             .arg(playlistName));
-
-    /*
-  if (m_mediaPlayer && m_mediaPlayer->playbackState() !=
-  QMediaPlayer::PlayingState) { if (!filePaths.isEmpty()) {
-          m_mediaPlayer->setSource(QUrl::fromLocalFile(filePaths.first()));
-          m_mediaPlayer->play();
-      }
-  }
-  */
 }
+
 
 void MainWindow::onVideoContextMenu(const QPoint &pos) {
 
@@ -4678,43 +4740,34 @@ void MainWindow::onVideoContextMenu(const QPoint &pos) {
 
 
 void MainWindow::setupVideoPlayer() {
-    videoWidget->setObjectName("videoWidget");
+    if (!m_videoFloatingWindow) {
 
-    videoWidget->setContextMenuPolicy(Qt::CustomContextMenu);
+        m_videoFloatingWindow = new QWidget(this, Qt::Window);
+        m_videoFloatingWindow->setAttribute(Qt::WA_DeleteOnClose, false);
+        m_videoFloatingWindow->setWindowTitle("Video Player");
+        m_videoFloatingWindow->setMinimumSize(800, 600);
+        m_videoFloatingWindow->installEventFilter(this);
+        videoWidget->setContextMenuPolicy(Qt::CustomContextMenu);
 
-    m_videoPlayerContainer = new QWidget();
-    m_videoPlayerContainer->setObjectName("videoPlayerContainer");
+        QVBoxLayout *layout = new QVBoxLayout(m_videoFloatingWindow);
+        layout->setContentsMargins(0, 0, 0, 0);
+        layout->setSpacing(0);
+
+        if(!m_videoToolbar){
+            createVideoToolbar();
+        }
+
+        if (m_mediaPlayer) m_mediaPlayer->setVideoOutput(videoWidget);
+
+        // Use existing videoWidget and toolbar
+        layout->addWidget(videoWidget);
+        layout->addWidget(m_videoToolbar);
 
 
-    QVBoxLayout *containerLayout = new QVBoxLayout(m_videoPlayerContainer);
-    containerLayout->setContentsMargins(0, 0, 0, 0);
-    containerLayout->setSpacing(0);
 
-    containerLayout->addWidget(videoWidget);
-
-    createVideoToolbar();
-    containerLayout->addWidget(m_videoToolbar);
-
-    videoPlaylist = new QListWidget();
-    videoPlaylist->setObjectName("videoPlaylist");
-
-    int videoPlayerTabIndex = m_playlistTabs->addTab(m_videoPlayerContainer, "Video Player");
-    int videoPlayListTabIndex = m_playlistTabs->addTab(videoPlaylist, "Video Playlist");
-
-    m_playlistTabs->tabBar()->setTabButton(videoPlayerTabIndex, QTabBar::RightSide, nullptr);
-    m_playlistTabs->tabBar()->setTabButton(videoPlayListTabIndex, QTabBar::RightSide, nullptr);
-
-    m_playlistTabs->tabBar()->setTabVisible(videoPlayerTabIndex, false);
-    m_playlistTabs->tabBar()->setTabVisible(videoPlayListTabIndex, false);
-
-    m_videoPlayerContainer->setMouseTracking(true);
-    videoWidget->setMouseTracking(true);
-
-    videoWidget->installEventFilter(this);
-
-    m_videoToolbar->show();
+        m_videoFloatingWindow->hide();
+    }
 }
-
 
 
 
@@ -4784,12 +4837,9 @@ void MainWindow::createVideoToolbar() {
     QPushButton* clearStreamButton = new QPushButton(this);
     clearStreamButton->setFixedSize(32, 32);
     clearStreamButton->setIcon(QIcon(":/icons-white/cloud-off.svg"));
-    clearStreamButton->setToolTip("Clear current stream - Disabled in full screen mode");
+    //clearStreamButton->setToolTip("Clear current stream - Disabled in full screen mode");
     connect(clearStreamButton, &QPushButton::clicked, this, [this](){
 
-        if(m_videoPlayerContainer->isFullScreen()){
-            return;
-        }
 
         QMessageBox confirmBox(this);
         confirmBox.setWindowTitle("Clear Current Stream");
@@ -4807,11 +4857,9 @@ void MainWindow::createVideoToolbar() {
     loadStreamButton->setFixedSize(32, 32);
 
     loadStreamButton->setIcon(QIcon(":/icons-white/rss.svg"));
-    loadStreamButton->setToolTip("Load Network Stream - Disabled in full screen mode");
+    //loadStreamButton->setToolTip("Load Network Stream - Disabled in full screen mode");
     connect(loadStreamButton, &QPushButton::clicked, this, [this](){
-        if(m_videoPlayerContainer->isFullScreen()){
-            return;
-        }
+
         onStreamFromUrl();
     });
 
@@ -4835,9 +4883,7 @@ void MainWindow::createVideoToolbar() {
     //connect(m_playButton, &QPushButton::clicked, this,
       //      &MainWindow::onPlayClicked);
     connect(m_playButton, &QPushButton::clicked, this, [this]() {
-        if (!videoPlaylist || videoPlaylist->count() == 0) {
-            return;
-        }
+
 
         onPlayClicked();
     });
@@ -4845,9 +4891,7 @@ void MainWindow::createVideoToolbar() {
       //      &MainWindow::onPauseClicked);
 
     connect(m_pauseButton, &QPushButton::clicked, this, [this]() {
-        if (!videoPlaylist || videoPlaylist->count() == 0) {
-            return;
-        }
+
 
         onPauseClicked();
     });
@@ -4857,9 +4901,7 @@ void MainWindow::createVideoToolbar() {
       //      &MainWindow::onStopClicked);
 
     connect(m_stopButton, &QPushButton::clicked, this, [this]() {
-        if (!videoPlaylist || videoPlaylist->count() == 0) {
-            return;
-        }
+
 
         onStopMusicClicked();
     });
@@ -4879,9 +4921,7 @@ void MainWindow::createVideoToolbar() {
       //  &MainWindow::playPreviousTrack);
 
     connect(m_vpreviousButton, &QPushButton::clicked, this, [this]() {
-        if (!videoPlaylist || videoPlaylist->count() == 0) {
-            return;
-        }
+
 
         playPreviousTrack();
     });
@@ -4890,9 +4930,7 @@ void MainWindow::createVideoToolbar() {
       //  &MainWindow::playNextTrack);
 
     connect(m_vnextButton, &QPushButton::clicked, this, [this]() {
-        if (!videoPlaylist || videoPlaylist->count() == 0) {
-            return;
-        }
+
 
         playNextTrack();
     });
@@ -4900,7 +4938,7 @@ void MainWindow::createVideoToolbar() {
     connect(m_vvolumeSlider, &QSlider::valueChanged, this,
             &MainWindow::onMusicVolumeChanged);
     connect(m_loadVideoButton, &QPushButton::clicked, this,
-            &MainWindow::onLoadVideoClicked);
+            &MainWindow::onLoadMusicClicked);
 
     QString toolbarStyle =
             "#videoToolbar {"
@@ -4962,7 +5000,8 @@ void MainWindow::showVideoToolbar() {
 
 bool MainWindow::eventFilter(QObject *watched, QEvent *event) {
 
-    if (watched == m_flickerContainer) {
+
+    if (watched == m_flickerFloatingWindow) {
         if (event->type() == QEvent::KeyPress) {
             QKeyEvent *keyEvent = static_cast<QKeyEvent *>(event);
             if (keyEvent->key() == Qt::Key_Escape) {
@@ -4970,10 +5009,31 @@ bool MainWindow::eventFilter(QObject *watched, QEvent *event) {
                 return true;
             }
         }
+        if (event->type() == QEvent::Close) {
+            if (m_visStimButton->isChecked()) {
+                m_visStimButton->blockSignals(true);
+                m_visStimButton->setChecked(false);
+                m_visStimButton->blockSignals(false);
+            }
+            m_flickerFloatingWindow->hide();
+            return true;
+        }
     }
 
-    if (watched == m_videoPlayerContainer || watched == videoWidget ||
-            watched == m_videoToolbar) {
+    // Video window events - now using the floating window
+    if (watched == m_videoFloatingWindow || watched == videoWidget || watched == m_videoToolbar) {
+
+        if (event->type() == QEvent::Close) {
+            // Window is being closed (X button clicked)
+            if (openVideoButton->isChecked()) {
+                openVideoButton->blockSignals(true);
+                openVideoButton->setChecked(false);
+                openVideoButton->blockSignals(false);
+            }
+            // Hide instead of destroy
+            m_videoFloatingWindow->hide();
+            return true; // Accept the close event
+        }
 
         if (event->type() == QEvent::MouseButtonRelease) {
             QMouseEvent *mouseEvent = static_cast<QMouseEvent *>(event);
@@ -5025,25 +5085,11 @@ void MainWindow::onVideoDurationChanged(qint64 duration) {
 
 
 void MainWindow::toggleFullScreen() {
-    if (videoWidget) {
-        if (m_videoPlayerContainer->isFullScreen()) {
-            m_videoPlayerContainer->setWindowFlags(Qt::Widget);
-            m_videoPlayerContainer->showNormal();
-
-            if (m_videoOriginalTabIndex >= 0) {
-                m_videoPlayerContainer->setParent(nullptr);
-                m_playlistTabs->insertTab(m_videoOriginalTabIndex, m_videoPlayerContainer, "Video Player");
-                m_playlistTabs->setCurrentIndex(m_videoOriginalTabIndex);
-                m_playlistTabs->tabBar()->setTabButton(m_videoOriginalTabIndex, QTabBar::RightSide, nullptr);
-                m_playlistTabs->tabBar()->setTabVisible(m_videoOriginalTabIndex, true);
-            }
-            m_videoOriginalTabIndex = -1;
+    if (m_videoFloatingWindow) {
+        if (m_videoFloatingWindow->isFullScreen()) {
+            m_videoFloatingWindow->showNormal();
         } else {
-            m_videoOriginalTabIndex = m_playlistTabs->currentIndex();
-            m_playlistTabs->removeTab(m_videoOriginalTabIndex);
-            m_videoPlayerContainer->setWindowFlags(Qt::Window | Qt::FramelessWindowHint);
-            m_videoPlayerContainer->showFullScreen();
-            m_videoToolbar->show();
+            m_videoFloatingWindow->showFullScreen();
         }
     }
 }
@@ -5072,98 +5118,80 @@ void MainWindow::updateVideoTimeDisplay(qint64 position, qint64 duration) {
 }
 
 
-void MainWindow::setupFlickerTab() {
-    m_flickerContainer = new QWidget();
-    m_flickerContainer->installEventFilter(this);
+void MainWindow::setupFlickerWindow() {
+    if (!m_flickerFloatingWindow) {
+        m_flickerFloatingWindow = new QWidget(this, Qt::Window);
+        m_flickerFloatingWindow->setWindowTitle("Visual Stimulation");
+        m_flickerFloatingWindow->setMinimumSize(800, 600);
+        //m_flickerFloatingWindow->resize(1024, 600);
+        m_flickerFloatingWindow->installEventFilter(this);
+        m_flickerFloatingWindow->setAttribute(Qt::WA_DeleteOnClose, false);
 
-    QVBoxLayout *flickerLayout = new QVBoxLayout(m_flickerContainer);
-    flickerLayout->setContentsMargins(0, 0, 0, 0);
-    flickerLayout->setSpacing(0);
+        QVBoxLayout *layout = new QVBoxLayout(m_flickerFloatingWindow);
+        layout->setContentsMargins(0, 0, 0, 0);
+        layout->setSpacing(0);
 
-    if (!m_flickerWidget) {
-        m_flickerWidget = new FlickerWidget(m_flickerContainer);
-        m_flickerWidget->setAttribute(Qt::WA_TranslucentBackground);
-        m_flickerWidget->setStyleSheet("background: transparent;");
+        // Create or reparent existing flicker container
+        if (!m_flickerContainer) {
+            m_flickerContainer = new QWidget();
+            QVBoxLayout *flickerLayout = new QVBoxLayout(m_flickerContainer);
+            flickerLayout->setContentsMargins(0, 0, 0, 0);
+            flickerLayout->setSpacing(0);
 
-        connect(m_flickerWidget, &FlickerWidget::toggleFullscreenRequested,
-                this, &MainWindow::toggleFlickerFullscreen);
-        connect(m_flickerWidget, &FlickerWidget::toggleDialogRequested,
-                this, [this]() {
-            if (m_visStimDialog) {
-                if (m_visStimDialog->isVisible()) {
-                    m_visStimDialog->hide();
-                } else {
-                    if (m_flickerContainer && ! m_flickerContainer->isFullScreen()) {
-                    m_visStimDialog->show();
-                    m_visStimDialog->raise();
-                    }else{
+            if (!m_flickerWidget) {
+                m_flickerWidget = new FlickerWidget(m_flickerContainer);
+                m_flickerWidget->setAttribute(Qt::WA_TranslucentBackground);
+
+                connect(m_flickerWidget, &FlickerWidget::toggleFullscreenRequested,
+                        this, &MainWindow::toggleFlickerFullscreen);
+                connect(m_flickerWidget, &FlickerWidget::toggleDialogRequested,
+                        this, [this]() {
+                    if (m_visStimDialog) {
+                        if (m_visStimDialog->isVisible()) {
+                            m_visStimDialog->hide();
+                        } else {
+                            if (m_flickerContainer && !m_flickerContainer->isFullScreen()) {
+                                m_visStimDialog->show();
+                                m_visStimDialog->raise();
+                            }
                         }
-                }
+                    }
+                });
             }
-        });
-    } else {
-        m_flickerWidget->setParent(m_flickerContainer);
-    }
-
-    flickerLayout->addWidget(m_flickerWidget);
-
-    if (!m_visStimDialog) {
-        m_visStimDialog = new VisStimDialog(m_flickerWidget, m_flickerContainer);
-    }
-
-    m_flickerOriginalTabIndex = m_playlistTabs->addTab(m_flickerContainer, "Visual Stimulation");
-
-    m_playlistTabs->tabBar()->setTabButton(m_flickerOriginalTabIndex, QTabBar::RightSide, nullptr);
-
-    m_playlistTabs->tabBar()->setTabVisible(m_flickerOriginalTabIndex, false);
-}
-
-
-void MainWindow::showFlickerTab() {
-    if (m_flickerOriginalTabIndex == -1) {
-        setupFlickerTab();
-    }
-
-    m_playlistTabs->tabBar()->setTabVisible(m_flickerOriginalTabIndex, true);
-    m_playlistTabs->setCurrentIndex(m_flickerOriginalTabIndex);
-
-    if (m_flickerWidget) {
-    }
-}
-
-
-void MainWindow::toggleFlickerFullscreen()
-{
-    if (!m_flickerContainer) return;
-
-    if (m_flickerContainer->isFullScreen()) {
-        if (m_visStimDialog) {
-            m_visStimDialog->setParent(m_flickerContainer);
+            flickerLayout->addWidget(m_flickerWidget);
         }
 
-        m_flickerContainer->setWindowFlags(Qt::Widget);
-        m_flickerContainer->showNormal();
+        layout->addWidget(m_flickerContainer);
 
-        m_flickerContainer->setParent(m_playlistTabs);
-        m_playlistTabs->insertTab(m_flickerOriginalTabIndex, m_flickerContainer, "Visual Stimulation");
-        m_playlistTabs->tabBar()->setTabButton(m_flickerOriginalTabIndex, QTabBar::RightSide, nullptr);
-        m_playlistTabs->tabBar()->setTabVisible(m_flickerOriginalTabIndex, true);
-        m_playlistTabs->setCurrentIndex(m_flickerOriginalTabIndex);
-
-    } else {
-        if (m_visStimDialog) {
-            m_visStimDialog->setParent(m_flickerContainer);
-
+        if (!m_visStimDialog) {
+            m_visStimDialog = new VisStimDialog(m_flickerWidget, m_flickerFloatingWindow);
         }
 
-        m_flickerOriginalTabIndex = m_playlistTabs->currentIndex();
-        m_playlistTabs->removeTab(m_flickerOriginalTabIndex);
-
-        m_flickerContainer->setParent(nullptr);
-        m_flickerContainer->setWindowFlags(Qt::Window | Qt::FramelessWindowHint);
-        m_flickerContainer->showFullScreen();
+        m_flickerFloatingWindow->hide();
     }
 }
+
+
+
+
+void MainWindow::toggleFlickerFullscreen() {
+    if (!m_flickerFloatingWindow) return;
+
+    if (m_flickerFloatingWindow->isFullScreen()) {
+        // Exit fullscreen - restore normal window
+        m_flickerFloatingWindow->setWindowFlags(Qt::Window);
+        //m_flickerFloatingWindow->setWindowState(Qt::WindowNoState);  // Clear maximized state
+        m_flickerFloatingWindow->showNormal();
+        m_flickerFloatingWindow->resize(1024, 600);  // Restore original size
+    } else {
+        // Enter fullscreen - remove titlebar
+        m_flickerFloatingWindow->setWindowFlags(Qt::Window | Qt::FramelessWindowHint);
+        m_flickerFloatingWindow->showFullScreen();
+    }
+}
+
+
+
 
 
 void MainWindow::toggleTheme(bool enableDark)

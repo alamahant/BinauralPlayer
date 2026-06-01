@@ -5,7 +5,8 @@
 #include<QDir>
 #include<QMediaPlayer>
 
-namespace ConstantGlobals {
+namespace ConstantGlobals
+{
 extern const QString appDirPath;
 extern const QString ambientFilePath;
 extern const QString presetFilePath;
@@ -17,7 +18,11 @@ extern QMediaPlayer::PlaybackState playbackState;
 extern QString lastMusicDirPath;
 extern double currentBinFreq;
 extern double currentIsonFreq;
-
+//extern const QStringList audioExtensions;
+//extern const QStringList videoExtensions;
+extern const QStringList allMediaExtensions;
+// Helper function to get the file dialog filter string (cached)
+QString getAllMediaFilterString();
 }
 
 

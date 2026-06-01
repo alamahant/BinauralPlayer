@@ -64,13 +64,55 @@
   <url type="bugtracker">https://github.com/alamahant/BinauralPlayer/issues</url>
 
   <screenshots>
+
     <screenshot type="default">
       <caption>Main interface with media and brainwave controls</caption>
       <image>https://raw.githubusercontent.com/alamahant/BinauralPlayer/master/screenshots/full.png</image>
     </screenshot>
+
+
+<screenshot>
+  <caption>Dark theme showcasing the latest features</caption>
+  <image>https://raw.githubusercontent.com/alamahant/BinauralPlayer/master/screenshots/dark-theme.png</image>
+</screenshot>
+
+<screenshot>
+  <caption>Ambient player with multiple channels</caption>
+  <image>https://raw.githubusercontent.com/alamahant/BinauralPlayer/master/screenshots/ambient-dialogs.png</image>
+</screenshot>
+
+<screenshot>
+  <caption>Flicker widget for visual brainwave entertainment</caption>
+  <image>https://raw.githubusercontent.com/alamahant/BinauralPlayer/master/screenshots/flicker.png</image>
+</screenshot>
+
+<screenshot>
+  <caption>Light theme full interface with the latest features</caption>
+  <image>https://raw.githubusercontent.com/alamahant/BinauralPlayer/master/screenshots/lighttheme-full.png</image>
+</screenshot>
+
+<screenshot>
+  <caption>Multi-stage session creator interface</caption>
+  <image>https://raw.githubusercontent.com/alamahant/BinauralPlayer/master/screenshots/sessionmanager.png</image>
+</screenshot>
+
+
   </screenshots>
 
   <releases>
+
+<release version="1.6.0" date="2026-06-01">
+  <description>
+    <p>Release v1.6.0:</p>
+    <ul>
+      <li>Video player and Visual Stimulation now open as independent floating windows (no tab embedding)</li>
+      <li>Each playlist now remembers its last selected track when switching tabs</li>
+      <li>Unified file extension system with duplicate detection across all file loading methods</li>
+      <li>Load playlist directly into current tab with overwrite confirmation</li>
+      <li>Fullscreen mode for flicker window removes titlebar for immersive experience</li>
+    </ul>
+  </description>
+</release>
 
 <release version="1.5.3" date="2026-05-17">
   <description>
