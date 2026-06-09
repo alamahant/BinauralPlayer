@@ -208,6 +208,42 @@ QString HelpMenuDialog::getWhatsNewContent()
 
 
 <div style="background-color: #e3f2fd; padding: 15px; border-radius: 8px; margin-bottom: 25px; border-left: 5px solid #1976d2;">
+    <h2 style="color: #1565c0; margin-top: 0;">🎵 Brainwave Presets & Cover Art — Version 1.6.1 <span style="font-size: 0.75em; background-color: #1976d2; color: white; padding: 2px 8px; border-radius: 12px; vertical-align: middle;">NEW</span></h2>
+    <p>Version 1.6.1 adds a massive library of brainwave presets and full cover art support for your music tracks.</p>
+
+    <div style="background-color: #e3f2fd; padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #1565c0;">
+        <h3 style="color: #1565c0; margin-top: 0;">📦 47+ Brainwave Presets</h3>
+        <ul>
+            <li><strong>Sleep & dreams</strong> — deep delta, hypnagogic, lucid dreaming induction</li>
+            <li><strong>Meditation</strong> — theta void, heart coherence, zen stillness</li>
+            <li><strong>Focus & productivity</strong> — deep work 90min, ADHD calm, gamma 40Hz</li>
+            <li><strong>Altered states</strong> — DMT mimic, psilocybin journey, theta gateway</li>
+            <li><strong>Solfeggio frequencies</strong> — 396, 417, 528, 639, 741, 852 Hz carriers</li>
+            <li><strong>Therapeutic</strong> — anxiety release, PTSD healing, migraine relief</li>
+        </ul>
+    </div>
+
+    <div style="background-color: #e8f5e9; padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #2e7d32;">
+        <h3 style="color: #2e7d32; margin-top: 0;">🖼️ Cover Art Support</h3>
+        <ul>
+            <li><strong>ffmpeg extraction</strong> — pulls embedded album art (Qt Multimedia couldn't)</li>
+            <li><strong>Smart caching</strong> — QMap stores original full-quality images per track</li>
+            <li><strong>Hover zoom</strong> — 1.15x magnification from original (no quality loss)</li>
+            <li><strong>Auto cleanup</strong> — clears old art when switching to tracks without images</li>
+        </ul>
+    </div>
+
+    <div style="background-color: #fff3e0; padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #e65100;">
+        <h3 style="color: #e65100; margin-top: 0;">🔧 Fixed</h3>
+        <ul>
+            <li>QDoubleSpinBox now accepts manual entry below 0.5 Hz with setSingleStep(0.1)</li>
+            <li>Pulse frequency spinbox validation matches engine's 0.10 Hz minimum</li>
+        </ul>
+    </div>
+</div>
+
+
+<div style="background-color: #e3f2fd; padding: 15px; border-radius: 8px; margin-bottom: 25px; border-left: 5px solid #1976d2;">
     <h2 style="color: #1565c0; margin-top: 0;">🪟 Floating Windows — Version 1.6.0 <span style="font-size: 0.75em; background-color: #1976d2; color: white; padding: 2px 8px; border-radius: 12px; vertical-align: middle;">NEW</span></h2>
     <p>Version 1.6.0 decouples video and visual stimulation from the tab system, giving you independent floating windows and smarter playlist management.</p>
 
