@@ -101,6 +101,18 @@
 
   <releases>
 
+<release version="1.6.1" date="2026-06-09">
+  <description>
+    <p>Release v1.6.1:</p>
+    <ul>
+      <li>Added 47+ brainwave presets (sleep, meditation, focus, altered states, Solfeggio frequencies)</li>
+      <li>Added cover art extraction via ffmpeg with caching and hover zoom in track info dialog</li>
+      <li>Added preset description files and extraction notice dialog with do-not-show-again option</li>
+      <li>Fixed QDoubleSpinBox manual entry below 0.5 Hz to work with setSingleStep(0.1)</li>
+    </ul>
+  </description>
+</release>
+
 <release version="1.6.0" date="2026-06-01">
   <description>
     <p>Release v1.6.0:</p>

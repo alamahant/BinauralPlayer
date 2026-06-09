@@ -81,4 +81,6 @@ signals:
     void toggleDialogRequested();
 private:
     float m_subliminalFactor = 3.0f;
+    void setupGlobalShortcut();
+
 };

@@ -83,7 +83,6 @@ if(FLATPAK_BUILD)
             DESTINATION "share/icons/hicolor/32x32/apps"
             RENAME "io.github.alamahant.BinauralPlayer.png")
 
-
 endif()
 
 qt_finalize_executable(BinauralPlayer)

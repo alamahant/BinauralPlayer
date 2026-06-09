@@ -9,6 +9,7 @@
 #include <QDebug>
 #include <QMenu>
 #include <QContextMenuEvent>
+#include<QShortcut>
 
 
 static const char *VERT_SRC = R"(
@@ -79,6 +80,7 @@ FlickerWidget::FlickerWidget(QWidget *parent)
         if (m_running) update();
     });
     m_renderTimer.setInterval(16);
+    setupGlobalShortcut();
 }
 
 FlickerWidget::~FlickerWidget()
@@ -110,7 +112,7 @@ void FlickerWidget::stopFlicker()
 
 void FlickerWidget::setFrequency(double hz)
 {
-    m_frequency = qBound(0.5, hz, 100.0);
+    m_frequency = qBound(0.1, hz, 100.0);
 }
 
 void FlickerWidget::setEnvelope(Envelope env)
@@ -353,6 +355,19 @@ bool FlickerWidget::eventFilter(QObject *watched, QEvent *event)
         raise();
         return true;
     }
+
+    if (event->type() == QEvent::KeyPress) {
+        QKeyEvent *keyEvent = static_cast<QKeyEvent *>(event);
+        if (keyEvent->key() == Qt::Key_Space || keyEvent->key() == Qt::Key_X) {
+            if (m_running) {
+                stopFlicker();
+            } else {
+                startFlicker();
+            }
+            return true;
+        }
+    }
+
     return QOpenGLWidget::eventFilter(watched, event);
 }
 
@@ -362,7 +377,6 @@ void FlickerWidget::contextMenuEvent(QContextMenuEvent *event)
     QAction *fullscreenAction  = menu.addAction("Toggle Fullscreen");
     QAction *dialogAction      = menu.addAction("Show/Hide Controls");
     QAction *startStopAction   = menu.addAction("Start/Stop Flickering");
-
     QAction *selected = menu.exec(event->globalPos());
 
     if (selected == fullscreenAction) {
@@ -376,4 +390,19 @@ void FlickerWidget::contextMenuEvent(QContextMenuEvent *event)
             startFlicker();
         }
     }
+}
+
+void FlickerWidget::setupGlobalShortcut()
+{
+    setFocusPolicy(Qt::StrongFocus);
+    setAttribute(Qt::WA_KeyCompression);
+    QShortcut *shortcut = new QShortcut(Qt::Key_Space, this);
+    shortcut->setContext(Qt::WidgetShortcut);
+    connect(shortcut, &QShortcut::activated, this, [this]() {
+        if (m_running) {
+            stopFlicker();
+        } else {
+            startFlicker();
+        }
+    });
 }

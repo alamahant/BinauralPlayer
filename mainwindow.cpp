@@ -28,6 +28,8 @@
 #include <QVideoWidget>
 #include <QWidget>
 #include<QProcess>
+#include<QPainter>
+#include<QTemporaryFile>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent), m_binauralEngine(new DynamicEngine(this))
@@ -80,7 +82,7 @@ MainWindow::MainWindow(QWidget *parent)
     addActions();
 
     setupMenus();
-    createInfoDialog();
+    //createInfoDialog();
     setupConnections();
     model = qobject_cast<QStandardItemModel *>(m_waveformCombo->model());
     squareWaveItem = model->item(1);
@@ -113,6 +115,7 @@ MainWindow::MainWindow(QWidget *parent)
     enableDarkThemeAction->setChecked(isDarkTheme);
     blockSignals(false);
     toggleTheme(isDarkTheme);
+    showPresetExtractionNotice();
 }
 
 MainWindow::~MainWindow() {
@@ -336,11 +339,12 @@ QToolBar *MainWindow::createBinauralToolbar() {
     toolbar->addSeparator();
 
     m_waveformCombo = new QComboBox(toolbar);
+
     m_waveformCombo->addItem("Sine");
     m_waveformCombo->addItem("Square");
     m_waveformCombo->addItem("Triangle");
     m_waveformCombo->addItem("Sawtooth");
-    m_waveformCombo->setMaximumWidth(90);
+    m_waveformCombo->setMaximumWidth(98);
     m_waveformCombo->setToolTip("Waveform type");
     m_waveformCombo->setEnabled(false);
     toolbar->addWidget(m_waveformCombo);
@@ -355,7 +359,7 @@ QToolBar *MainWindow::createBinauralToolbar() {
     m_binauralVolumeInput->setValue(15.0);
     m_binauralVolumeInput->setDecimals(1);
     m_binauralVolumeInput->setSuffix("%");
-    m_binauralVolumeInput->setMaximumWidth(70);
+    m_binauralVolumeInput->setMaximumWidth(80);
     m_binauralVolumeInput->setToolTip("Binaural volume (0-100%)");
     m_binauralVolumeInput->setEnabled(false);
     toolbar->addWidget(m_binauralVolumeInput);
@@ -922,8 +926,15 @@ void MainWindow::setupConnections() {
 
     connect(m_trackInfoButton, &QPushButton::clicked, [this](bool checked) {
         if (checked) {
+            if (coverArtLabel) {
+                coverArtLabel->removeEventFilter(this);
+
+                coverArtLabel->installEventFilter(this); // Install fresh
+                coverArtLabel->setCursor(Qt::PointingHandCursor); // Ensure cursor is set
+            }
             trackInfoDialog->show();
         } else {
+
             trackInfoDialog->hide();
         }
     });
@@ -3158,6 +3169,10 @@ void MainWindow::setupMenus() {
     fileMenu->addAction(streamAction);
     fileMenu->addSeparator();
 
+    QAction *openFolderAction = fileMenu->addAction("&Open Data Directory");
+    connect(openFolderAction, &QAction::triggered, this, &MainWindow::openFolder);
+    fileMenu->addSeparator();
+
 
     fileMenu->addAction(quitAction);
 
@@ -3244,6 +3259,12 @@ void MainWindow::setupMenus() {
 
     presetsMenu->addAction(savePresetAction);
     presetsMenu->addAction(loadPresetAction);
+    presetsMenu->addSeparator();
+
+    QAction* populatePresetsAction = presetsMenu->addAction("Populate Presets Directory");
+    populatePresetsAction->setIcon(QIcon(":/icons/folder.svg"));
+
+    connect(populatePresetsAction, &QAction::triggered, this, &MainWindow::copyPresetsArchive);
     presetsMenu->addSeparator();
 
     QAction *resetPresetsAction = new QAction("&Binaural Defaults", this);
@@ -3777,7 +3798,8 @@ void MainWindow::onFileOpened(const QString &filePath) {
 QString MainWindow::getTrackMetadata() {
     metaData = m_mediaPlayer->metaData();
 
-    QString displayMetaData = "Metadata:\n";
+    //QString displayMetaData = "Metadata:\n";
+    QString displayMetaData = "\n\n";
 
     QList<QMediaMetaData::Key> allKeys = {
         QMediaMetaData::Title, QMediaMetaData::Author, QMediaMetaData::Genre,
@@ -3866,6 +3888,7 @@ QString MainWindow::getTrackMetadata() {
     return displayMetaData.trimmed();
 }
 
+/*
 void MainWindow::handleMetaDataUpdated() {
     currentTrackMetadata = getTrackMetadata();
     if (trackInfoDialog) {
@@ -3877,7 +3900,9 @@ void MainWindow::handleMetaDataUpdated() {
         }
     }
 }
+*/
 
+/*
 void MainWindow::createInfoDialog() {
 
     trackInfoDialog = new QDialog(this);
@@ -3899,7 +3924,97 @@ void MainWindow::createInfoDialog() {
         }
     });
 }
+*/
 
+void MainWindow::createInfoDialog() {
+    trackInfoDialog = new QDialog(this);
+    trackInfoDialog->setWindowTitle("Track Information");
+    trackInfoDialog->setWindowModality(Qt::NonModal);
+    trackInfoDialog->resize(500, 600); // Increased height for image
+    // Ensure dialog is not deleted when closed
+    trackInfoDialog->setAttribute(Qt::WA_DeleteOnClose, false);
+
+    // Create widgets
+    coverArtLabel = new QLabel(trackInfoDialog);
+    coverArtLabel->setAlignment(Qt::AlignCenter);
+    //coverArtLabel->setMinimumSize(200, 200);
+    //coverArtLabel->setMaximumSize(300, 300);
+    originalCoverArtSize = QSize(200, 200);
+    coverArtLabel->setFixedSize(originalCoverArtSize);
+    coverArtLabel->installEventFilter(this);
+    coverArtLabel->setCursor(Qt::PointingHandCursor);
+    coverArtLabel->setScaledContents(false);  // So we control scaling
+    //coverArtLabel->setScaledContents(true);
+    coverArtLabel->setStyleSheet("QLabel { border: 1px solid gray; background-color: #f0f0f0; }");
+
+    metadataBrowser = new QTextBrowser(trackInfoDialog);
+    //metadataBrowser->setAlignment(Qt::AlignCenter);
+    metadataBrowser->setReadOnly(true);
+    metadataBrowser->setFont(QFont("Monospace", 10));
+    metadataBrowser->setMinimumHeight(300);
+
+    // Layout
+    QVBoxLayout *layout = new QVBoxLayout(trackInfoDialog);
+    layout->addWidget(coverArtLabel, 0, Qt::AlignCenter);
+    layout->addWidget(metadataBrowser);
+    trackInfoDialog->setLayout(layout);
+
+    connect(trackInfoDialog, &QDialog::finished, this, [this](int result) {
+        Q_UNUSED(result);
+        if (m_trackInfoButton) {
+            m_trackInfoButton->setChecked(false);
+        }
+    });
+}
+
+void MainWindow::handleMetaDataUpdated() {
+    currentTrackMetadata = getTrackMetadata();
+
+    if (metadataBrowser) {
+        metadataBrowser->setText(currentTrackMetadata);
+    }
+
+    // Try to get cover art
+    if (coverArtLabel) {
+        QImage coverArt;
+
+        // First try Qt (might work for some formats)
+        QVariant coverVariant = m_mediaPlayer->metaData().value(QMediaMetaData::CoverArtImage);
+        if (coverVariant.isValid() && coverVariant.canConvert<QImage>()) {
+            coverArt = coverVariant.value<QImage>();
+        }
+
+        // If Qt failed, use ffmpeg
+        if (coverArt.isNull() && m_mediaPlayer->source().isLocalFile()) {
+            coverArt = extractCoverArt(m_mediaPlayer->source().toLocalFile());
+        }
+
+        // Display result
+        if (!coverArt.isNull()) {
+            //QPixmap pixmap = QPixmap::fromImage(coverArt);
+            //coverArtLabel->setPixmap(pixmap.scaled(coverArtLabel->size(),
+              //                                     Qt::KeepAspectRatio,
+                //                                   Qt::SmoothTransformation));
+
+            originalCoverArtImage = coverArt;  // Store original
+            QPixmap pixmap = QPixmap::fromImage(coverArt);
+            QPixmap scaled = pixmap.scaled(coverArtLabel->size(),
+                                           Qt::KeepAspectRatio,
+                                           Qt::SmoothTransformation);
+            coverArtLabel->setPixmap(scaled);
+
+        } else {
+            originalCoverArtImage = QImage();
+            coverArtLabel->clear();
+            coverArtLabel->setText("No Cover Art");
+            coverArtLabel->setAlignment(Qt::AlignCenter);
+        }
+    }
+
+    if (trackInfoDialog && trackInfoDialog->isVisible()) {
+        trackInfoDialog->update();
+    }
+}
 
 void MainWindow::setupAmbientPlayers() {
     for (int i = 1; i <= 5; i++) {
@@ -5001,6 +5116,35 @@ void MainWindow::showVideoToolbar() {
 bool MainWindow::eventFilter(QObject *watched, QEvent *event) {
 
 
+    if (watched == coverArtLabel) {
+        if (event->type() == QEvent::Enter) {
+            if (!originalCoverArtImage.isNull()) {
+                // Store current size before scaling
+                originalCoverArtSize = coverArtLabel->size();
+
+                QSize newSize(originalCoverArtSize.width() * 1.50,
+                             originalCoverArtSize.height() * 1.50);
+
+                // Scale from ORIGINAL image every time
+                QPixmap scaled = QPixmap::fromImage(originalCoverArtImage)
+                                .scaled(newSize, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+                coverArtLabel->setPixmap(scaled);
+                coverArtLabel->setFixedSize(newSize);
+            }
+            return true;
+        }
+        else if (event->type() == QEvent::Leave) {
+            if (!originalCoverArtImage.isNull()) {
+                // Scale back to original size from ORIGINAL image
+                QPixmap scaled = QPixmap::fromImage(originalCoverArtImage)
+                                .scaled(originalCoverArtSize, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+                coverArtLabel->setPixmap(scaled);
+                coverArtLabel->setFixedSize(originalCoverArtSize);
+            }
+            return true;
+        }
+    }
+
     if (watched == m_flickerFloatingWindow) {
         if (event->type() == QEvent::KeyPress) {
             QKeyEvent *keyEvent = static_cast<QKeyEvent *>(event);
@@ -5336,4 +5480,117 @@ void MainWindow::onClearStreamProcess() {
     m_currentStreamUrl.clear();
 
     statusBar()->showMessage("Stream extraction cancelled and player cleared", 2000);
+}
+
+QImage MainWindow::extractCoverArt(const QString& filePath) {
+    // Check cache first
+    if (coverArtCache.contains(filePath)) {
+        return coverArtCache[filePath];
+    }
+
+    // Extract image
+    QTemporaryFile tempFile;
+    if (!tempFile.open()) return QImage();
+    QString tempPath = tempFile.fileName() + ".jpg";
+    tempFile.close();
+
+    QProcess ffmpeg;
+    ffmpeg.start("ffmpeg", QStringList() << "-i" << filePath
+                 << "-map" << "0:v:0" << "-vcodec" << "copy" << tempPath);
+    ffmpeg.waitForFinished(500);
+
+    QImage cover;
+    cover.load(tempPath);
+    QFile::remove(tempPath);
+
+    // Store in cache (even if null, to avoid re-trying broken files)
+    coverArtCache[filePath] = cover;
+
+    return cover;
+}
+
+// brainwave presets notice
+void MainWindow::showPresetExtractionNotice()
+{
+    QSettings settings;
+
+    if (settings.value("presetExtractionNotice/doNotShowAgain", false).toBool()) {
+        return;
+    }
+
+    // Copy the archive to the user's directory
+    QString destPath = ConstantGlobals::presetFilePath + "/brainwave_presets.tar.xz";
+
+    if (!QFile::exists(destPath)) {
+        QFile::copy(":/files/brainwave_presets.tar.xz", destPath);
+    }
+
+
+    // Create dialog
+    QMessageBox msgBox(this);
+    msgBox.setWindowTitle("Brainwave Presets Available");
+    msgBox.setIcon(QMessageBox::Information);
+    QString msg = "A collection of 47+ brainwave presets has been installed, to be used by Session Manager.\n\n"
+                  "Location: " + ConstantGlobals::presetFilePath + "\n\n"
+                  "File: brainwave_presets.tar.xz\n\n"
+                  "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
+                  "📦 EXTRACTION INSTRUCTIONS:\n"
+                  "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n"
+                  "1. Right-click brainwave_presets.tar.xz\n"
+                  "2. Select 'Extract To...' (NOT 'Extract Here')\n"
+                  "3. Choose the current folder as destination\n\n"
+                  "OR using terminal:\n"
+                  "cd " + ConstantGlobals::ambientPresetFilePath + " && tar xvf brainwave_presets.tar.xz\n\n"
+                  "4. You can always remake them available via Presets → Populate Presets Directory\n\n"
+                  "Would you like to open this folder?";
+
+    msgBox.setText(msg);
+    QCheckBox *doNotShowAgain = new QCheckBox("Do not show this message again");
+    msgBox.setCheckBox(doNotShowAgain);
+
+    msgBox.addButton(QMessageBox::Ok);
+    msgBox.addButton(QMessageBox::Cancel);
+
+    if (msgBox.exec() == QMessageBox::Ok) {
+        QDesktopServices::openUrl(QUrl::fromLocalFile(ConstantGlobals::presetFilePath));
+    }
+
+    if (doNotShowAgain->isChecked()) {
+        settings.setValue("presetExtractionNotice/doNotShowAgain", true);
+    }
+}
+
+void MainWindow::copyPresetsArchive()
+{
+    QString destPath = ConstantGlobals::presetFilePath + "/brainwave_presets.tar.xz";
+
+    // Check if already exists
+    if (QFile::exists(destPath)) {
+        QMessageBox::information(this, "Already Exists",
+            "Presets archive already exists at:\n" + destPath);
+        return;
+    }
+
+    // Confirm with user
+    QMessageBox::StandardButton reply = QMessageBox::question(this, "Copy Presets",
+        "Copy brainwave presets archive to:\n" + ConstantGlobals::presetFilePath + "?",
+        QMessageBox::Yes | QMessageBox::No);
+
+    if (reply == QMessageBox::Yes) {
+        QDir().mkpath(ConstantGlobals::presetFilePath);
+        QFile::copy(":/files/brainwave_presets.tar.xz", destPath);
+        QMessageBox::information(this, "Done", "Archive copied successfully.");
+    }
+}
+
+void MainWindow::openFolder() {
+    // Optional: Check if the folder exists
+    QDir dir(ConstantGlobals::appDirPath);
+    if (!dir.exists()) {
+        return;
+    }
+
+    // Convert local path to URL and open
+    if (!QDesktopServices::openUrl(QUrl::fromLocalFile(ConstantGlobals::appDirPath))) {
+    }
 }

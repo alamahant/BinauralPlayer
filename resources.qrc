@@ -83,5 +83,6 @@
         <file>icons-white/check.svg</file>
         <file>files/dark-theme.css</file>
         <file>icons-white/cloud-off.svg</file>
+        <file>files/brainwave_presets.tar.xz</file>
     </qresource>
 </RCC>

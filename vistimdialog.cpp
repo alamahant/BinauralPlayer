@@ -163,7 +163,11 @@ void VisStimDialog::onStartStop()
             QMessageBox::warning(this, "Photosensitivity warning",
                 "This feature produces flickering light effects.\n"
                 "Do not use if you are sensitive to flashing lights\n"
-                "or have a history of photosensitive epilepsy.");
+                "or have a history of photosensitive epilepsy.\n"
+                "In any case please consult your doctor, before using this feature.\n"
+                "Furthermore it is advisable to have your eyes closed or half closed for the entire session\n"
+                "and stop the session immediately at the slightest experience of discomfort.\n"
+                "Press <Space> or <X> to start/stop the flicker effect.");
             warned = true;
         }
         applyToFlicker();
@@ -289,8 +293,8 @@ void VisStimDialog::buildUi()
 
         auto *spinRow = new QHBoxLayout();
         m_freqSpin = new QDoubleSpinBox();
-        m_freqSpin->setRange(0.5, 100.0);
-        m_freqSpin->setSingleStep(0.5);
+        m_freqSpin->setRange(0.1, 100.0);
+        //m_freqSpin->setSingleStep(0.5);
         m_freqSpin->setDecimals(2);
         m_freqSpin->setSuffix(" Hz");
         m_freqSpin->setValue(m_syncedFreq);
@@ -509,6 +513,7 @@ void VisStimDialog::buildUi()
     m_startStopBtn->setDefault(true);
     connect(m_startStopBtn, &QPushButton::clicked,
             this, &VisStimDialog::onStartStop);
+
     footer->addWidget(m_startStopBtn);
 
     root->addLayout(footer);

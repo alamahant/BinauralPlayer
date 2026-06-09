@@ -196,7 +196,7 @@ void BinauralEngine::setRightFrequency(double hz) {
 
 void BinauralEngine::setBeatFrequency(double hz)
 {
-    if (hz < 0.01 || hz > 100.0) {
+    if (hz < 0.5 || hz > 100.0) {
         emit errorOccurred(QString("Invalid beat frequency: %1 Hz").arg(hz));
         return;
     }

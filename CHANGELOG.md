@@ -1,5 +1,31 @@
 # Changelog
 
+## [2026-06-09] - Release v1.6.1
+
+### Added
+- **47+ Brainwave Preset Library**
+  - Bundled preset collection: sleep, meditation, focus, altered states, Solfeggio frequencies
+  - Presets as `.bsession` files in tar archive (`brainwave_presets.tar.xz`)
+  - Auto-copy to user data directory on first run via `showPresetExtractionNotice()`
+  - Dialog with folder open, command copy, and "do not show again" checkbox
+
+- **Preset Description Files**
+  - `session_descriptions.txt` with category headers, frequency patterns, and use cases
+  - `unlimited_duration_notice.txt` explaining sessions exceeding 45-min default limit
+
+- **Cover Art Implementation**
+  - `QProcess` + `ffmpeg` extraction (Qt Multimedia couldn't handle embedded art)
+  - `QMap` caching stores original full-quality images per track
+  - `QLabel` in track info dialog with 1.15x hover zoom (scaled from original, no quality loss)
+  - Clear old art when switching to tracks without images
+  - Dialog hides on close (not delete) to preserve event filters
+
+### Fixed
+- `QDoubleSpinBox` manual entry below 0.5 Hz now works with `setSingleStep(0.1)` and `setRange(0.10, 100.0)`
+- Pulse frequency spinbox validation now matches engine's 0.10 Hz minimum
+
+---
+
 ## [2026-06-01] - Release v1.6.0
 
 ### Added

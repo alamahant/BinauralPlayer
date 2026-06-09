@@ -109,6 +109,8 @@ signals:
     void pauseRequested();
     void resumeRequested();
     void syncTimersRequested(int stageIndex, int totalTimeRemainingSec);
+private:
+    //QString comments = QString();
 };
 
 #endif // SESSIONDIALOG_H

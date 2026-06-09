@@ -11,6 +11,7 @@
 #include <QTextStream>
 #include <QtMath>
 #include"constants.h"
+#include<QFileInfo>
 
 SessionDialog::SessionDialog(QWidget *parent)
     : QDialog(parent)
@@ -33,7 +34,7 @@ SessionDialog::SessionDialog(QWidget *parent)
     , m_unlimitedDuration(false)
     , m_stageTimer(nullptr)
 {
-    setWindowTitle("Multi-Stage Session");
+    setWindowTitle("Session Manager");
     setMinimumSize(700, 600);
 
     setupUI();
@@ -107,15 +108,6 @@ void SessionDialog::setupUI()
         "<td><b>25</b></td>"
         "<td style='color: #666;'>Focus (432Hz + 10Hz pulse, 25% vol)</td>"
         "</tr>"
-        "<tr>"
-        "<td><b>GENERATOR</b></td>"
-        "<td>432</td>"
-        "<td>432</td>"
-        "<td>SINE</td>"
-        "<td>3</td>"
-        "<td>15</td>"
-        "<td style='color: #666;'>Relaxation (432Hz mono)</td>"
-        "</tr>"
         "</table>"
     );
     headerLabel->setStyleSheet(
@@ -155,11 +147,9 @@ void SessionDialog::setupUI()
         "5 fields (volume=15% default):\n"
         "  binaural:387:306:sine:10\n"
         "  isochronic:200:10:square:5\n"
-        "  generator:432:432:sine:3\n\n"
         "6 fields (specify volume):\n"
         "  binaural:250:358:sine:10:30\n"
         "  isochronic:200:10:square:5:25\n"
-        "  generator:432:432:sine:3:50\n\n"
         "Note:\n"
         "- ISOCHRONIC: RIGHT field = PULSE frequency (Hz)\n"
         "- Volume optional (0-100%, default 15%)"
@@ -377,20 +367,20 @@ bool SessionDialog::validateStage(const Stage &stage, int lineNum, QString &erro
             return false;
         }
 
-        /*
-        if (stage.rightFreq <= stage.leftFreq) {
-            error = "BINAURAL requires right frequency > left frequency";
+
+        if (stage.rightFreq == stage.leftFreq) {
+            error = "BINAURAL requires different values for right and left frequencies";
             return false;
         }
-        */
+
 
     } else if (stage.toneType == 1) { // ISOCHRONIC
-        if (qAbs(stage.rightFreq - stage.leftFreq) > 0.1) {
+        if (qAbs(stage.rightFreq - stage.leftFreq) != 0) {
             error = "ISOCHRONIC carrier mismatch (right should equal left)";
             return false;
         }
-        if (stage.pulseFreq < 0.5 || stage.pulseFreq > 100.0) {
-            error = "ISOCHRONIC pulse must be 0.5-100 Hz";
+        if (stage.pulseFreq < 0.1 || stage.pulseFreq > 100.0) {
+            error = "ISOCHRONIC pulse must be 0.1-100 Hz";
             return false;
         }
 
@@ -402,6 +392,14 @@ bool SessionDialog::validateStage(const Stage &stage, int lineNum, QString &erro
             return false;
         }
         */
+        if (stage.rightFreq < 20.0 || stage.rightFreq > 20000.0) {
+            error = "Right frequency must be 20-20000 Hz";
+            return false;
+        }
+        if (stage.leftFreq < 20.0 || stage.leftFreq > 20000.0) {
+            error = "Left frequency must be 20-20000 Hz";
+            return false;
+        }
 
     }
 
@@ -450,7 +448,8 @@ void SessionDialog::onLoadClicked()
                            "Could not open file for reading.");
         return;
     }
-
+    QFileInfo fileInfo(fileName);
+    QString name = fileInfo.baseName();
     QTextStream in(&file);
     QString content = in.readAll();
     file.close();
@@ -459,6 +458,7 @@ void SessionDialog::onLoadClicked()
 
         m_parseButton->click();
         m_statusLabel->setText(QString("✓ Loaded and parsed %1 stage(s)").arg(m_stages.size()));
+        setWindowTitle(QString("Session manager - %1").arg(name));
 }
 
 void SessionDialog::onSaveClicked()
@@ -519,6 +519,7 @@ void SessionDialog::onClearClicked()
     m_statusLabel->setText("Cleared");
     m_stageInfoLabel->setText("Stage: --/-- | Time: --:--/--:--");
     m_totalTimeLabel->setText("Total: --:--");
+    setWindowTitle("Session Manager");
     m_playButton->setEnabled(false);
 
     highlightCurrentStage(); // Clears any highlights

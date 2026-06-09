@@ -412,6 +412,8 @@ private:
 public slots:
     void toggleFlickerFullscreen();
     void onClearStreamProcess();
+    void copyPresetsArchive();
+    void openFolder();
 
 private:
     void extractYouTubeAndAddToPlaylist(const QString &youtubeUrl);
@@ -429,5 +431,14 @@ private:
 
     //preserveindex
     QMap<QString, int> m_playlistLastTrackIndex;
+
+    // cover art
+    QLabel* coverArtLabel;
+    QImage extractCoverArt(const QString& filePath);
+    QMap<QString, QImage> coverArtCache;
+    QSize originalCoverArtSize;
+    QImage originalCoverArtImage;  // Store the original full-size image
+    void showPresetExtractionNotice();
+
 };
 #endif // MAINWINDOW_H
