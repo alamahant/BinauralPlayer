@@ -32,6 +32,7 @@ qt_add_executable(BinauralPlayer
     flickerwidget.cpp flickerwidget.h
     vistimdialog.cpp vistimdialog.h
     resources.qrc
+    radionicsconsole.cpp radionicsconsole.h
 )
 
 target_link_libraries(BinauralPlayer PRIVATE

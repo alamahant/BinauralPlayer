@@ -35,6 +35,7 @@
 #include"vistimdialog.h"
 #include"flickerwidget.h"
 #include<QProcess>
+#include"radionicsconsole.h"
 
 class MainWindow : public QMainWindow
 {
@@ -440,5 +441,10 @@ private:
     QImage originalCoverArtImage;  // Store the original full-size image
     void showPresetExtractionNotice();
 
+    // radionics
+private:
+    RadionicsConsole *radConsole = nullptr;
+    QPushButton* radDialogButton;
+    bool wasDark = false;
 };
 #endif // MAINWINDOW_H

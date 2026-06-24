@@ -1,5 +1,17 @@
 # Changelog
 
+## [2026-06-23] - Release v1.6.2
+
+### Added
+- **Radionics Console (Experimental)**
+  - Intention-based frequency generation tool
+  - Three interactive dials for creating unique frequency signatures
+  - Save/Load sessions with images and settings
+  - Continuous broadcast mode
+  - Help menu with theory and usage guide
+
+---
+
 ## [2026-06-09] - Release v1.6.1
 
 ### Added

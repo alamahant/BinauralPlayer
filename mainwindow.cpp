@@ -46,7 +46,8 @@ MainWindow::MainWindow(QWidget *parent)
       m_naturePowerButton(nullptr),
       m_sessionManagerDialog(new SessionDialog(this)),
       m_cueDialog(new CueSheetDialog(this)),
-      videoWidget(new QVideoWidget(this))
+      videoWidget(new QVideoWidget(this)),
+      radConsole(new RadionicsConsole(this))
 {
     setWindowTitle("Binaural Media Player");
     setMinimumSize(900, 700);
@@ -116,6 +117,36 @@ MainWindow::MainWindow(QWidget *parent)
     blockSignals(false);
     toggleTheme(isDarkTheme);
     showPresetExtractionNotice();
+
+    //radConsole->setWindowFlags(Qt::Window);
+    radConsole->setWindowFlags(Qt::Window | Qt::WindowMinimizeButtonHint | Qt::WindowCloseButtonHint);
+    connect(radConsole, &RadionicsConsole::structuralLinkCaptured, this, [this](double combinedSeed, double leftFreq, double rightFreq,
+            double baseFreq, double offset, QString trend, QString target){
+
+        if(!m_binauralPowerButton->isChecked()) m_binauralPowerButton->setChecked(true);
+
+        m_leftFreqInput->setValue(leftFreq);
+        m_rightFreqInput->setValue(rightFreq);
+    });
+    connect(radConsole, &RadionicsConsole::playRequested, this, [this]{
+        m_binauralPlayButton->click();
+    });
+    connect(radConsole, &RadionicsConsole::stopRequested, this, [this]{
+        if(m_binauralEngine->isPlaying()){
+            m_binauralStopButton->click();
+        }
+    });
+    connect(radConsole, &RadionicsConsole::closeRequested, this, [this]{
+        radDialogButton->setChecked(false);
+        toggleTheme(wasDark);
+    });
+    connect(radConsole, &RadionicsConsole::durationChanged, this, [this](int minutes){
+        if(minutes > 45 && !unlimitedDurationAction->isChecked()){
+            //unlimitedDurationAction->setChecked(true);
+            unlimitedDurationAction->trigger();
+        }
+        m_brainwaveDuration->setValue(minutes);
+    });
 }
 
 MainWindow::~MainWindow() {
@@ -517,6 +548,30 @@ QToolBar *MainWindow::createBinauralToolbarExt() {
     });
 
     toolbar->addWidget(m_visStimButton);
+
+    toolbar->addSeparator();
+    radDialogButton = new QPushButton("Radionics", this);
+    radDialogButton ->setCheckable(true);
+    radDialogButton->setChecked(false);
+    connect(radDialogButton, &QPushButton::clicked, this, [this](bool checked){
+        //toggleTheme(checked);
+        wasDark = isDarkTheme;
+        if(!isDarkTheme) toggleTheme(true);
+        if(checked) {
+            radConsole->show();
+            radConsole->raise();
+            m_binauralPowerButton->setChecked(true);
+            //onToneTypeComboIndexChanged(2);
+            toneTypeCombo->setCurrentIndex(2);
+
+        }else{
+            radConsole->hide();
+            toggleTheme(wasDark);
+
+        }
+    });
+
+    toolbar->addWidget(radDialogButton);
 
     return toolbar;
 }
@@ -1344,6 +1399,10 @@ void MainWindow::onBinauralPauseClicked() {
         m_binauralPlayButton->setToolTip("Resume");
 
         m_binauralStatusLabel->setText("Binaural tones paused");
+
+        if(radConsole){
+            radConsole->onExternalStopRequested();
+        }
     }
 }
 
@@ -1368,6 +1427,10 @@ void MainWindow::onBinauralStopClicked() {
     }
     m_binauralStatusLabel->setText("Binaural tones stopped");
     unlimitedDurationAction->setEnabled(true);
+
+    if(radConsole){
+        radConsole->onExternalStopRequested();
+    }
 }
 
 
@@ -3325,6 +3388,14 @@ void MainWindow::setupMenus() {
         HelpMenuDialog dialog(HelpType::WhatsNew, this);
         dialog.exec();
     });
+
+
+    QAction *radionicsAction = helpMenu->addAction("Radionics Console");
+    connect(radionicsAction, &QAction::triggered, [this]() {
+        HelpMenuDialog dialog(HelpType::Radionics, this);
+        dialog.exec();
+    });
+
 
     QAction *supportusAction = helpMenu->addAction("Support Us");
     connect(supportusAction, &QAction::triggered, [this]() {

@@ -101,6 +101,19 @@
 
   <releases>
 
+<release version="1.6.2" date="2026-06-23">
+  <description>
+    <p>Release v1.6.2:</p>
+    <ul>
+      <li>Added experimental Radionics Console with intention-based frequency generation</li>
+      <li>Added three interactive dials for creating unique frequency signatures</li>
+      <li>Added save/load session support with images and settings</li>
+      <li>Added continuous broadcast mode and help menu with theory guide</li>
+      <li>Added image hover zoom and styled message boxes</li>
+    </ul>
+  </description>
+</release>
+
 <release version="1.6.1" date="2026-06-09">
   <description>
     <p>Release v1.6.1:</p>

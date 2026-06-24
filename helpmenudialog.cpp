@@ -78,6 +78,9 @@ void HelpMenuDialog::loadContent(HelpType type)
     case HelpType::onChangelog:
         content = getChangelogContent();
         break;
+    case HelpType::Radionics:
+        content = getRadionicsTheoryContent();
+        break;
     case HelpType::supportUs:
         content = getSupportusContent();
         break;
@@ -107,6 +110,7 @@ QString HelpMenuDialog::getTitle(HelpType type)
     case HelpType::onChangelog: return "Changelog";
 
     case HelpType::supportUs: return "Support Us";
+    case HelpType::Radionics: return "On The Radionics Console";
 
     default: return "Help";
     }
@@ -200,6 +204,290 @@ QString HelpMenuDialog::getBestPracticesContent()
         </div>
     )";
 }
+
+
+
+QString HelpMenuDialog::getRadionicsTheoryContent()
+{
+    return R"(
+        <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #2c3e50;">
+
+            <h1 style="color: #8e44ad; text-align: center; margin-bottom: 20px;">
+                Radionics Console: Theory & Implementation
+            </h1>
+
+            <h2 style="color: #3498db;">What is Radionics?</h2>
+            <p>
+                Radionics is a speculative practice that originated in the early 20th century, primarily developed by American physician Dr. Albert Abrams (1864–1924). The core concept suggests that <strong>all existents</strong>—not just living beings, but all matter, objects, and even abstract concepts—possess unique vibratory frequencies or "energy signatures."
+            </p>
+            <p>
+                This idea draws from <strong>Platonic ontology</strong>, the ancient Greek philosophical concept that all things have an ideal "form" or essence that exists beyond the physical world. According to this view, every person, object, thought, and intention has a corresponding vibrational frequency that can be accessed, influenced, and aligned with.
+            </p>
+            <p>
+                By tuning into the frequency of a desired outcome—a <strong>"trend"</strong>—practitioners believe they can bring that outcome into physical manifestation. The radionic device acts as a bridge between the ideal (the intention) and the real (the manifestation).
+            </p>
+
+            <h2 style="color: #3498db;">Key Concepts</h2>
+            <table style="width: 100%; border-collapse: collapse; margin: 10px 0;">
+                <tr style="background: #ecf0f1;">
+                    <th style="padding: 8px; border: 1px solid #bdc3c7; text-align: left;">Concept</th>
+                    <th style="padding: 8px; border: 1px solid #bdc3c7; text-align: left;">Description</th>
+                </tr>
+                <tr>
+                    <td style="padding: 8px; border: 1px solid #bdc3c7;"><strong>The Witness</strong></td>
+                    <td style="padding: 8px; border: 1px solid #bdc3c7;">A physical or symbolic representation of the target (e.g., a name, photo, hair sample, or written intention).</td>
+                </tr>
+                <tr style="background: #f9f9f9;">
+                    <td style="padding: 8px; border: 1px solid #bdc3c7;"><strong>The Rate</strong></td>
+                    <td style="padding: 8px; border: 1px solid #bdc3c7;">A unique combination of dial settings (numbers) that corresponds to a specific condition, intention, or outcome.</td>
+                </tr>
+                <tr>
+                    <td style="padding: 8px; border: 1px solid #bdc3c7;"><strong>The Broadcast</strong></td>
+                    <td style="padding: 8px; border: 1px solid #bdc3c7;">The transmission of the intention, often through sound, light, or electromagnetic fields.</td>
+                </tr>
+                <tr style="background: #f9f9f9;">
+                    <td style="padding: 8px; border: 1px solid #bdc3c7;"><strong>The Structural Link</strong></td>
+                    <td style="padding: 8px; border: 1px solid #bdc3c7;">The energetic connection between the operator, the device, and the target—a "bridge" between intention and manifestation.</td>
+                </tr>
+                <tr>
+                    <td style="padding: 8px; border: 1px solid #bdc3c7;"><strong>The Trend</strong></td>
+                    <td style="padding: 8px; border: 1px solid #bdc3c7;">The desired outcome or condition you wish to manifest.</td>
+                </tr>
+            </table>
+
+            <h2 style="color: #3498db;">Manifestation and the Law of Attraction</h2>
+            <p>
+                Radionics operates on principles similar to the <strong>Law of Attraction</strong>—the idea that focused intention, combined with emotional alignment, attracts corresponding experiences into one's life. However, radionics adds a technological dimension to this process:
+            </p>
+            <ul style="padding-left: 20px;">
+                <li><strong>Intention becomes frequency:</strong> Instead of merely thinking about a desired outcome, radionics encodes that intention into a specific, measurable frequency.</li>
+                <li><strong>The frequency becomes the carrier:</strong> The audio tone carries the intention like a radio wave carries a signal.</li>
+                <li><strong>Manifestation occurs through resonance:</strong> By continuously broadcasting the intention's frequency, the practitioner is believed to "tune" themselves and their environment to that outcome.</li>
+            </ul>
+            <p>
+                This aligns with the Hermetic principle of correspondence: <em>"As above, so below; as within, so without."</em> The frequency represents the internal state; the external world supposedly adjusts to match it.
+            </p>
+
+            <h2 style="color: #3498db;">Radionics vs. Law of Attraction</h2>
+            <table style="width: 100%; border-collapse: collapse; margin: 10px 0;">
+                <tr style="background: #ecf0f1;">
+                    <th style="padding: 8px; border: 1px solid #bdc3c7; text-align: left;">Law of Attraction</th>
+                    <th style="padding: 8px; border: 1px solid #bdc3c7; text-align: left;">Radionics</th>
+                </tr>
+                <tr>
+                    <td style="padding: 8px; border: 1px solid #bdc3c7;">Mental focus and visualization</td>
+                    <td style="padding: 8px; border: 1px solid #bdc3c7;">Frequency encoding and broadcast</td>
+                </tr>
+                <tr style="background: #f9f9f9;">
+                    <td style="padding: 8px; border: 1px solid #bdc3c7;">Emotional alignment</td>
+                    <td style="padding: 8px; border: 1px solid #bdc3c7;">Mechanical/physical tuning</td>
+                </tr>
+                <tr>
+                    <td style="padding: 8px; border: 1px solid #bdc3c7;">Passive manifestation</td>
+                    <td style="padding: 8px; border: 1px solid #bdc3c7;">Active transmission</td>
+                </tr>
+                <tr style="background: #f9f9f9;">
+                    <td style="padding: 8px; border: 1px solid #bdc3c7;">Relies on consistent mental repetition</td>
+                    <td style="padding: 8px; border: 1px solid #bdc3c7;">Automatically broadcasts intention without sustained effort</td>
+                </tr>
+            </table>
+
+            <h2 style="color: #3498db;">Spooky Action at a Distance</h2>
+            <p>
+                In physics, quantum entanglement—often called <strong>"spooky action at a distance"</strong> by Albert Einstein—describes how two particles can remain connected across vast distances, instantaneously affecting each other's states.
+            </p>
+            <p>
+                Radionics operates on a similar principle: the structural link is believed to connect the operator, the device, and the target (who may be anywhere in the world) through a non-local, non-physical connection. By broadcasting the intention frequency, the practitioner can influence the target across time and space, regardless of physical proximity.
+            </p>
+            <p>
+                This is why radionic sessions can be performed "remotely" with only a witness (e.g., a photo or name) serving as the connection to the target.
+            </p>
+
+            <h2 style="color: #3498db;">The Concept of "Always On"</h2>
+            <p>
+                One of the key advantages of radionics over pure mental manifestation is that <strong>the device keeps working even after you stop</strong>.
+            </p>
+            <p>
+                When you play a radionic tone, the frequency continues to broadcast—even if you walk away, sleep, or forget about it. The device becomes an autonomous intention broadcaster, constantly "reminding" the universe (and your subconscious) of your desired outcome.
+            </p>
+            <p>
+                This is analogous to planting a seed in the soil: you water it once, but the seed continues to grow on its own, drawing nutrients from the earth. Similarly, the radionic tone serves as a "seed frequency" that continues to resonate and attract the intended outcome, even without your active participation.
+            </p>
+
+            <h2 style="color: #3498db;">Advanced Practices and Hardware Integration</h2>
+            <p>
+                Experienced radionics practitioners often combine digital radionics with physical devices to amplify and enhance the transmission:
+            </p>
+            <ul style="padding-left: 20px;">
+                <li><strong>1. Orgonite:</strong> A resin-based material containing metal shavings and crystals. It is believed to convert negative energy into positive, life-affirming energy. Placing orgonite near the audio output is thought to "charge" the intention and purify the broadcast.</li>
+                <li><strong>2. Orgone Generators:</strong> Devices that generate orgone energy, believed to enhance the effectiveness of radionic broadcasts. Some practitioners place radionic devices on top of orgone generators to amplify the intention frequency.</li>
+                <li><strong>3. Moebius Coils:</strong> A special type of electrical coil that creates a unique electromagnetic field. Connecting the radionic tone to a Moebius coil wrapped around crystals is believed to embed the intention into the physical environment.</li>
+                <li><strong>4. Crystals:</strong> Quartz crystals are often used as "programmable" receivers and transmitters of intention. By wrapping a Moebius coil around a crystal and running the radionic tone through it, the crystal is believed to "store" and continuously broadcast the intention.</li>
+                <li><strong>5. Amplifiers and Speakers:</strong> Connecting your computer's audio output to an amplifier and speakers (or even ultrasonic transducers) allows the intention frequency to fill the physical space, saturating the environment with the desired vibration.</li>
+            </ul>
+
+            <h2 style="color: #3498db;">Full Broadcast Chain</h2>
+<pre style="background-color: #2c3e50; color: #ecf0f1; padding: 15px; border-radius: 8px; font-family: 'Courier New', Courier, monospace; line-height: 1.8; white-space: pre; overflow-x: auto; border: 1px solid #444;">
+User Sets Intention
+    ↓
+Radionics Console Generates Frequency Signature
+    ↓
+┌──────────────────────────────────────────────┐
+│                 OUTPUT OPTIONS               │
+├────────────────┬───────────────┬─────────────┤
+│  Headphones    │   Speakers    │  Amplifier  │
+│  (Active       │   (Room       │  → Moebius  │
+│   Listening)   │   Broadcast)  │    Coils    │
+│                │               │  → Crystals │
+│                │               │  → Orgonite │
+└────────────────┴───────────────┴─────────────┘
+    ↓
+Continuous Broadcast (Even After You Stop)
+    ↓
+Intention Manifests Through Resonance and Attraction
+            </pre>
+
+            <h2 style="color: #c0392b;">Scientific Status</h2>
+            <div style="background: #f8f9fa; border-left: 4px solid #c0392b; padding: 15px; border-radius: 4px; margin: 10px 0;">
+                <p style="margin: 0; color: #333;">
+                    <strong>⚠️ Important Disclaimer</strong><br><br>
+                    Radionics, like the Law of Attraction and orgone theory, is <strong>not supported by mainstream science</strong>. Rigorous studies have consistently failed to demonstrate its efficacy beyond placebo effects.
+                    <br><br>
+                    This console is provided for <strong>entertainment and exploration purposes only</strong>. It is not a medical device and is not intended to diagnose, treat, cure, or prevent any disease.
+                    <br><br>
+                    Use it with curiosity, not expectation. If you notice any benefit, that's wonderful—but no claims are made or implied.
+                </p>
+            </div>
+
+            <h2 style="color: #3498db;">Our Implementation</h2>
+            <p>
+                The Radionics Console in BinauralPlayer is a modern, digital interpretation of these traditional concepts.
+            </p>
+            <ul style="padding-left: 20px;">
+                <li><strong>1. Intention Setting:</strong> TARGET (who or what this session is for) and TREND (what you wish to achieve).</li>
+                <li><strong>2. The "Rates" (Dials):</strong> Three interactive dials generate random numbers (0–9999) when clicked and held. The combination creates a unique "seed" value.</li>
+                <li><strong>3. Frequency Encoding:</strong> The combined seed is mapped to a frequency offset (0–5 Hz), applied to a base frequency (20–1000 Hz) to generate left and right audio channels.</li>
+                <li><strong>4. The Structural Link:</strong> When all three dials are locked, a unique frequency signature representing your intention is emitted as audio.</li>
+                <li><strong>5. Continuous Broadcast:</strong> Once playing, the tone continues to broadcast your intention—even if you walk away.</li>
+                <li><strong>6. Session Management:</strong> Save and load sessions, preserving all settings for later use.</li>
+            </ul>
+
+            <h2 style="color: #3498db;">How to Use the Console</h2>
+            <table style="width: 100%; border-collapse: collapse; margin: 10px 0;">
+                <tr style="background: #ecf0f1;">
+                    <th style="padding: 8px; border: 1px solid #bdc3c7; text-align: left;">Step</th>
+                    <th style="padding: 8px; border: 1px solid #bdc3c7; text-align: left;">Action</th>
+                </tr>
+                <tr>
+                    <td style="padding: 8px; border: 1px solid #bdc3c7;">1</td>
+                    <td style="padding: 8px; border: 1px solid #bdc3c7;">Set your <strong>TARGET</strong> and <strong>TREND</strong> (text or images)</td>
+                </tr>
+                <tr style="background: #f9f9f9;">
+                    <td style="padding: 8px; border: 1px solid #bdc3c7;">2</td>
+                    <td style="padding: 8px; border: 1px solid #bdc3c7;">While focusing on the desired outcome click and hold each <strong>DIAL</strong> to spin, release to lock</td>
+                </tr>
+                <tr>
+                    <td style="padding: 8px; border: 1px solid #bdc3c7;">3</td>
+                    <td style="padding: 8px; border: 1px solid #bdc3c7;">Adjust <strong>BASE FREQUENCY</strong> (20–1000 Hz)</td>
+                </tr>
+                <tr style="background: #f9f9f9;">
+                    <td style="padding: 8px; border: 1px solid #bdc3c7;">4</td>
+                    <td style="padding: 8px; border: 1px solid #bdc3c7;">Set <strong>DURATION</strong> (1–360 minutes)</td>
+                </tr>
+                <tr>
+                    <td style="padding: 8px; border: 1px solid #bdc3c7;">5</td>
+                    <td style="padding: 8px; border: 1px solid #bdc3c7;">Click <strong>PLAY</strong> to broadcast your intention</td>
+                </tr>
+                <tr style="background: #f9f9f9;">
+                    <td style="padding: 8px; border: 1px solid #bdc3c7;">6</td>
+                    <td style="padding: 8px; border: 1px solid #bdc3c7;"><strong>Walk away</strong> — let the frequency do the work</td>
+                </tr>
+                <tr>
+                    <td style="padding: 8px; border: 1px solid #bdc3c7;">7</td>
+                    <td style="padding: 8px; border: 1px solid #bdc3c7;">Click <strong>STOP</strong> to end the session</td>
+                </tr>
+                <tr style="background: #f9f9f9;">
+                    <td style="padding: 8px; border: 1px solid #bdc3c7;">8</td>
+                    <td style="padding: 8px; border: 1px solid #bdc3c7;">Use <strong>SAVE/LOAD</strong> to manage sessions</td>
+                </tr>
+                <tr>
+                    <td style="padding: 8px; border: 1px solid #bdc3c7;">9</td>
+                    <td style="padding: 8px; border: 1px solid #bdc3c7;">Use <strong>RESET</strong> to clear all settings</td>
+                </tr>
+            </table>
+
+<h2 style="color: #3498db;">Advanced Exploration (DIY Hardware)</h2>
+<p>
+    Some advanced practitioners choose to experiment with physical hardware to complement their digital sessions.
+    This is entirely optional and not required for the console to function.
+</p>
+<div style="background-color: #f8f9fa; border-left: 4px solid #f39c12; padding: 15px; border-radius: 4px; margin: 10px 0;">
+    <p style="margin: 0; color: #333;">
+        <strong>⚠️ Caution</strong><br><br>
+        Working with electronics, amplifiers, and coils carries inherent risks including electrical shock,
+        equipment damage, and fire hazards. Only attempt this if you have the necessary knowledge and experience.
+        <br><br>
+        The developers of BinauralPlayer assume no responsibility for any damage, injury, or loss
+        resulting from DIY hardware experiments.
+    </p>
+</div>
+<p>
+    If you choose to explore this path:
+</p>
+<ul style="padding-left: 20px;">
+    <li>Connect your computer's audio output to an amplifier</li>
+    <li>Connect the amplifier's speaker jacks to a Moebius coil</li>
+    <li>Wrap the coil around crystals or place it near orgonite</li>
+    <li>Play the radionic tone</li>
+    <li>Walk away — the intention is now broadcasting into the physical environment</li>
+</ul>
+<p>
+    This creates a complete broadcast chain from digital intention to physical transmission.
+</p>
+
+
+            <h2 style="color: #3498db;">Philosophical Notes</h2>
+            <blockquote style="border-left: 4px solid #8e44ad; padding-left: 15px; margin: 10px 0; color: #555; font-style: italic;">
+                "The frequency is the signature. The intention is the content. The hardware is just the messenger."
+                <br><br>
+                "Set it, play it, walk away. Trust the process."
+            </blockquote>
+
+            <h2 style="color: #3498db;">The Universe as Vibrational</h2>
+            <p>
+                The underlying philosophy of radionics is that <strong>the universe is vibrational at its core</strong>. Matter is energy. Energy is frequency. Frequency is information. And information can be shaped by intention.
+            </p>
+            <p>
+                By generating a specific frequency with a specific intention, you are, in effect, shaping the informational field of reality itself—"tuning" it to your desired outcome.
+            </p>
+            <p>
+                This is akin to tuning a radio: you don't create the music, you simply select the station. Similarly, radionics doesn't "create" the outcome—it aligns you with the frequency of the outcome you wish to manifest.
+            </p>
+            <blockquote style="border-left: 4px solid #8e44ad; padding-left: 15px; margin: 10px 0; color: #555; font-style: italic;">
+                "You are not creating something new. You are tuning into what already exists in the field of possibilities."
+            </blockquote>
+
+            <h2 style="color: #3498db;">Further Reading</h2>
+            <ul style="padding-left: 20px;">
+                <li>Abrams, A. (1910). <em>Spondylotherapy</em></li>
+                <li>De La Warr, G. (1960). <em>The De La Warr Radionic Instrument</em></li>
+                <li>Reich, W. (1940). <em>The Function of the Orgasm</em> (orgone theory)</li>
+                <li>Plato. <em>The Republic</em> (Theory of Forms)</li>
+                <li>Public domain research on radionics, orgonite, and intention-based technologies</li>
+            </ul>
+
+            <div style="background-color: #f8f9fa; padding: 15px; border-radius: 8px; margin-top: 25px; text-align: center;">
+                <strong>
+                    The frequency is the signature. The intention is the content.
+                    <br>
+                    Set it, play it, walk away. Trust the process.
+                </strong>
+            </div>
+
+        </div>
+    )";
+}
+
 
 
 QString HelpMenuDialog::getWhatsNewContent()

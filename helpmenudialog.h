@@ -22,7 +22,8 @@ enum class HelpType {
     onNewStorageSystem,
     onNamedProfiles,
     onChangelog,
-    supportUs
+    supportUs,
+    Radionics
 };
 
 class HelpMenuDialog : public QDialog
@@ -52,6 +53,7 @@ private:
     QString getOnNewStorageSystemContent();
     QString getOnNamedProfilesContent();
     QString getChangelogContent();
+    QString getRadionicsTheoryContent();
 
     QString getSupportusContent();
 
