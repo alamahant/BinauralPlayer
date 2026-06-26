@@ -494,6 +494,73 @@ QString HelpMenuDialog::getWhatsNewContent()
 {
     return R"(
 
+<div style="background-color: #e8f5e9; padding: 15px; border-radius: 8px; margin-bottom: 25px; border-left: 5px solid #2e7d32;">
+    <h2 style="color: #1b5e20; margin-top: 0;">🌊 Background Noise Layer — Version 1.6.3 <span style="font-size: 0.75em; background-color: #2e7d32; color: white; padding: 2px 8px; border-radius: 12px; vertical-align: middle;">NEW</span></h2>
+    <p>Version 1.6.3 adds a real-time background noise layer that blends seamlessly with your binaural and isochronic tones.</p>
+
+    <div style="background-color: #e8f5e9; padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #2e7d32;">
+        <h3 style="color: #1b5e20; margin-top: 0;">🎵 Four Noise Colors</h3>
+        <ul>
+            <li><strong>White</strong> — classic hiss, like TV static</li>
+            <li><strong>Pink</strong> — smooth waterfall, steady rain</li>
+            <li><strong>Brown</strong> — deep rumbling thunder</li>
+            <li><strong>Grey</strong> — balanced, perceptually flat</li>
+        </ul>
+    </div>
+
+    <div style="background-color: #e3f2fd; padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #1565c0;">
+        <h3 style="color: #1565c0; margin-top: 0;">🎛️ Compact Toolbar Controls</h3>
+        <ul>
+            <li><strong>Toggle button</strong> — enable/disable noise layer with one click</li>
+            <li><strong>Type selector</strong> — choose between White, Pink, Brown, and Grey</li>
+            <li><strong>Level spinbox</strong> — adjust mix from 0.00 (pure tone) to 1.00 (pure noise)</li>
+            <li><strong>Real-time mixing</strong> — applies to all tone types (binaural, isochronic, generator)</li>
+        </ul>
+    </div>
+
+    <div style="background-color: #fff3e0; padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #e65100;">
+        <h3 style="color: #e65100; margin-top: 0;">⚙️ Engine Integration</h3>
+        <ul>
+            <li><strong>Voss-McCartney pink noise</strong> — 8-stage sweet spot for smooth, natural sound</li>
+            <li><strong>Real-time generation</strong> — no files needed, infinite length</li>
+            <li><strong>State reset</strong> — properly resets with stop/play</li>
+            <li><strong>Crossfade mixing</strong> — seamless blend between tone and noise</li>
+        </ul>
+    </div>
+</div>
+
+<div style="background-color: #f3e5f5; padding: 15px; border-radius: 8px; margin-bottom: 25px; border-left: 5px solid #7b1fa2;">
+    <h2 style="color: #6a1b9a; margin-top: 0;">🧪 Radionics Console (Experimental) — Version 1.6.2 <span style="font-size: 0.75em; background-color: #7b1fa2; color: white; padding: 2px 8px; border-radius: 12px; vertical-align: middle;">NEW</span></h2>
+    <p>Version 1.6.2 introduces the Radionics Console — an experimental intention-based frequency generation tool that encodes your intent into audio tones.</p>
+
+    <div style="background-color: #ede7f6; padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #7b1fa2;">
+        <h3 style="color: #6a1b9a; margin-top: 0;">🎯 Intention-Based Frequency Generation</h3>
+        <ul>
+            <li><strong>Target &amp; Trend</strong> — set who this is for and what you want to achieve</li>
+            <li><strong>Three interactive dials</strong> — click and hold to spin, release to lock your intention seed</li>
+            <li><strong>Combined seed</strong> — maps to a 0–5 Hz frequency offset from base frequency (20–1000 Hz)</li>
+            <li><strong>Continuous broadcast mode</strong> — intention persists even after you walk away</li>
+        </ul>
+    </div>
+
+    <div style="background-color: #e8f5e9; padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #2e7d32;">
+        <h3 style="color: #2e7d32; margin-top: 0;">💾 Session Management</h3>
+        <ul>
+            <li><strong>Save/Load</strong> — store and restore sessions as JSON with images, frequencies, and dial settings</li>
+            <li><strong>Image upload</strong> — add visual witness for your target and trend</li>
+            <li><strong>Reset confirmation</strong> — prevents accidental clearing of session data</li>
+        </ul>
+    </div>
+
+    <div style="background-color: #e3f2fd; padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #1565c0;">
+        <h3 style="color: #1565c0; margin-top: 0;">📖 Help Menu</h3>
+        <ul>
+            <li><strong>Comprehensive theory guide</strong> — explains radionics, manifestation, and "spooky action at a distance"</li>
+            <li><strong>Hardware integration</strong> — advanced practitioners can connect to amplifiers, Moebius coils, crystals, and orgonite</li>
+            <li><strong>Philosophical notes</strong> — the universe as vibrational and intention as tuning</li>
+        </ul>
+    </div>
+</div>
 
 <div style="background-color: #e3f2fd; padding: 15px; border-radius: 8px; margin-bottom: 25px; border-left: 5px solid #1976d2;">
     <h2 style="color: #1565c0; margin-top: 0;">🎵 Brainwave Presets & Cover Art — Version 1.6.1 <span style="font-size: 0.75em; background-color: #1976d2; color: white; padding: 2px 8px; border-radius: 12px; vertical-align: middle;">NEW</span></h2>
@@ -1146,99 +1213,26 @@ QString HelpMenuDialog::getFeaturesContent()
     )";
 }
 
-/*
+
 QString HelpMenuDialog::getInstructionsContent()
 {
     return R"(
 <div style=\"font-family: Arial, sans-serif; line-height: 1.6; color: #2c3e50;\">
     <h1 style=\"color: #3498db; text-align: center; margin-bottom: 20px;\">🎧 How to Use BinauralPlayer</h1>
 
-    <div style=\"background-color: #ecf0f1; padding: 15px; border-radius: 8px; margin-bottom: 25px;\">
-        <h2 style=\"color: #2c3e50; margin-top: 0;\">🔊 Step 1: Choose Audio Type</h2>
-        <p>BinauralPlayer supports two forms of brainwave audio stimulation:</p>
-        <ul style=\"padding-left: 20px;\">
-            <li><strong>Binaural Beats</strong> — requires headphones</li>
-            <li><strong>Isochronic Tones</strong> — headphones optional</li>
-        </ul>
-        <p>Choose the mode from the interface before setting frequencies.</p>
-    </div>
-
-    <h2 style=\"color: #9b59b6; border-bottom: 2px solid #9b59b6; padding-bottom: 5px;\">🎧 Step 2: Using Binaural Beats</h2>
-
-    <div style=\"background-color: #fff3cd; padding: 15px; border-radius: 8px; margin: 15px 0;\">
-        <h3 style=\"color: #856404; margin-top: 0;\">How Binaural Beats Work</h3>
-        <p>Binaural beats are created when the left and right ears receive two <strong>slightly different</strong> frequencies. The brain perceives the difference as the beat.</p>
-        <p><strong>Example:</strong> Left = 200 Hz, Right = 208 Hz → Beat = 8 Hz</p>
-    </div>
-
-    <h3 style=\"color: #e67e22;\">Setting Up Binaural Beats:</h3>
-    <ol style=\"padding-left: 25px;\">
-        <li>Set <strong>Left Carrier Frequency</strong> (e.g., 200 Hz)</li>
-        <li>Set <strong>Right Carrier Frequency</strong> to create the desired beat (e.g., 208 Hz → 8 Hz beat)</li>
-        <li>Press <strong>Play</strong> to start the session</li>
-    </ol>
-
-    <p><strong>Tip:</strong> Binaural beats work best with high-quality headphones.</p>
-    <p>You can safely use beats outside the 0–30 Hz range, such as 40–100 Hz for stimulation.</p>
-
-    <h2 style=\"color: #1abc9c; border-bottom: 2px solid #1abc9c; padding-bottom: 5px;\">🔵 Step 3: Using Isochronic Tones</h2>
-
-    <div style=\"background-color: #e8f8f5; padding: 15px; border-radius: 8px; margin: 15px 0;\">
-        <h3 style=\"color: #117a65; margin-top: 0;\">How Isochronic Tones Work</h3>
-        <p>Isochronic tones use a <strong>single frequency</strong> that pulses on and off rapidly at the chosen beat frequency.</p>
-    </div>
-
-    <h3 style=\"color: #e67e22;\">Setting Up Isochronic Tones:</h3>
-    <ol style=\"padding-left: 25px;\">
-        <li>Set the <strong>Left Frequency</strong> (this will automatically copy to the right when you press Play)</li>
-        <li>Enter the <strong>Isochronic Pulse Frequency</strong> (0–100 Hz)</li>
-        <li>Press <strong>Play</strong> to generate pulses</li>
-    </ol>
-
-    <p><strong>Recommended:</strong> 0–30 Hz is best for brainwave entrainment.
-    Headphones are optional for ISO — speakers often work great.</p>
-
-    <h2 style=\"color: #e74c3c; border-bottom: 2px solid #e74c3c; padding-bottom: 5px;\">⚠️ Safety & Responsibility</h2>
-
-    <div style=\"background-color: #ffebee; border: 2px solid #f44336; padding: 20px; border-radius: 8px; margin-bottom: 25px;\">
-        <h3 style=\"color: #c62828; text-align: center; margin-top: 0;\">Important Notice</h3>
-        <p style=\"font-weight: bold; text-align: center; color: #b71c1c;\">
-            Brainwave entrainment affects your mental state.<br>
-            Use responsibly and discontinue immediately if you feel discomfort.
+<div style="background-color: #ffeaa7; padding: 15px; border-radius: 8px; margin-bottom: 25px; border-left: 4px solid #fdcb6e;">
+        <h2 style="color: #2d3436; margin-top: 0;">⚠️ IMPORTANT: Enable the Toolbars</h2>
+        <p style="font-weight: bold; margin-bottom: 8px;">
+            Before you start, make sure the <strong>Binaural Toolbar</strong> is turned ON:
         </p>
-        <ul style=\"padding-left: 20px; color: #b71c1c;\">
-            <li>Always start at a <strong>low or comfortable volume</strong></li>
-            <li>Do NOT use while driving, operating machinery, or in unsafe environments</li>
-            <li>If you have epilepsy or neurological conditions, consult a doctor first</li>
-            <li>These audios may induce relaxation, drowsiness, or altered consciousness</li>
+        <ul style="padding-left: 20px; margin-bottom: 8px;">
+            <li>Press the <strong>second button from the left</strong> (the ON/OFF toggle button) to enable the binaural controls.</li>
+            <li>If you want to play ambient sounds, also enable the <strong>Ambience Toolbar</strong> using its ON/OFF button.</li>
         </ul>
+        <p style="margin: 0; font-size: 14px; color: #636e72;">
+            💡 The toolbar buttons light up when active. Without these enabled, you won't hear anything!
+        </p>
     </div>
-
-    <h2 style=\"color: #f39c12; border-bottom: 2px solid #f39c12; padding-bottom: 5px;\">🎯 Recommended Beat Ranges</h2>
-
-    <ul style=\"padding-left: 20px;\">
-        <li><strong>0.5–4 Hz (Delta):</strong> Deep sleep</li>
-        <li><strong>4–8 Hz (Theta):</strong> Meditation & trance</li>
-        <li><strong>8–14 Hz (Alpha):</strong> Relaxation & creativity</li>
-        <li><strong>14–30 Hz (Beta):</strong> Focus & alertness</li>
-        <li><strong>30–60+ Hz (Gamma):</strong> High cognition (binaural only)</li>
-    </ul>
-
-    <div style=\"text-align: center; margin: 30px 0; padding: 20px; background-color: #f8f9fa; border-radius: 8px;\">
-        <h3 style=\"color: #495057; margin-top: 0;\">🌟 Enjoy Responsibly</h3>
-        <p style=\"margin-bottom: 0;\">BinauralPlayer makes it easy to explore powerful audio-based mental states.
-        Keep volumes safe, stay aware of your body, and relax into the experience.</p>
-    </div>
-</div>
-    )";
-}
-*/
-
-QString HelpMenuDialog::getInstructionsContent()
-{
-    return R"(
-<div style=\"font-family: Arial, sans-serif; line-height: 1.6; color: #2c3e50;\">
-    <h1 style=\"color: #3498db; text-align: center; margin-bottom: 20px;\">🎧 How to Use BinauralPlayer</h1>
 
     <div style=\"background-color: #ecf0f1; padding: 15px; border-radius: 8px; margin-bottom: 25px;\">
         <h2 style=\"color: #2c3e50; margin-top: 0;\">🔊 Step 1: Choose Audio Type</h2>

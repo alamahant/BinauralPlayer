@@ -19,7 +19,7 @@ int main(int argc, char *argv[])
 
     QApplication::setApplicationName("BinauralPlayer");
     QApplication::setOrganizationName("Alamahant");
-    QApplication::setApplicationVersion("1.6.2");
+    QApplication::setApplicationVersion("1.6.3");
 
     QApplication a(argc, argv);
 

@@ -134,6 +134,35 @@ private:
 
     QIODevice* m_dynamicDevice;
     class DynamicAudioDevice;
+
+    // ============================================================
+    // NOISE CONTROL
+    // ============================================================
+    public:
+        void setNoiseType(int type);
+        void setNoiseLevel(double level);
+        void setNoiseEnabled(bool enabled);
+        int getNoiseType() const;
+        double getNoiseLevel() const;
+        bool isNoiseEnabled() const;
+
+    private:
+        double generateWhiteNoise();
+        double generatePinkNoise();
+        double generateBrownNoise();
+        double generateGreyNoise();
+
+        void resetNoiseState();
+
+        std::atomic<int> m_noiseType{0};        // 0=Off, 1=White, 2=Pink, 3=Brown 4=Grey
+        std::atomic<double> m_noiseLevel{0.3};  // 0.0-1.0
+        std::atomic<bool> m_noiseEnabled{false};
+
+        // Pink noise filter state
+        double m_pinkB0{0.0}, m_pinkB1{0.0}, m_pinkB2{0.0};
+        double m_pinkB3{0.0}, m_pinkB4{0.0}, m_pinkB5{0.0}, m_pinkB6{0.0};
+        // Brown noise state
+        double m_brownState{0.0};
 };
 
 #endif // DYNAMICENGINE_H

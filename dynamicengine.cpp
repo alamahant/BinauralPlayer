@@ -5,6 +5,7 @@
 #include <QTime>
 #include <QElapsedTimer>
 #include "constants.h"
+#include<QRandomGenerator>
 
 DynamicEngine::DynamicEngine(QObject *parent)
     : QObject(parent)
@@ -99,6 +100,7 @@ bool DynamicEngine::startDynamicPlayback()
           }
         
     protected:
+          /*
         qint64 readData(char* data, qint64 maxlen) override {
             int16_t* samples = reinterpret_cast<int16_t*>(data);
             int sampleCount = maxlen / (2 * sizeof(int16_t)); // Stereo
@@ -158,7 +160,104 @@ bool DynamicEngine::startDynamicPlayback()
             
             return sampleCount * 2 * sizeof(int16_t);
         }
-        
+        */
+
+          qint64 readData(char* data, qint64 maxlen) override {
+              int16_t* samples = reinterpret_cast<int16_t*>(data);
+              int sampleCount = maxlen / (2 * sizeof(int16_t));
+
+              // Load engine settings
+              double leftFreq = m_engine->m_leftFrequency.load();
+              double rightFreq = m_engine->m_rightFrequency.load();
+              double amplitude = m_engine->m_amplitude.load();
+              auto waveform = m_engine->m_currentWaveform.load();
+              double sampleRate = m_engine->m_sampleRate;
+              double pulseFreq = m_engine->m_pulseFrequency;
+              bool isIsochronic = (ConstantGlobals::currentToneType == 1);
+
+              // Load noise settings once per buffer
+              bool noiseEnabled = m_engine->m_noiseEnabled.load();
+              int noiseType = m_engine->m_noiseType.load();
+              double noiseLevel = m_engine->m_noiseLevel.load();
+
+              for (int i = 0; i < sampleCount; ++i) {
+                  double leftSample = 0.0;
+                  double rightSample = 0.0;
+
+                  // ============================================================
+                  // STEP 1: GENERATE TONE
+                  // ============================================================
+                  if (isIsochronic) {
+                      double carrierPhaseInc = (2.0 * M_PI * leftFreq) / sampleRate;
+                      double pulsePhaseInc = (2.0 * M_PI * pulseFreq) / sampleRate;
+
+                      double carrier = 0.0;
+                      switch (waveform) {
+                          case SINE_WAVE: carrier = sin(m_phaseLeft); break;
+                          case SQUARE_WAVE: carrier = (sin(m_phaseLeft) >= 0.0) ? 1.0 : 0.0; break;
+                          case TRIANGLE_WAVE: carrier = m_engine->calculateTriangleSample(m_phaseLeft); break;
+                          case SAWTOOTH_WAVE: carrier = m_engine->calculateSawtoothSample(m_phaseLeft); break;
+                      }
+
+                      double pulse = (sin(m_phaseRight) >= 0.0) ? 1.0 : 0.0;
+
+                      leftSample = carrier * pulse;
+                      rightSample = leftSample;
+
+                      m_phaseLeft += carrierPhaseInc;
+                      m_phaseRight += pulsePhaseInc;
+                  } else {
+                      double leftPhaseInc = (2.0 * M_PI * leftFreq) / sampleRate;
+                      double rightPhaseInc = (2.0 * M_PI * rightFreq) / sampleRate;
+
+                      leftSample = m_engine->calculateSample(m_phaseLeft, waveform);
+                      rightSample = m_engine->calculateSample(m_phaseRight, waveform);
+
+                      m_phaseLeft += leftPhaseInc;
+                      m_phaseRight += rightPhaseInc;
+                  }
+
+                  // ============================================================
+                  // STEP 2: GENERATE AND MIX NOISE (UNIVERSAL)
+                  // ============================================================
+                  if (noiseEnabled && noiseType > 0 && noiseLevel > 0.0) {
+                      double noiseSample = 0.0;
+                      switch (noiseType) {
+                          case 1: noiseSample = m_engine->generateWhiteNoise(); break;
+                          case 2: noiseSample = m_engine->generatePinkNoise(); break;
+                          case 3: noiseSample = m_engine->generateBrownNoise(); break;
+                          case 4: noiseSample = m_engine->generateGreyNoise(); break;
+
+                          default: noiseSample = 0.0; break;
+                      }
+
+                      // Mix tone with noise (crossfade)
+                      leftSample = (leftSample * (1.0 - noiseLevel)) + (noiseSample * noiseLevel);
+                      rightSample = (rightSample * (1.0 - noiseLevel)) + (noiseSample * noiseLevel);
+                  }
+
+                  // ============================================================
+                  // STEP 3: APPLY AMPLITUDE AND OUTPUT
+                  // ============================================================
+                  leftSample *= amplitude;
+                  rightSample *= amplitude;
+
+                  // Clamp
+                  leftSample = qBound(-1.0, leftSample, 1.0);
+                  rightSample = qBound(-1.0, rightSample, 1.0);
+
+                  // Write to buffer
+                  samples[2 * i] = static_cast<int16_t>(leftSample * 32767);
+                  samples[2 * i + 1] = static_cast<int16_t>(rightSample * 32767);
+
+                  // Phase wrapping
+                  if (m_phaseLeft > 2.0 * M_PI) m_phaseLeft -= 2.0 * M_PI;
+                  if (m_phaseRight > 2.0 * M_PI) m_phaseRight -= 2.0 * M_PI;
+              }
+
+              return sampleCount * 2 * sizeof(int16_t);
+          }
+
         qint64 writeData(const char* data, qint64 len) override {
             Q_UNUSED(data);
             Q_UNUSED(len);
@@ -559,4 +658,136 @@ double DynamicEngine::calculateSawtoothSample(double phase)
     double normalized = phase / (2.0 * M_PI);
     double sawtooth = 2.0 * (normalized - std::floor(normalized + 0.5));
     return sawtooth;
+}
+
+
+// ============================================================
+// NOISE CONTROL
+// ============================================================
+
+void DynamicEngine::setNoiseType(int type)
+{
+    if (type < 0 || type > 4) {
+        emit errorOccurred(QString("Invalid noise type: %1").arg(type));
+        return;
+    }
+    m_noiseType = type;
+    resetNoiseState();
+}
+
+void DynamicEngine::setNoiseLevel(double level)
+{
+    if (level < 0.0 || level > 1.0) {
+        emit errorOccurred(QString("Invalid noise level: %1").arg(level));
+        return;
+    }
+    m_noiseLevel = level;
+}
+
+void DynamicEngine::setNoiseEnabled(bool enabled)
+{
+    m_noiseEnabled = enabled;
+    if (!enabled) {
+        resetNoiseState();
+    }
+}
+
+int DynamicEngine::getNoiseType() const
+{
+    return m_noiseType;
+}
+
+double DynamicEngine::getNoiseLevel() const
+{
+    return m_noiseLevel;
+}
+
+bool DynamicEngine::isNoiseEnabled() const
+{
+    return m_noiseEnabled;
+}
+
+// ============================================================
+// NOISE GENERATION
+// ============================================================
+
+double DynamicEngine::generateWhiteNoise()
+{
+    return QRandomGenerator::global()->generateDouble() * 2.0 - 1.0;
+}
+
+
+double DynamicEngine::generatePinkNoise()
+{
+    // Voss-McCartney algorithm
+    static const int numStages = 8;
+    static int index = 0;
+    static double values[numStages] = {0.0};
+    static double runningSum = 0.0;
+
+    // Generate new white noise for stage 0
+    values[0] = generateWhiteNoise();
+
+    // For each stage, update at 2^stage intervals
+    for (int i = 1; i < numStages; ++i) {
+        if (index % (1 << i) == 0) {
+            values[i] = generateWhiteNoise();
+        }
+    }
+
+    // Sum all stages
+    runningSum = 0.0;
+    for (int i = 0; i < numStages; ++i) {
+        runningSum += values[i];
+    }
+
+    // Update index
+    ++index;
+    if (index >= (1 << (numStages - 1))) {
+        index = 0;
+    }
+
+    // Scale to match original amplitude
+    double pink = (runningSum / numStages) * 2.0;  // Multiply by 2 to restore volume
+
+    return qBound(-1.0, pink, 1.0);
+}
+
+
+double DynamicEngine::generateGreyNoise()
+{
+    static double prev = 0.0;
+    double white = generateWhiteNoise();
+
+    // Original grey (soft)
+    double grey = 0.7 * prev + 0.3 * white;
+    prev = grey;
+
+
+    // Boost lows and highs slightly, attenuate mids
+    static double midFilter = 0.0;
+    midFilter = 0.5 * midFilter + 0.5 * grey;
+    double shaped = grey - (0.15 * midFilter);  // Slight mid cut
+
+    return qBound(-1.0, shaped, 1.0);
+}
+
+double DynamicEngine::generateBrownNoise()
+{
+    double step = (QRandomGenerator::global()->generateDouble() - 0.5) * 0.5;
+    m_brownState += step;
+    m_brownState = qBound(-0.8, m_brownState, 0.8);
+    return m_brownState;
+}
+
+void DynamicEngine::resetNoiseState()
+{
+    m_pinkB0 = 0.0;
+    m_pinkB1 = 0.0;
+    m_pinkB2 = 0.0;
+    m_pinkB3 = 0.0;
+    m_pinkB4 = 0.0;
+    m_pinkB5 = 0.0;
+    m_pinkB6 = 0.0;
+    m_brownState = 0.0;
 }

@@ -1,5 +1,18 @@
 # Changelog
 
+## [2026-06-26] - Release v1.6.3
+
+### Added
+- **Background Noise Layer**
+  - White, Pink, Brown, and Grey noise generation
+  - Adjustable mix level (0.00 to 1.00)
+  - Toggle on/off via toolbar button
+  - Real-time mixing with binaural/isochronic tones
+  - Tooltips for all noise controls
+  - Reset support for noise settings
+
+---
+
 ## [2026-06-23] - Release v1.6.2
 
 ### Added

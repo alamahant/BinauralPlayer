@@ -314,7 +314,7 @@ QToolBar *MainWindow::createBinauralToolbar() {
 
     m_binauralPowerButton = new QPushButton("●", toolbar);
     m_binauralPowerButton->setCheckable(true);
-    m_binauralPowerButton->setToolTip("Enable/disable binaural tones");
+    m_binauralPowerButton->setToolTip("Enable/disable toolbar buttons");
     m_binauralPowerButton->setMaximumWidth(30);
     toolbar->addWidget(m_binauralPowerButton);
 
@@ -438,7 +438,8 @@ QToolBar *MainWindow::createBinauralToolbarExt() {
                 return; // User canceled, don't proceed
             }
 
-            m_binauralEngine->stop();
+            //m_binauralEngine->stop();
+            m_binauralStopButton->click();
         }
         toneTypeCombo->setCurrentIndex(0); // Binaural
         m_leftFreqInput->setValue(360.0);
@@ -447,6 +448,18 @@ QToolBar *MainWindow::createBinauralToolbarExt() {
         m_pulseFreqLabel->setValue(7.83);
         m_binauralVolumeInput->setValue(15.0);
         updateBinauralBeatDisplay();
+
+        noiseEnableBtn->setChecked(false);
+        noiseTypeCombo->setCurrentIndex(0); // White
+        noiseLevelSpin->setValue(0.30);
+
+        // Reset engine noise state
+        if (m_binauralEngine) {
+            m_binauralEngine->setNoiseEnabled(false);
+            m_binauralEngine->setNoiseType(0); // Off
+            m_binauralEngine->setNoiseLevel(0.30);
+        }
+
         statusBar()->showMessage("Brainwave settings reset to defaults", 3000);
     });
     toolbar->addSeparator();
@@ -473,6 +486,73 @@ QToolBar *MainWindow::createBinauralToolbarExt() {
     m_binauralStopButton->setToolTip("Stop binaural tones");
     m_binauralStopButton->setEnabled(false);
     toolbar->addWidget(m_binauralStopButton);
+
+    //noise controls
+    toolbar->addSeparator();
+    noiseEnableBtn = new QPushButton(this);
+    noiseEnableBtn->setToolTip("Enable/disable background noise (White, Pink, or Brown)");
+    noiseEnableBtn->setIcon(QIcon(":/icons/zap.svg"));
+
+    noiseEnableBtn->setCheckable(true);
+    noiseEnableBtn->setChecked(false);
+    noiseEnableBtn->setFixedSize(20, 20);
+
+    noiseTypeCombo = new QComboBox(this);
+    noiseTypeCombo->setToolTip("Select noise color: White, Pink, or Brown");
+    noiseTypeCombo->addItem("White");
+    noiseTypeCombo->addItem("Pink");
+    noiseTypeCombo->addItem("Brown");
+    noiseTypeCombo->addItem("Grey");
+
+    noiseTypeCombo->setCurrentIndex(0);
+    noiseTypeCombo->setFixedWidth(70);
+
+    noiseLevelSpin = new QDoubleSpinBox(this);
+    noiseLevelSpin->setToolTip("Noise mix level (0.00 = tone only, 1.00 = noise only)");
+    noiseLevelSpin->setRange(0.0, 1.0);
+    noiseLevelSpin->setSingleStep(0.05);
+    noiseLevelSpin->setValue(0.30);
+    //noiseLevelSpin->setPrefix("L:");
+    noiseLevelSpin->setDecimals(2);
+    noiseLevelSpin->setFixedWidth(55);
+
+    // Add to toolbar
+    toolbar->addWidget(noiseEnableBtn);
+    toolbar->addWidget(noiseTypeCombo);
+    toolbar->addWidget(noiseLevelSpin);
+    //toolbar->addSeparator();
+
+
+    // Connections
+    connect(noiseEnableBtn, &QPushButton::toggled,
+            this, [this](bool checked) {
+                m_binauralEngine->setNoiseEnabled(checked);
+                //noiseTypeCombo->setEnabled(checked);
+                //noiseLevelSpin->setEnabled(checked);
+
+                if (checked) {
+                    int currentIndex = noiseTypeCombo->currentIndex();
+                    m_binauralEngine->setNoiseType(currentIndex + 1); // 1=White, 2=Pink, 3=Brown
+                } else {
+                    m_binauralEngine->setNoiseType(0); // Off
+                }
+            });
+
+    connect(noiseTypeCombo, QOverload<int>::of(&QComboBox::currentIndexChanged),
+            this, [this](int index) {
+                m_binauralEngine->setNoiseType(index + 1);
+            });
+
+    connect(noiseLevelSpin, QOverload<double>::of(&QDoubleSpinBox::valueChanged),
+            this, [this](double value) {
+                m_binauralEngine->setNoiseLevel(value);
+            });
+
+    // Start disabled
+    noiseEnableBtn->setEnabled(false);
+    noiseTypeCombo->setEnabled(false);
+    noiseLevelSpin->setEnabled(false);
+    //
 
     durationLabel = new QLabel("Timer:", toolbar);
     durationLabel->setToolTip("Auto-stop after selected duration");
@@ -513,7 +593,7 @@ QToolBar *MainWindow::createBinauralToolbarExt() {
 
     toolbar->addWidget(m_openSessionManagerButton);
 
-    toolbar->addSeparator();
+    //toolbar->addSeparator();
     m_visStimButton = new QPushButton("Visual", toolbar);
     m_visStimButton->setCheckable(true);
     m_visStimButton->setToolTip("Visual Stimulation");
@@ -549,7 +629,7 @@ QToolBar *MainWindow::createBinauralToolbarExt() {
 
     toolbar->addWidget(m_visStimButton);
 
-    toolbar->addSeparator();
+    //toolbar->addSeparator();
     radDialogButton = new QPushButton("Radionics", this);
     radDialogButton ->setCheckable(true);
     radDialogButton->setChecked(false);
@@ -1162,6 +1242,16 @@ void MainWindow::updateBinauralPowerState(bool enabled) {
     if (!enabled && m_autoStopTimer) {
         stopAutoStopTimer();
     }
+
+    noiseTypeCombo->setEnabled(enabled);
+    noiseLevelSpin->setEnabled(enabled);
+    if(noiseEnableBtn->isChecked()){
+    noiseEnableBtn->setChecked(!enabled);
+    }
+    noiseEnableBtn ->setEnabled(enabled);
+
+    radDialogButton->setEnabled(enabled);
+    m_visStimButton->setEnabled(enabled);
 }
 
 void MainWindow::updateNaturePowerState(bool enabled) {
@@ -3345,8 +3435,10 @@ void MainWindow::setupMenus() {
                 return; // User canceled, don't proceed
             }
 
-            m_binauralEngine->stop();
+            //m_binauralEngine->stop();
+            m_binauralStopButton->click();
         }
+
         toneTypeCombo->setCurrentIndex(0); // Binaural
         m_leftFreqInput->setValue(360.0);
         m_rightFreqInput->setValue(367.83);
@@ -3354,6 +3446,18 @@ void MainWindow::setupMenus() {
         m_pulseFreqLabel->setValue(7.83);
         m_binauralVolumeInput->setValue(15.0);
         updateBinauralBeatDisplay();
+
+        noiseEnableBtn->setChecked(false);
+        noiseTypeCombo->setCurrentIndex(0); // White
+        noiseLevelSpin->setValue(0.30);
+
+        // Reset engine noise state
+        if (m_binauralEngine) {
+            m_binauralEngine->setNoiseEnabled(false);
+            m_binauralEngine->setNoiseType(0); // Off
+            m_binauralEngine->setNoiseLevel(0.30);
+        }
+
         statusBar()->showMessage("Brainwave settings reset to defaults", 3000);
     });
     presetsMenu->addAction(resetPresetsAction);
@@ -5454,6 +5558,7 @@ void MainWindow::toggleTheme(bool enableDark)
             openAmbientPresetButton->setIcon(QIcon(":/icons-white/folder.svg"));
             saveAmbientPresetButton->setIcon(QIcon(":/icons-white/save.svg"));
             resetPlayersButton->setIcon(QIcon(":/icons-white/refresh-cw.svg"));
+            noiseEnableBtn->setIcon(QIcon(":/icons-white/zap.svg"));
             m_beatFreqLabel->setStyleSheet(
                 "background-color: #16213e; padding: 2px; border: 1px solid #0f3460; color: #ffffff;");
             statusBar()->showMessage("Dark theme applied", 2000);
@@ -5501,6 +5606,7 @@ void MainWindow::toggleTheme(bool enableDark)
         m_binauralPauseButton->setIcon(QIcon(":/icons/pause.svg"));
         m_binauralStopButton->setIcon(QIcon(":/icons/square.svg"));
         m_openSessionManagerButton->setIcon(QIcon(":/icons/layers.svg"));
+        noiseEnableBtn->setIcon(QIcon(":/icons/zap.svg"));
 
 
         m_masterPauseButton->setStyleSheet(

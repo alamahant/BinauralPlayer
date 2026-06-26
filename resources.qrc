@@ -84,5 +84,7 @@
         <file>files/dark-theme.css</file>
         <file>icons-white/cloud-off.svg</file>
         <file>files/brainwave_presets.tar.xz</file>
+        <file>icons/zap.svg</file>
+        <file>icons-white/zap.svg</file>
     </qresource>
 </RCC>

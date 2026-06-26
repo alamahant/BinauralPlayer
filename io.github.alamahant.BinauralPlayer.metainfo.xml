@@ -101,6 +101,19 @@
 
   <releases>
 
+<release version="1.6.3" date="2026-06-26">
+  <description>
+    <p>Release v1.6.3:</p>
+    <ul>
+      <li>Added background noise layer (White, Pink, Brown, Grey)</li>
+      <li>Added adjustable noise mix level (0.00 to 1.00)</li>
+      <li>Added toolbar controls for noise enable/disable, type selection, and level adjustment</li>
+      <li>Added real-time noise mixing with binaural and isochronic tones</li>
+      <li>Added tooltips and reset support for all noise controls</li>
+    </ul>
+  </description>
+</release>
+
 <release version="1.6.2" date="2026-06-23">
   <description>
     <p>Release v1.6.2:</p>

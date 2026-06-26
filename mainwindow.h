@@ -446,5 +446,10 @@ private:
     RadionicsConsole *radConsole = nullptr;
     QPushButton* radDialogButton;
     bool wasDark = false;
+
+    //noise
+    QPushButton *noiseEnableBtn;
+    QComboBox *noiseTypeCombo;
+    QDoubleSpinBox *noiseLevelSpin;
 };
 #endif // MAINWINDOW_H
