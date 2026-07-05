@@ -13,5 +13,12 @@
       <pubDate>2026-07-04 12:00:00</pubDate>
     </item>
 
+ <item>
+      <title>Testing</title>
+      <description>Notifications,  hints and tips  about BinauralPlayer usage and features will appear here. Check back regularly or enable RSS in the app settings.</description>
+      <link>https://github.com/alamahant/BinauralPlayer/blob/master/binauralplayer-feed.xml</link>
+      <pubDate>2026-07-05 12:00:00</pubDate>
+    </item>
+
   </channel>
 </rss>
