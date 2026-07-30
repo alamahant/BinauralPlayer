@@ -17,9 +17,9 @@ A sophisticated desktop application for multimedia playback, binaural/isochronic
 
 ---
 
-## :sparkles: Features
+## ✨ Features
 
-### :musical note: Media Playback
+### 🎵 Media Playback
 
 * **Multi-format support:** MP3, WAV, FLAC, OGG, M4A, MP4, M4V, AVI, MKV
 * **Tabbed playlists:** Create, rename, and manage multiple playlists
@@ -27,7 +27,7 @@ A sophisticated desktop application for multimedia playback, binaural/isochronic
 * **Streaming support:** Play audio directly from HTTP/HTTPS URLs
 * **Time display:** Track position/duration with seekable progress bar
 
-### :brain: Brainwave Audio Generation
+### 🧠 Brainwave Audio Generation
 
 * **Three modes:** Binaural Beats (headphones required), Isochronic Tones, Audio Generator
 * **Real-time dynamic engine:** Immediate parameter changes; no pre-rendered buffers
@@ -35,7 +35,7 @@ A sophisticated desktop application for multimedia playback, binaural/isochronic
 * **Frequency control:** Left/right channels (20Hz–20kHz)
 * **Auto-stop timer:** With countdown visualization
 
-### :clipboard: Playlist Management
+### 📋 Playlist Management
 
 * **Tabbed interface:** Multiple named playlists with closeable tabs
 
@@ -43,7 +43,7 @@ A sophisticated desktop application for multimedia playback, binaural/isochronic
 * **File operations:** Save/load playlists in JSON
 * **Track operations:** Add, remove, clear with smart selection tracking
 
-### :artist palette: User Interface
+### 🎨 User Interface
 
 * **Custom toolbars:** Color-coded (Media: Blue, Binaural: Purple, Nature: Green)
 * **Split status bar:** Media playback (left), binaural engine status (right)
@@ -53,7 +53,7 @@ A sophisticated desktop application for multimedia playback, binaural/isochronic
 
 ---
 
-## :hammer and wrench: Technical Architecture
+## 🛠️ Technical Architecture
 
 ### Core Components
 
@@ -76,7 +76,7 @@ A sophisticated desktop application for multimedia playback, binaural/isochronic
 
 ---
 
-## :package: Installation & Build
+## 📦 Installation & Build
 
 ### Prerequisites
 
@@ -108,7 +108,7 @@ make -j$(nproc)
 ./BinauralPlayer
 
 ```
-## :video game: Usage Guide
+## 🎮 Usage Guide
 
 ### Basic Playback
 
@@ -149,7 +149,7 @@ make -j$(nproc)
 
 ---
 
-## :test tube: Testing
+## 🧪 Testing
 
 ### Sample Streams
 
@@ -166,7 +166,7 @@ make -j$(nproc)
 
 ---
 
-## :wrench: Troubleshooting
+## 🔧 Troubleshooting
 
 ### No audio
 
@@ -201,22 +201,22 @@ QT_MEDIA_BACKEND=ffmpeg ./BinauralPlayer
 
 ---
 
-## :page facing up: License
+## 📄 License
 
 This project is licensed under the **GPL Version 3 License** – see the [LICENSE](LICENSE) file for details.
 
 ---
 
-## :bust in silhouette: Author
+## 👤 Author
 
 **Alamahant** – Developer & Maintainer  
-:copyright: 2025 Alamahant. All rights reserved.
+© 2025 Alamahant. All rights reserved.
 
 > "Harmonizing code and consciousness through audio technology"
 
 ---
 
-## :rocket: Roadmap
+## 🚀 Roadmap
 
 * Nature sound mixer
 * Audio visualizations
@@ -227,4 +227,4 @@ This project is licensed under the **GPL Version 3 License** – see the [LICENS
 
 ---
 
-:musical note: **Happy listening and coding!**
+🎵 **Happy listening and coding!**
