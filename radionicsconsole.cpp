@@ -932,10 +932,10 @@ void RadionicsConsole::showZoomedImage(const QPixmap &pixmap, QLabel *sourceLabe
 {
     if (pixmap.isNull()) return;
 
-    // 🎯 Show original size (no scaling at all)
+    //Show original size (no scaling at all)
     QPixmap original = pixmap;  // Just use the original pixmap
 
-    // 🎯 Optional: Limit size to fit screen (so it doesn't overflow)
+
     QSize maxSize = QApplication::primaryScreen()->availableSize() * 0.7;
     if (original.width() > maxSize.width() || original.height() > maxSize.height()) {
         original = original.scaled(maxSize, Qt::KeepAspectRatio, Qt::SmoothTransformation);

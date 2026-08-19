@@ -33,6 +33,7 @@ qt_add_executable(BinauralPlayer
     vistimdialog.cpp vistimdialog.h
     resources.qrc
     radionicsconsole.cpp radionicsconsole.h
+    rssnotificationdialog.cpp rssnotificationdialog.h
 )
 
 target_link_libraries(BinauralPlayer PRIVATE

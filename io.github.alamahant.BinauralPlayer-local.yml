@@ -1,0 +1,34 @@
+app-id: io.github.alamahant.BinauralPlayer
+runtime: org.kde.Platform
+runtime-version: '6.10'
+sdk: org.kde.Sdk
+command: BinauralPlayer
+finish-args:
+  - --share=ipc
+  - --socket=fallback-x11
+  - --socket=wayland
+  - --device=dri
+  - --share=network
+  - --socket=pulseaudio
+  - --filesystem=xdg-run/pipewire-0:ro
+  - --filesystem=xdg-music:ro
+  - --filesystem=xdg-documents/BinauralPlayer:create
+modules:
+  - name: yt-dlp
+    buildsystem: simple
+    build-commands:
+      - install -D yt-dlp /app/bin/yt-dlp
+      - chmod +x /app/bin/yt-dlp
+    sources:
+      - type: file
+        url: https://github.com/yt-dlp/yt-dlp/releases/download/2026.03.17/yt-dlp_linux
+        sha256: c2b0189f581fe4a2ddd41954f1bcb7d327db04b07ed0dea97e4f1b3e09b5dd8e
+        dest-filename: yt-dlp
+  - name: Binauralplayer
+    buildsystem: cmake-ninja
+    config-opts:
+      - -DFLATPAK_BUILD=ON
+      - -DCMAKE_BUILD_TYPE=Release
+    sources:
+      - type: dir
+        path: .

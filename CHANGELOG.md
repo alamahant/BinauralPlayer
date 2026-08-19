@@ -1,5 +1,24 @@
 # Changelog
 
+## [2026-08-19] - Release v1.7.0
+
+### Fixed
+- **Isochronic Tone Clicking Issue**
+  - Fixed annoying "clicking" sound when generating isochronic tones with sine waves
+  - Implemented smooth attack/release envelope (10ms fade in/out) for all waveforms
+  - Eliminates amplitude discontinuities that caused audible clicks
+  - Works for all waveform types: Sine, Square, Triangle, and Sawtooth
+  - Users can now enjoy clean, click-free isochronic tones even at high amplitudes
+
+### Added
+- **Dedicated Sessions Directory**
+  - Created dedicated `/sessions` directory for preset storage
+  - Shipped sessions now packaged as `session_presets.tar.xz`
+  - Cleaner organization of preset files
+  - Easier management of user-created sessions
+  - Added RSS notification dialog for app updates and announcements with enable/disable toggle, item navigation, persistent read status, and offline caching
+---
+
 ## [2026-06-26] - Release v1.6.31
 NOTE: This is a bump if v1.6.3 because it failed to be published even after successfull PR merging
 ### Added

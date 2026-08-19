@@ -9,6 +9,7 @@ const QString playlistFilePath = appDirPath + "/playlists";
 const QString musicFilePath = appDirPath + "/music";
 const QString ambientPresetFilePath = appDirPath + "/ambient-presets";
 const QString radionicsFilePath = appDirPath + "/radionics";
+const QString sessionsFilePath = appDirPath + "/sessions";
 
 int currentToneType = 0;
 QMediaPlayer::PlaybackState playbackState = QMediaPlayer::StoppedState;

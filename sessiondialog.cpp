@@ -435,7 +435,7 @@ void SessionDialog::onLoadClicked()
     QString fileName = QFileDialog::getOpenFileName(
         this,
         "Load Session",                          // caption
-        ConstantGlobals::presetFilePath,         // initial directory
+        ConstantGlobals::sessionsFilePath,         // initial directory
         "Session Files (*.txt *.bsession);;"
         "All Files (*)"
     );
@@ -472,7 +472,7 @@ void SessionDialog::onSaveClicked()
     QString fileName = QFileDialog::getSaveFileName(
         this,
         "Save Session",                          // caption
-        ConstantGlobals::presetFilePath + "/Session",         // initial directory / path
+        ConstantGlobals::sessionsFilePath + "/Session",         // initial directory / path
         "Session Files (*.bsession);;"
         "Text Files (*.txt);;"
         "All Files (*)"

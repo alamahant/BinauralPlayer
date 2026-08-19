@@ -55,14 +55,15 @@ protected:
 
 private slots:
     void onParseClicked();
-    void onLoadClicked();
-    void onSaveClicked();
+
     void onClearClicked();
     void onPlayClicked();
     void onPauseClicked();
     void onStopClicked();
     void onStageTimerTimeout();
-
+public slots:
+    void onLoadClicked();
+    void onSaveClicked();
 private:
     QTextEdit *m_textEdit;
     QLabel *m_statusLabel;

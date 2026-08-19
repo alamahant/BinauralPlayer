@@ -16,10 +16,11 @@ int main(int argc, char *argv[])
     QDir().mkpath(ConstantGlobals::musicFilePath);
     QDir().mkpath(ConstantGlobals::ambientPresetFilePath);
     QDir().mkpath(ConstantGlobals::radionicsFilePath);
+    QDir().mkpath(ConstantGlobals::sessionsFilePath);
 
     QApplication::setApplicationName("BinauralPlayer");
     QApplication::setOrganizationName("Alamahant");
-    QApplication::setApplicationVersion("1.6.31");
+    QApplication::setApplicationVersion("1.7.0");
 
     QApplication a(argc, argv);
 

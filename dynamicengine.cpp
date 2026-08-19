@@ -88,7 +88,11 @@ bool DynamicEngine::startDynamicPlayback()
     class DynamicAudioDevice : public QIODevice {
     public:
         DynamicAudioDevice(DynamicEngine* engine) 
-            : m_engine(engine), m_phaseLeft(0.0), m_phaseRight(0.0) {
+            : m_engine(engine),
+              m_phaseLeft(0.0),
+              m_phaseRight(0.0),
+              m_pulseEnvelope(0.0),
+              m_prevPulseOn(false)   {
             setOpenMode(QIODevice::ReadOnly);
         }
 
@@ -100,67 +104,6 @@ bool DynamicEngine::startDynamicPlayback()
           }
         
     protected:
-          /*
-        qint64 readData(char* data, qint64 maxlen) override {
-            int16_t* samples = reinterpret_cast<int16_t*>(data);
-            int sampleCount = maxlen / (2 * sizeof(int16_t)); // Stereo
-            
-            double leftFreq = m_engine->m_leftFrequency.load();
-            double rightFreq = m_engine->m_rightFrequency.load();
-            double amplitude = m_engine->m_amplitude.load();
-            auto waveform = m_engine->m_currentWaveform.load();
-            double sampleRate = m_engine->m_sampleRate;
-            double pulseFreq = m_engine->m_pulseFrequency;
-            
-            bool isIsochronic = (ConstantGlobals::currentToneType == 1);
-            
-            for (int i = 0; i < sampleCount; ++i) {
-                double leftSample = 0.0;
-                double rightSample = 0.0;
-                
-                if (isIsochronic) {
-                    double carrierPhaseInc = (2.0 * M_PI * leftFreq) / sampleRate;
-                    double pulsePhaseInc = (2.0 * M_PI * pulseFreq) / sampleRate;
-                    
-                    double carrier = 0.0;
-                    switch (waveform) {
-                        case SINE_WAVE: carrier = sin(m_phaseLeft); break;
-                        case SQUARE_WAVE: carrier = (sin(m_phaseLeft) >= 0.0) ? 1.0 : 0.0; break;
-                        case TRIANGLE_WAVE: carrier = m_engine->calculateTriangleSample(m_phaseLeft); break;
-                        case SAWTOOTH_WAVE: carrier = m_engine->calculateSawtoothSample(m_phaseLeft); break;
-                    }
-                    
-                    double pulse = (sin(m_phaseRight) >= 0.0) ? 1.0 : 0.0;
-                    
-                    leftSample = carrier * pulse * amplitude;
-                    rightSample = leftSample; // Stereo identical
-                    
-                    m_phaseLeft += carrierPhaseInc;
-                    m_phaseRight += pulsePhaseInc;
-                } else {
-                    double leftPhaseInc = (2.0 * M_PI * leftFreq) / sampleRate;
-                    double rightPhaseInc = (2.0 * M_PI * rightFreq) / sampleRate;
-                    
-                    leftSample = m_engine->calculateSample(m_phaseLeft, waveform);
-                    rightSample = m_engine->calculateSample(m_phaseRight, waveform);
-                    
-                    leftSample *= amplitude;
-                    rightSample *= amplitude;
-                    
-                    m_phaseLeft += leftPhaseInc;
-                    m_phaseRight += rightPhaseInc;
-                }
-                
-                samples[2 * i] = static_cast<int16_t>(leftSample * 32767);
-                samples[2 * i + 1] = static_cast<int16_t>(rightSample * 32767);
-                
-                if (m_phaseLeft > 2.0 * M_PI) m_phaseLeft -= 2.0 * M_PI;
-                if (m_phaseRight > 2.0 * M_PI) m_phaseRight -= 2.0 * M_PI;
-            }
-            
-            return sampleCount * 2 * sizeof(int16_t);
-        }
-        */
 
           qint64 readData(char* data, qint64 maxlen) override {
               int16_t* samples = reinterpret_cast<int16_t*>(data);
@@ -191,19 +134,45 @@ bool DynamicEngine::startDynamicPlayback()
                       double carrierPhaseInc = (2.0 * M_PI * leftFreq) / sampleRate;
                       double pulsePhaseInc = (2.0 * M_PI * pulseFreq) / sampleRate;
 
+                      // Generate carrier waveform
                       double carrier = 0.0;
                       switch (waveform) {
                           case SINE_WAVE: carrier = sin(m_phaseLeft); break;
-                          case SQUARE_WAVE: carrier = (sin(m_phaseLeft) >= 0.0) ? 1.0 : 0.0; break;
+                          case SQUARE_WAVE: carrier = (sin(m_phaseLeft) >= 0.0) ? 1.0 : -1.0; break;
                           case TRIANGLE_WAVE: carrier = m_engine->calculateTriangleSample(m_phaseLeft); break;
                           case SAWTOOTH_WAVE: carrier = m_engine->calculateSawtoothSample(m_phaseLeft); break;
                       }
 
-                      double pulse = (sin(m_phaseRight) >= 0.0) ? 1.0 : 0.0;
+                      // Determine if pulse should be ON or OFF
+                      bool pulseOn = (sin(m_phaseRight) >= 0.0);
 
-                      leftSample = carrier * pulse;
-                      rightSample = leftSample;
+                      // ============================================================
+                      // SMOOTH ENVELOPE WITH ATTACK/RELEASE (FIXES CLICKING)
+                      // ============================================================
+                      const double attackTime = 0.01;   // 10ms attack (adjustable)
+                      const double releaseTime = 0.01;  // 10ms release (adjustable)
+                      const double attackSteps = attackTime * sampleRate;
+                      const double releaseSteps = releaseTime * sampleRate;
 
+                      if (pulseOn) {
+                          // Attack: ramp up
+                          if (m_pulseEnvelope < 1.0) {
+                              m_pulseEnvelope += 1.0 / attackSteps;
+                              if (m_pulseEnvelope > 1.0) m_pulseEnvelope = 1.0;
+                          }
+                      } else {
+                          // Release: ramp down
+                          if (m_pulseEnvelope > 0.0) {
+                              m_pulseEnvelope -= 1.0 / releaseSteps;
+                              if (m_pulseEnvelope < 0.0) m_pulseEnvelope = 0.0;
+                          }
+                      }
+
+                      // Apply smooth envelope to carrier
+                      leftSample = carrier * m_pulseEnvelope;
+                      rightSample = leftSample; // Stereo identical
+
+                      // Update phases
                       m_phaseLeft += carrierPhaseInc;
                       m_phaseRight += pulsePhaseInc;
                   } else {
@@ -268,6 +237,8 @@ bool DynamicEngine::startDynamicPlayback()
         DynamicEngine* m_engine;
         double m_phaseLeft;
         double m_phaseRight;
+        double m_pulseEnvelope;
+        bool m_prevPulseOn;
     };
     
     m_dynamicDevice = new DynamicAudioDevice(this);

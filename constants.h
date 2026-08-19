@@ -14,6 +14,7 @@ extern const QString playlistFilePath;
 extern const QString musicFilePath;
 extern const QString ambientPresetFilePath;
 extern const QString radionicsFilePath;
+extern const QString sessionsFilePath;
 
 extern int currentToneType;
 extern QMediaPlayer::PlaybackState playbackState;

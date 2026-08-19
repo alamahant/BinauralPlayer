@@ -11,7 +11,6 @@
 #include <QPushButton>
 #include <QComboBox>
 #include <QLabel>
-#include "binauralengine.h"
 #include<QSettings>
 #include<QMediaPlayer>
 #include<QSlider>
@@ -36,6 +35,7 @@
 #include"flickerwidget.h"
 #include<QProcess>
 #include"radionicsconsole.h"
+#include"rssnotificationdialog.h"
 
 class MainWindow : public QMainWindow
 {
@@ -451,5 +451,10 @@ private:
     QPushButton *noiseEnableBtn;
     QComboBox *noiseTypeCombo;
     QDoubleSpinBox *noiseLevelSpin;
+    //rssfeed
+    RssNotificationDialog* rssDialog = nullptr;
+    QAction *rssAction;
+    QAction* loadSessionAction;
+
 };
 #endif // MAINWINDOW_H

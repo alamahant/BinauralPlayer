@@ -47,7 +47,8 @@ MainWindow::MainWindow(QWidget *parent)
       m_sessionManagerDialog(new SessionDialog(this)),
       m_cueDialog(new CueSheetDialog(this)),
       videoWidget(new QVideoWidget(this)),
-      radConsole(new RadionicsConsole(this))
+      radConsole(new RadionicsConsole(this)),
+      rssDialog(new RssNotificationDialog(this))
 {
     setWindowTitle("Binaural Media Player");
     setMinimumSize(900, 700);
@@ -146,6 +147,22 @@ MainWindow::MainWindow(QWidget *parent)
             unlimitedDurationAction->trigger();
         }
         m_brainwaveDuration->setValue(minutes);
+    });
+
+    connect(rssDialog, &RssNotificationDialog::newContentAvailable,
+            this, [this](bool hasNew){
+
+        if (!rssAction) return;
+
+        if (hasNew) {
+            rssAction->setIcon(QIcon(":/icons/rss-green.svg"));
+            // rssAction->setIcon(QIcon(":/icons/rss-red.svg"));
+        } else {
+            rssAction->setIcon(QIcon(":/icons/rss.svg"));
+
+        }
+
+
     });
 }
 
@@ -3275,6 +3292,8 @@ void MainWindow::addActions() {
     loadPresetAction->setStatusTip("Load a saved brainwave preset");
     loadPresetAction->setIcon(QIcon(":/icons/folder.svg"));
 
+
+
     managePresetsAction = new QAction("&Manage Presets...", this);
     managePresetsAction->setStatusTip("Open presets folder in file explorer");
     managePresetsAction->setIcon(QIcon(":/icons/settings.svg"));
@@ -3321,6 +3340,18 @@ void MainWindow::setupMenus() {
     streamAction->setIcon(QIcon(":/icons/rss.svg"));
     fileMenu->addAction(streamAction);
     fileMenu->addSeparator();
+
+    //
+    rssAction = fileMenu->addAction("&RSS Notifications");
+    rssAction->setShortcut(QKeySequence("Ctrl+R"));
+    rssAction->setIcon(QIcon(":/icons/rss.svg"));
+    connect(rssAction, &QAction::triggered, this, [this]{
+        if(rssDialog) rssDialog->show();
+    });
+    fileMenu->addAction(rssAction);
+    fileMenu->addSeparator();
+
+    //
 
     QAction *openFolderAction = fileMenu->addAction("&Open Data Directory");
     connect(openFolderAction, &QAction::triggered, this, &MainWindow::openFolder);
@@ -3414,7 +3445,17 @@ void MainWindow::setupMenus() {
     presetsMenu->addAction(loadPresetAction);
     presetsMenu->addSeparator();
 
-    QAction* populatePresetsAction = presetsMenu->addAction("Populate Presets Directory");
+    loadSessionAction = new QAction("Load &Session...", this);
+    loadSessionAction->setStatusTip("Loadsession");
+    loadSessionAction->setIcon(QIcon(":/icons/folder.svg"));
+    connect(loadSessionAction, &QAction::triggered, this, [this]{
+       if(m_sessionManagerDialog) m_sessionManagerDialog->onLoadClicked();
+    });
+
+    presetsMenu->addAction(loadSessionAction);
+    presetsMenu->addSeparator();
+
+    QAction* populatePresetsAction = presetsMenu->addAction("Populate Sessions Directory");
     populatePresetsAction->setIcon(QIcon(":/icons/folder.svg"));
 
     connect(populatePresetsAction, &QAction::triggered, this, &MainWindow::copyPresetsArchive);
@@ -5498,10 +5539,14 @@ void MainWindow::toggleFlickerFullscreen() {
 
     if (m_flickerFloatingWindow->isFullScreen()) {
         // Exit fullscreen - restore normal window
+        m_flickerFloatingWindow->showNormal();
         m_flickerFloatingWindow->setWindowFlags(Qt::Window);
         //m_flickerFloatingWindow->setWindowState(Qt::WindowNoState);  // Clear maximized state
-        m_flickerFloatingWindow->showNormal();
-        m_flickerFloatingWindow->resize(1024, 600);  // Restore original size
+        //m_flickerFloatingWindow->showNormal();
+        //m_flickerFloatingWindow->resize(600, 600);  // Restore original size
+        m_flickerFloatingWindow->show();
+        m_flickerFloatingWindow->raise();
+
     } else {
         // Enter fullscreen - remove titlebar
         m_flickerFloatingWindow->setWindowFlags(Qt::Window | Qt::FramelessWindowHint);
@@ -5696,10 +5741,10 @@ void MainWindow::showPresetExtractionNotice()
     }
 
     // Copy the archive to the user's directory
-    QString destPath = ConstantGlobals::presetFilePath + "/brainwave_presets.tar.xz";
+    QString destPath = ConstantGlobals::sessionsFilePath + "/session_presets.tar.xz";
 
     if (!QFile::exists(destPath)) {
-        QFile::copy(":/files/brainwave_presets.tar.xz", destPath);
+        QFile::copy(":/files/session_presets.tar.xz", destPath);
     }
 
 
@@ -5707,18 +5752,18 @@ void MainWindow::showPresetExtractionNotice()
     QMessageBox msgBox(this);
     msgBox.setWindowTitle("Brainwave Presets Available");
     msgBox.setIcon(QMessageBox::Information);
-    QString msg = "A collection of 47+ brainwave presets has been installed, to be used by Session Manager.\n\n"
-                  "Location: " + ConstantGlobals::presetFilePath + "\n\n"
-                  "File: brainwave_presets.tar.xz\n\n"
+    QString msg = "A collection of 47+ brainwave session presets has been installed, to be used by Session Manager.\n\n"
+                  "Location: " + ConstantGlobals::sessionsFilePath + "\n\n"
+                  "File: session_presets.tar.xz\n\n"
                   "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
                   "📦 EXTRACTION INSTRUCTIONS:\n"
                   "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n"
-                  "1. Right-click brainwave_presets.tar.xz\n"
+                  "1. Right-click session_presets.tar.xz\n"
                   "2. Select 'Extract To...' (NOT 'Extract Here')\n"
                   "3. Choose the current folder as destination\n\n"
                   "OR using terminal:\n"
-                  "cd " + ConstantGlobals::ambientPresetFilePath + " && tar xvf brainwave_presets.tar.xz\n\n"
-                  "4. You can always remake them available via Presets → Populate Presets Directory\n\n"
+                  "cd " + ConstantGlobals::sessionsFilePath + " && tar xvf session_presets.tar.xz\n\n"
+                  "4. You can always remake them available via Presets → Populate Sessions Directory\n\n"
                   "Would you like to open this folder?";
 
     msgBox.setText(msg);
@@ -5729,7 +5774,7 @@ void MainWindow::showPresetExtractionNotice()
     msgBox.addButton(QMessageBox::Cancel);
 
     if (msgBox.exec() == QMessageBox::Ok) {
-        QDesktopServices::openUrl(QUrl::fromLocalFile(ConstantGlobals::presetFilePath));
+        QDesktopServices::openUrl(QUrl::fromLocalFile(ConstantGlobals::sessionsFilePath));
     }
 
     if (doNotShowAgain->isChecked()) {
@@ -5739,23 +5784,23 @@ void MainWindow::showPresetExtractionNotice()
 
 void MainWindow::copyPresetsArchive()
 {
-    QString destPath = ConstantGlobals::presetFilePath + "/brainwave_presets.tar.xz";
+    QString destPath = ConstantGlobals::sessionsFilePath + "/session_presets.tar.xz";
 
     // Check if already exists
     if (QFile::exists(destPath)) {
         QMessageBox::information(this, "Already Exists",
-            "Presets archive already exists at:\n" + destPath);
+            "Sessions archive already exists at:\n" + destPath);
         return;
     }
 
     // Confirm with user
-    QMessageBox::StandardButton reply = QMessageBox::question(this, "Copy Presets",
-        "Copy brainwave presets archive to:\n" + ConstantGlobals::presetFilePath + "?",
+    QMessageBox::StandardButton reply = QMessageBox::question(this, "Copy Sessions",
+        "Copy brainwave sessions archive to:\n" + ConstantGlobals::sessionsFilePath + "?",
         QMessageBox::Yes | QMessageBox::No);
 
     if (reply == QMessageBox::Yes) {
-        QDir().mkpath(ConstantGlobals::presetFilePath);
-        QFile::copy(":/files/brainwave_presets.tar.xz", destPath);
+        QDir().mkpath(ConstantGlobals::sessionsFilePath);
+        QFile::copy(":/files/session_presets.tar.xz", destPath);
         QMessageBox::information(this, "Done", "Archive copied successfully.");
     }
 }

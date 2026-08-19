@@ -122,31 +122,31 @@ QString HelpMenuDialog::getBestPracticesContent()
         <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #2c3e50;">
 
             <h1 style="color: #8e44ad; text-align: center; margin-bottom: 20px;">
-                🧠 Best Practices for Binaural & Isochronic Audio
+                Best Practices for Binaural & Isochronic Audio
             </h1>
 
             <p>
                 Brainwave entrainment is the practice of using rhythmic audio—such as binaural beats
                 or isochronic tones—to gently guide the brain into specific states of relaxation,
-                focus, meditation, or sleep. While extremely helpful when used correctly, it’s important
+                focus, meditation, or sleep. While extremely helpful when used correctly, it's important
                 to understand how it works and how to use it safely.
             </p>
 
-            <h2 style="color: #3498db;">🌊 What Are Binaural Beats?</h2>
+            <h2 style="color: #3498db;">What Are Binaural Beats?</h2>
             <p>
                 Binaural beats occur when you play slightly different frequencies in each ear.
                 The brain detects the difference between the tones and begins synchronizing with
-                the resulting “beat frequency.” This effect requires <strong>headphones</strong>.
+                the resulting "beat frequency." This effect requires <strong>headphones</strong>.
             </p>
 
-            <h2 style="color: #3498db;">⚡ What Are Isochronic Tones?</h2>
+            <h2 style="color: #3498db;">What Are Isochronic Tones?</h2>
             <p>
                 Isochronic tones are single, sharply-pulsed tones that turn on and off at a steady rhythm.
                 They do *not* require headphones and are considered one of the strongest forms of
                 brainwave entrainment.
             </p>
 
-            <h2 style="color: #27ae60;">✨ Potential Benefits</h2>
+            <h2 style="color: #27ae60;">Potential Benefits</h2>
             <ul style="padding-left: 20px;">
                 <li>Deep relaxation and meditation assistance</li>
                 <li>Improved focus and concentration</li>
@@ -156,7 +156,7 @@ QString HelpMenuDialog::getBestPracticesContent()
                 <li>Mood balancing and emotional grounding</li>
             </ul>
 
-            <h2 style="color: #c0392b;">⚠️ Safety & Dangers</h2>
+            <h2 style="color: #c0392b;">Safety & Dangers</h2>
             <ul style="padding-left: 20px;">
                 <li>Do <strong>not</strong> use while driving or operating machinery</li>
                 <li>Avoid high-intensity frequencies if you are prone to seizures or epilepsy</li>
@@ -166,7 +166,7 @@ QString HelpMenuDialog::getBestPracticesContent()
                 <li>Never force meditation states; let the brain shift naturally</li>
             </ul>
 
-            <h2 style="color: #2980b9;">📜 Useful Frequency Lists</h2>
+            <h2 style="color: #2980b9;">Useful Frequency Lists</h2>
             <p>
                 A large list of brainwave-related frequencies can be found here:
             </p>
@@ -175,7 +175,7 @@ QString HelpMenuDialog::getBestPracticesContent()
                 <li><a href="https://docs.preterhuman.net/Brainwave/Cymatic_Frequency_Listing">https://docs.preterhuman.net/Brainwave/Cymatic_Frequency_Listing</a></li>
             </ul>
 
-            <h2 style="color: #16a085;">🌿 Background Ambience</h2>
+            <h2 style="color: #16a085;">Background Ambience</h2>
             <p>
                 Atmospheric nature sounds greatly enhance the experience. High-quality,
                 royalty-free ambient audio can be found at:
@@ -184,7 +184,7 @@ QString HelpMenuDialog::getBestPracticesContent()
                 <a href="https://pixabay.com/sound-effects/search/nature/">https://pixabay.com/sound-effects/search/nature/</a>
             </p>
 
-            <h2 style="color: #8e44ad;">💡 Best Practices</h2>
+            <h2 style="color: #8e44ad;">Best Practices</h2>
             <ul style="padding-left: 20px;">
                 <li>Use good headphones for binaural beats</li>
                 <li>Use speakers or headphones for isochronic tones</li>
@@ -350,7 +350,7 @@ Intention Manifests Through Resonance and Attraction
             <h2 style="color: #c0392b;">Scientific Status</h2>
             <div style="background: #f8f9fa; border-left: 4px solid #c0392b; padding: 15px; border-radius: 4px; margin: 10px 0;">
                 <p style="margin: 0; color: #333;">
-                    <strong>⚠️ Important Disclaimer</strong><br><br>
+                    <strong>Important Disclaimer</strong><br><br>
                     Radionics, like the Law of Attraction and orgone theory, is <strong>not supported by mainstream science</strong>. Rigorous studies have consistently failed to demonstrate its efficacy beyond placebo effects.
                     <br><br>
                     This console is provided for <strong>entertainment and exploration purposes only</strong>. It is not a medical device and is not intended to diagnose, treat, cure, or prevent any disease.
@@ -423,7 +423,7 @@ Intention Manifests Through Resonance and Attraction
 </p>
 <div style="background-color: #f8f9fa; border-left: 4px solid #f39c12; padding: 15px; border-radius: 4px; margin: 10px 0;">
     <p style="margin: 0; color: #333;">
-        <strong>⚠️ Caution</strong><br><br>
+        <strong>Caution</strong><br><br>
         Working with electronics, amplifiers, and coils carries inherent risks including electrical shock,
         equipment damage, and fire hazards. Only attempt this if you have the necessary knowledge and experience.
         <br><br>
@@ -495,11 +495,48 @@ QString HelpMenuDialog::getWhatsNewContent()
     return R"(
 
 <div style="background-color: #e8f5e9; padding: 15px; border-radius: 8px; margin-bottom: 25px; border-left: 5px solid #2e7d32;">
-    <h2 style="color: #1b5e20; margin-top: 0;">🌊 Background Noise Layer — Version 1.6.3 <span style="font-size: 0.75em; background-color: #2e7d32; color: white; padding: 2px 8px; border-radius: 12px; vertical-align: middle;">NEW</span></h2>
+    <h2 style="color: #1b5e20; margin-top: 0;">Isochronic Tone Fix & Sessions Directory — Version 1.7.0 <span style="font-size: 0.75em; background-color: #2e7d32; color: white; padding: 2px 8px; border-radius: 12px; vertical-align: middle;">NEW</span></h2>
+    <p>Version 1.7.0 fixes the long-standing isochronic tone clicking issue and introduces a dedicated sessions directory for better preset organization.</p>
+
+    <div style="background-color: #e8f5e9; padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #2e7d32;">
+        <h3 style="color: #1b5e20; margin-top: 0;">Fixed: Isochronic Tone Clicking</h3>
+        <ul>
+            <li><strong>No more clicking</strong> — eliminated annoying click sound when generating isochronic tones</li>
+            <li><strong>Smooth envelope</strong> — implemented 10ms attack/release fade in/out for all waveforms</li>
+            <li><strong>All waveforms supported</strong> — works for Sine, Square, Triangle, and Sawtooth</li>
+            <li><strong>Clean audio</strong> — enjoy click-free isochronic tones even at high amplitudes</li>
+            <li><strong>Better phase management</strong> — eliminates amplitude discontinuities</li>
+        </ul>
+    </div>
+
+    <div style="background-color: #e3f2fd; padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #1565c0;">
+        <h3 style="color: #1565c0; margin-top: 0;">Added: Dedicated Sessions Directory</h3>
+        <ul>
+            <li><strong>/sessions directory</strong> — dedicated folder for preset storage</li>
+            <li><strong>session_presets.tar.xz</strong> — shipped sessions now packaged as tarball</li>
+            <li><strong>Cleaner organization</strong> — better separation of app and user files</li>
+            <li><strong>Easier management</strong> — simplified preset file handling</li>
+        </ul>
+    </div>
+</div>
+
+<div style="background-color: #e3f2fd; padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #1565c0;">
+    <h3 style="color: #1565c0; margin-top: 0;">Added: RSS Notification Dialog</h3>
+    <ul>
+        <li><strong>Stay informed</strong> — receive app updates and announcements via RSS feed</li>
+        <li><strong>Enable/disable</strong> — toggle feed checking on/off</li>
+        <li><strong>Browse items</strong> — navigate through multiple feed entries</li>
+        <li><strong>Mark as read</strong> — persistent read status across sessions</li>
+        <li><strong>Offline cache</strong> — view previously fetched items without internet</li>
+    </ul>
+</div>
+
+<div style="background-color: #e8f5e9; padding: 15px; border-radius: 8px; margin-bottom: 25px; border-left: 5px solid #2e7d32;">
+    <h2 style="color: #1b5e20; margin-top: 0;">Background Noise Layer — Version 1.6.3 <span style="font-size: 0.75em; background-color: #2e7d32; color: white; padding: 2px 8px; border-radius: 12px; vertical-align: middle;">NEW</span></h2>
     <p>Version 1.6.3 adds a real-time background noise layer that blends seamlessly with your binaural and isochronic tones.</p>
 
     <div style="background-color: #e8f5e9; padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #2e7d32;">
-        <h3 style="color: #1b5e20; margin-top: 0;">🎵 Four Noise Colors</h3>
+        <h3 style="color: #1b5e20; margin-top: 0;">Four Noise Colors</h3>
         <ul>
             <li><strong>White</strong> — classic hiss, like TV static</li>
             <li><strong>Pink</strong> — smooth waterfall, steady rain</li>
@@ -509,7 +546,7 @@ QString HelpMenuDialog::getWhatsNewContent()
     </div>
 
     <div style="background-color: #e3f2fd; padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #1565c0;">
-        <h3 style="color: #1565c0; margin-top: 0;">🎛️ Compact Toolbar Controls</h3>
+        <h3 style="color: #1565c0; margin-top: 0;">Compact Toolbar Controls</h3>
         <ul>
             <li><strong>Toggle button</strong> — enable/disable noise layer with one click</li>
             <li><strong>Type selector</strong> — choose between White, Pink, Brown, and Grey</li>
@@ -519,7 +556,7 @@ QString HelpMenuDialog::getWhatsNewContent()
     </div>
 
     <div style="background-color: #fff3e0; padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #e65100;">
-        <h3 style="color: #e65100; margin-top: 0;">⚙️ Engine Integration</h3>
+        <h3 style="color: #e65100; margin-top: 0;">Engine Integration</h3>
         <ul>
             <li><strong>Voss-McCartney pink noise</strong> — 8-stage sweet spot for smooth, natural sound</li>
             <li><strong>Real-time generation</strong> — no files needed, infinite length</li>
@@ -530,13 +567,13 @@ QString HelpMenuDialog::getWhatsNewContent()
 </div>
 
 <div style="background-color: #f3e5f5; padding: 15px; border-radius: 8px; margin-bottom: 25px; border-left: 5px solid #7b1fa2;">
-    <h2 style="color: #6a1b9a; margin-top: 0;">🧪 Radionics Console (Experimental) — Version 1.6.2 <span style="font-size: 0.75em; background-color: #7b1fa2; color: white; padding: 2px 8px; border-radius: 12px; vertical-align: middle;">NEW</span></h2>
+    <h2 style="color: #6a1b9a; margin-top: 0;">Radionics Console (Experimental) — Version 1.6.2 <span style="font-size: 0.75em; background-color: #7b1fa2; color: white; padding: 2px 8px; border-radius: 12px; vertical-align: middle;">NEW</span></h2>
     <p>Version 1.6.2 introduces the Radionics Console — an experimental intention-based frequency generation tool that encodes your intent into audio tones.</p>
 
     <div style="background-color: #ede7f6; padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #7b1fa2;">
-        <h3 style="color: #6a1b9a; margin-top: 0;">🎯 Intention-Based Frequency Generation</h3>
+        <h3 style="color: #6a1b9a; margin-top: 0;">Intention-Based Frequency Generation</h3>
         <ul>
-            <li><strong>Target &amp; Trend</strong> — set who this is for and what you want to achieve</li>
+            <li><strong>Target & Trend</strong> — set who this is for and what you want to achieve</li>
             <li><strong>Three interactive dials</strong> — click and hold to spin, release to lock your intention seed</li>
             <li><strong>Combined seed</strong> — maps to a 0–5 Hz frequency offset from base frequency (20–1000 Hz)</li>
             <li><strong>Continuous broadcast mode</strong> — intention persists even after you walk away</li>
@@ -544,7 +581,7 @@ QString HelpMenuDialog::getWhatsNewContent()
     </div>
 
     <div style="background-color: #e8f5e9; padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #2e7d32;">
-        <h3 style="color: #2e7d32; margin-top: 0;">💾 Session Management</h3>
+        <h3 style="color: #2e7d32; margin-top: 0;">Session Management</h3>
         <ul>
             <li><strong>Save/Load</strong> — store and restore sessions as JSON with images, frequencies, and dial settings</li>
             <li><strong>Image upload</strong> — add visual witness for your target and trend</li>
@@ -553,7 +590,7 @@ QString HelpMenuDialog::getWhatsNewContent()
     </div>
 
     <div style="background-color: #e3f2fd; padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #1565c0;">
-        <h3 style="color: #1565c0; margin-top: 0;">📖 Help Menu</h3>
+        <h3 style="color: #1565c0; margin-top: 0;">Help Menu</h3>
         <ul>
             <li><strong>Comprehensive theory guide</strong> — explains radionics, manifestation, and "spooky action at a distance"</li>
             <li><strong>Hardware integration</strong> — advanced practitioners can connect to amplifiers, Moebius coils, crystals, and orgonite</li>
@@ -563,11 +600,11 @@ QString HelpMenuDialog::getWhatsNewContent()
 </div>
 
 <div style="background-color: #e3f2fd; padding: 15px; border-radius: 8px; margin-bottom: 25px; border-left: 5px solid #1976d2;">
-    <h2 style="color: #1565c0; margin-top: 0;">🎵 Brainwave Presets & Cover Art — Version 1.6.1 <span style="font-size: 0.75em; background-color: #1976d2; color: white; padding: 2px 8px; border-radius: 12px; vertical-align: middle;">NEW</span></h2>
+    <h2 style="color: #1565c0; margin-top: 0;">Brainwave Presets & Cover Art — Version 1.6.1 <span style="font-size: 0.75em; background-color: #1976d2; color: white; padding: 2px 8px; border-radius: 12px; vertical-align: middle;">NEW</span></h2>
     <p>Version 1.6.1 adds a massive library of brainwave presets and full cover art support for your music tracks.</p>
 
     <div style="background-color: #e3f2fd; padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #1565c0;">
-        <h3 style="color: #1565c0; margin-top: 0;">📦 47+ Brainwave Presets</h3>
+        <h3 style="color: #1565c0; margin-top: 0;">47+ Brainwave Presets</h3>
         <ul>
             <li><strong>Sleep & dreams</strong> — deep delta, hypnagogic, lucid dreaming induction</li>
             <li><strong>Meditation</strong> — theta void, heart coherence, zen stillness</li>
@@ -579,7 +616,7 @@ QString HelpMenuDialog::getWhatsNewContent()
     </div>
 
     <div style="background-color: #e8f5e9; padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #2e7d32;">
-        <h3 style="color: #2e7d32; margin-top: 0;">🖼️ Cover Art Support</h3>
+        <h3 style="color: #2e7d32; margin-top: 0;">Cover Art Support</h3>
         <ul>
             <li><strong>ffmpeg extraction</strong> — pulls embedded album art (Qt Multimedia couldn't)</li>
             <li><strong>Smart caching</strong> — QMap stores original full-quality images per track</li>
@@ -589,7 +626,7 @@ QString HelpMenuDialog::getWhatsNewContent()
     </div>
 
     <div style="background-color: #fff3e0; padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #e65100;">
-        <h3 style="color: #e65100; margin-top: 0;">🔧 Fixed</h3>
+        <h3 style="color: #e65100; margin-top: 0;">Fixed</h3>
         <ul>
             <li>QDoubleSpinBox now accepts manual entry below 0.5 Hz with setSingleStep(0.1)</li>
             <li>Pulse frequency spinbox validation matches engine's 0.10 Hz minimum</li>
@@ -599,11 +636,11 @@ QString HelpMenuDialog::getWhatsNewContent()
 
 
 <div style="background-color: #e3f2fd; padding: 15px; border-radius: 8px; margin-bottom: 25px; border-left: 5px solid #1976d2;">
-    <h2 style="color: #1565c0; margin-top: 0;">🪟 Floating Windows — Version 1.6.0 <span style="font-size: 0.75em; background-color: #1976d2; color: white; padding: 2px 8px; border-radius: 12px; vertical-align: middle;">NEW</span></h2>
+    <h2 style="color: #1565c0; margin-top: 0;">Floating Windows — Version 1.6.0 <span style="font-size: 0.75em; background-color: #1976d2; color: white; padding: 2px 8px; border-radius: 12px; vertical-align: middle;">NEW</span></h2>
     <p>Version 1.6.0 decouples video and visual stimulation from the tab system, giving you independent floating windows and smarter playlist management.</p>
 
     <div style="background-color: #e3f2fd; padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #1565c0;">
-        <h3 style="color: #1565c0; margin-top: 0;">🪟 Independent Windows</h3>
+        <h3 style="color: #1565c0; margin-top: 0;">Independent Windows</h3>
         <ul>
             <li><strong>Video player</strong> now opens in its own floating window — no tab embedding</li>
             <li><strong>Visual Stimulation (Flicker)</strong> also floats independently</li>
@@ -613,7 +650,7 @@ QString HelpMenuDialog::getWhatsNewContent()
     </div>
 
     <div style="background-color: #e8f5e9; padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #2e7d32;">
-        <h3 style="color: #2e7d32; margin-top: 0;">📋 Smarter Playlists</h3>
+        <h3 style="color: #2e7d32; margin-top: 0;">Smarter Playlists</h3>
         <ul>
             <li><strong>Track persistence</strong> — each playlist remembers its last selected track</li>
             <li><strong>Unified file handling</strong> — single extension list with duplicate detection</li>
@@ -625,11 +662,11 @@ QString HelpMenuDialog::getWhatsNewContent()
 
 
 <div style="background-color: #e8f5e9; padding: 15px; border-radius: 8px; margin-bottom: 25px; border-left: 5px solid #43a047;">
-    <h2 style="color: #2e7d32; margin-top: 0;">🎬 Streaming Support — Version 1.5.3 <span style="font-size: 0.75em; background-color: #43a047; color: white; padding: 2px 8px; border-radius: 12px; vertical-align: middle;">NEW</span></h2>
+    <h2 style="color: #2e7d32; margin-top: 0;">Streaming Support — Version 1.5.3 <span style="font-size: 0.75em; background-color: #43a047; color: white; padding: 2px 8px; border-radius: 12px; vertical-align: middle;">NEW</span></h2>
     <p>Version 1.5.3 introduces comprehensive streaming support for YouTube and major video platforms, transforming Jasmine into a true media player that handles both local files and online streams.</p>
 
     <div style="background-color: #e8f5e9; padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #2e7d32;">
-        <h3 style="color: #2e7d32; margin-top: 0;">📺 YouTube & Streaming Sites</h3>
+        <h3 style="color: #2e7d32; margin-top: 0;">YouTube & Streaming Sites</h3>
         <p>Add YouTube, Dailymotion, Rumble, Odysee, and Vimeo links directly to your playlists:</p>
         <ul>
             <li><strong>Unified extraction</strong> using single-process yt-dlp with 9-second timeout</li>
@@ -640,7 +677,7 @@ QString HelpMenuDialog::getWhatsNewContent()
     </div>
 
     <div style="background-color: #fff3e0; padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #ff9800;">
-        <h3 style="color: #e65100; margin-top: 0;">🔗 Add Stream Feature (Ctrl+U)</h3>
+        <h3 style="color: #e65100; margin-top: 0;">Add Stream Feature (Ctrl+U)</h3>
         <p>Enhanced URL input with broad format support:</p>
         <ul>
             <li><strong>Video formats:</strong> .mp4, .mkv, .webm, .avi, .mov, .flv, .mpeg</li>
@@ -651,7 +688,7 @@ QString HelpMenuDialog::getWhatsNewContent()
     </div>
 
     <div style="background-color: #e3f2fd; padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #1565c0;">
-        <h3 style="color: #1565c0; margin-top: 0;">⚡ Technical Improvements</h3>
+        <h3 style="color: #1565c0; margin-top: 0;">Technical Improvements</h3>
         <ul>
             <li>Single unified function replaces separate YouTube/generic handlers</li>
             <li>User-agent header for better site compatibility</li>
@@ -662,10 +699,10 @@ QString HelpMenuDialog::getWhatsNewContent()
 </div>
 
 <div style="background-color: #fce4ec; padding: 15px; border-radius: 8px; margin-bottom: 25px; border-left: 5px solid #e91e63;">
-    <h2 style="color: #c2185b; margin-top: 0;">🔧 Stability Fix — Version 1.5.2</h2>
+    <h2 style="color: #c2185b; margin-top: 0;">Stability Fix — Version 1.5.2</h2>
 
     <div style="background-color: #fce4ec; padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #e91e63;">
-        <h3 style="color: #c2185b; margin-top: 0;">🐛 Critical Crash Fixed</h3>
+        <h3 style="color: #c2185b; margin-top: 0;">Critical Crash Fixed</h3>
         <p>Application no longer crashes when changing waveform from Sine to Square/Triangle/Sawtooth in Visual Stimulation dialog.</p>
         <ul>
             <li><strong>Root cause:</strong> Null pointer access to <code>m_visStimDialog</code> in waveform change handlers</li>
@@ -675,7 +712,7 @@ QString HelpMenuDialog::getWhatsNewContent()
     </div>
 
     <div style="background-color: #fce4ec; padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #e91e63;">
-        <h3 style="color: #c2185b; margin-top: 0;">💪 Stability Improvements</h3>
+        <h3 style="color: #c2185b; margin-top: 0;">Stability Improvements</h3>
         <ul>
             <li>Visual stimulation dialog now safely handles uninitialized states</li>
             <li>Better stability during tone type switching (BINAURAL/ISOCHRONIC/GENERATOR)</li>
@@ -685,11 +722,11 @@ QString HelpMenuDialog::getWhatsNewContent()
 
 
             <div style="background-color: #f5eef8; padding: 15px; border-radius: 8px; margin-bottom: 25px; border-left: 5px solid #8e44ad;">
-                <h2 style="color: #8e44ad; margin-top: 0;">🌙 Dark Theme — Version 1.5.1 <span style="font-size: 0.75em; background-color: #8e44ad; color: white; padding: 2px 8px; border-radius: 12px; vertical-align: middle;">NEW</span></h2>
+                <h2 style="color: #8e44ad; margin-top: 0;">Dark Theme — Version 1.5.1 <span style="font-size: 0.75em; background-color: #8e44ad; color: white; padding: 2px 8px; border-radius: 12px; vertical-align: middle;">NEW</span></h2>
                 <p>Version 1.5.1 introduces a full dark theme mode, reducing eye strain during extended sessions and providing a sleek, modern interface for low-light environments.</p>
 
                 <div style="background-color: #ede7f6; padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #7b1fa2;">
-                    <h3 style="color: #7b1fa2; margin-top: 0;">🎨 Theme Toggle</h3>
+                    <h3 style="color: #7b1fa2; margin-top: 0;">Theme Toggle</h3>
                     <p>Switch seamlessly between light and dark themes via the View menu. The theme preference persists across application restarts.</p>
                     <ul>
                         <li><strong>View → Dark Theme</strong> menu option with checkmark indicator</li>
@@ -699,7 +736,7 @@ QString HelpMenuDialog::getWhatsNewContent()
                 </div>
 
                 <div style="background-color: #fce4ec; padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #e91e63;">
-                    <h3 style="color: #c2185b; margin-top: 0;">🖥️ Comprehensive Dark Styling</h3>
+                    <h3 style="color: #c2185b; margin-top: 0;">Comprehensive Dark Styling</h3>
                     <p>All interface elements adapt to the dark theme for a cohesive visual experience:</p>
                     <ul>
                         <li><strong>Main window</strong> with dark background and reduced glare</li>
@@ -711,7 +748,7 @@ QString HelpMenuDialog::getWhatsNewContent()
                 </div>
 
                 <div style="background-color: #e8f5e9; padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #43a047;">
-                    <h3 style="color: #2e7d32; margin-top: 0;">👁️ Eye Comfort Features</h3>
+                    <h3 style="color: #2e7d32; margin-top: 0;">Eye Comfort Features</h3>
                     <p>Designed for extended use with reduced blue light emission and optimized contrast ratios:</p>
                     <ul>
                         <li><strong>Reduced luminance</strong> across all UI components</li>
@@ -725,14 +762,14 @@ QString HelpMenuDialog::getWhatsNewContent()
             </div>
 
         <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #2c3e50;">
-            <h1 style="color: #8e44ad; text-align: center; margin-bottom: 20px;">🌳 What's New - Dynamic Audio Engine & Enhanced Features</h1>
+            <h1 style="color: #8e44ad; text-align: center; margin-bottom: 20px;">What's New - Dynamic Audio Engine & Enhanced Features</h1>
 
             <div style="background-color: #f5eef8; padding: 15px; border-radius: 8px; margin-bottom: 25px; border-left: 5px solid #8e44ad;">
-                <h2 style="color: #8e44ad; margin-top: 0;">✦ Visual Brainwave Entrainment — Version 1.5.0 <span style="font-size: 0.75em; background-color: #8e44ad; color: white; padding: 2px 8px; border-radius: 12px; vertical-align: middle;">NEW</span></h2>
+                <h2 style="color: #8e44ad; margin-top: 0;">Visual Brainwave Entrainment — Version 1.5.0 <span style="font-size: 0.75em; background-color: #8e44ad; color: white; padding: 2px 8px; border-radius: 12px; vertical-align: middle;">NEW</span></h2>
                 <p>Version 1.5.0 introduces a full audiovisual entrainment system, adding an OpenGL-powered flicker engine directly on the video screen to reinforce your audio sessions through sight as well as sound.</p>
 
                 <div style="background-color: #ede7f6; padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #7b1fa2;">
-                    <h3 style="color: #7b1fa2; margin-top: 0;">🖥️ OpenGL Flicker Engine</h3>
+                    <h3 style="color: #7b1fa2; margin-top: 0;">OpenGL Flicker Engine</h3>
                     <p>A real-time OpenGL renderer pulses the video screen at the active beat frequency, creating simultaneous audiovisual stimulation that targets the same brainwave band through both hearing and sight.</p>
                     <ul>
                         <li><strong>Zero-latency rendering</strong> locked to the active beat frequency</li>
@@ -742,12 +779,12 @@ QString HelpMenuDialog::getWhatsNewContent()
                 </div>
 
                 <div style="background-color: #fce4ec; padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #e91e63;">
-                    <h3 style="color: #c2185b; margin-top: 0;">🎨 Customisable Flicker Colors</h3>
+                    <h3 style="color: #c2185b; margin-top: 0;">Customisable Flicker Colors</h3>
                     <p>Pick any on/off color combination for the flicker cycle using the built-in color picker. Choose deep red on black for a warm, low-stimulation session, or white on black for maximum contrast.</p>
                 </div>
 
                 <div style="background-color: #e8f5e9; padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #43a047;">
-                    <h3 style="color: #2e7d32; margin-top: 0;">〜 Brightness Envelope Sync</h3>
+                    <h3 style="color: #2e7d32; margin-top: 0;">Brightness Envelope Sync</h3>
                     <p>The flicker envelope automatically mirrors the active audio waveform — sine, square, or sawtooth — for a fully coherent audiovisual experience.</p>
                     <ul>
                         <li><strong>Auto-sync:</strong> Envelope matches the audio waveform by default</li>
@@ -756,7 +793,7 @@ QString HelpMenuDialog::getWhatsNewContent()
                 </div>
 
                 <div style="background-color: #e3f2fd; padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #1e88e5;">
-                    <h3 style="color: #1565c0; margin-top: 0;">📡 Frequency Sync with Override</h3>
+                    <h3 style="color: #1565c0; margin-top: 0;">Frequency Sync with Override</h3>
                     <p>The flicker frequency locks to the active beat by default. An optional override spinbox lets you set an independent flicker frequency, with a live brainwave band label (delta / theta / alpha / beta / gamma) updating as you adjust.</p>
                     <ul>
                         <li><strong>Default:</strong> Locked to the audio beat frequency</li>
@@ -766,7 +803,7 @@ QString HelpMenuDialog::getWhatsNewContent()
                 </div>
 
                 <div style="background-color: #fff8e1; padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #ffa000;">
-                    <h3 style="color: #e65100; margin-top: 0;">💬 Subliminal Text Overlay</h3>
+                    <h3 style="color: #e65100; margin-top: 0;">Subliminal Text Overlay</h3>
                     <p>Display an affirmation or intention-setting message on the flicker screen during your session. The receptive mental state induced by entrainment may enhance absorption of a positive message.</p>
                     <ul>
                         <li><strong>Display modes:</strong> Flash (synced with each pulse), Always (visible throughout), or Off</li>
@@ -776,7 +813,7 @@ QString HelpMenuDialog::getWhatsNewContent()
                 </div>
 
                 <div style="background-color: #fff3e0; border: 3px solid #e65100; padding: 15px; border-radius: 8px; margin: 15px 0;">
-                    <h3 style="color: #bf360c; text-align: center; margin-top: 0;">⚠️ CRITICAL — Exiting Fullscreen During Flicker</h3>
+                    <h3 style="color: #bf360c; text-align: center; margin-top: 0;">CRITICAL — Exiting Fullscreen During Flicker</h3>
                     <p style="font-weight: bold; color: #bf360c; text-align: center;">
                         When the flicker is running in fullscreen mode the screen may be difficult or disorienting to look at.<br>
                         You can exit fullscreen at any time using either of these methods:
@@ -792,10 +829,10 @@ QString HelpMenuDialog::getWhatsNewContent()
             </div>
 
             <div style="background-color: #f0f0f5; padding: 15px; border-radius: 8px; margin-bottom: 25px;">
-                <h2 style="color: #8e44ad; margin-top: 0;">⚡ Major Feature Additions - Version 1.3.0</h2>
+                <h2 style="color: #8e44ad; margin-top: 0;">Major Feature Additions - Version 1.3.0</h2>
 
                 <div style="background-color: #e8f4f8; padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #3498db;">
-                    <h3 style="color: #3498db; margin-top: 0;">🎵 Multi-Stage Session Manager</h3>
+                    <h3 style="color: #3498db; margin-top: 0;">Multi-Stage Session Manager</h3>
                     <p>A sophisticated system for creating and executing timed sequences of audio tones. Users define multiple stages with parameters (binaural/isochronic tones, frequencies, waveforms, duration, volume) that play sequentially.</p>
                     <ul>
                         <li><strong>Text-based stage definition</strong> using simple colon-separated format</li>
@@ -811,7 +848,7 @@ QString HelpMenuDialog::getWhatsNewContent()
                 </div>
 
                 <div style="background-color: #f0f8ff; padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #9b59b6;">
-                    <h3 style="color: #9b59b6; margin-top: 0;">📀 CUE Sheet Import Feature</h3>
+                    <h3 style="color: #9b59b6; margin-top: 0;">CUE Sheet Import Feature</h3>
                     <p>A tool for importing and navigating audio tracks defined in CUE sheet files. Parses standard CUE files to extract track information and enables direct playback of individual tracks within long audio files.</p>
                     <ul>
                         <li><strong>Load standard CUE files</strong> (.cue format) with associated audio files</li>
@@ -826,7 +863,7 @@ QString HelpMenuDialog::getWhatsNewContent()
                 </div>
 
                 <div style="background-color: #fff8e1; padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #e67e22;">
-                    <h3 style="color: #e67e22; margin-top: 0;">⏱️ Digital Seek Widget</h3>
+                    <h3 style="color: #e67e22; margin-top: 0;">Digital Seek Widget</h3>
                     <p>A precision navigation tool allowing users to jump to specific time positions within audio tracks.</p>
                     <ul>
                         <li>Enter exact time values in minutes:seconds format</li>
@@ -837,7 +874,7 @@ QString HelpMenuDialog::getWhatsNewContent()
                 </div>
 
                 <div style="background-color: #f0fff0; padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #2E8B57;">
-                    <h3 style="color: #2E8B57; margin-top: 0;">📂 Drag-and-Drop File Import</h3>
+                    <h3 style="color: #2E8B57; margin-top: 0;">Drag-and-Drop File Import</h3>
                     <p>Streamlined file import functionality for enhanced workflow efficiency.</p>
                     <ul>
                         <li>Drag music files directly from your file system into the application</li>
@@ -849,7 +886,7 @@ QString HelpMenuDialog::getWhatsNewContent()
             </div>
 
             <div style="background-color: #ecf0f1; padding: 15px; border-radius: 8px; margin-bottom: 25px;">
-                <h2 style="color: #2c3e50; margin-top: 0;">⚡ BinauralPlayer Goes Fully Dynamic - Version 1.2.0</h2>
+                <h2 style="color: #2c3e50; margin-top: 0;">BinauralPlayer Goes Fully Dynamic - Version 1.2.0</h2>
                 <p>Tone generation has been switched to a real-time dynamic engine.</p>
                 <ul>
                     <li>Buffered tone generation removed entirely.</li>
@@ -869,82 +906,82 @@ QString HelpMenuDialog::getWhatsNewContent()
                 for relaxation, focus, meditation, and atmospheric enhancement.</p>
             </div>
 
-            <h2 style="color: #2E8B57; border-bottom: 2px solid #2E8B57; padding-bottom: 5px;">🌿 Nature Toolbar Features</h2>
+            <h2 style="color: #2E8B57; border-bottom: 2px solid #2E8B57; padding-bottom: 5px;">Nature Toolbar Features</h2>
 
             <div style="margin: 20px 0;">
-                <h3 style="color: #2E8B57;">🎚️ 5-Channel Ambient Mixer</h3>
+                <h3 style="color: #2E8B57;">5-Channel Ambient Mixer</h3>
                 <p>Five independent sound players that can run simultaneously. Create complex sound environments
                 by mixing rain, forest, thunder, ocean, and more.</p>
 
-                <h3 style="color: #2E8B57;">🔘 Global Power Control</h3>
+                <h3 style="color: #2E8B57;">Global Power Control</h3>
                 <p>Single power button to enable/disable all nature sounds at once. Perfect for quick mute
                 or instant atmosphere activation.</p>
 
-                <h3 style="color: #2E8B57;">⏯️ Master Transport Controls</h3>
+                <h3 style="color: #2E8B57;">Master Transport Controls</h3>
                 <p>Play, pause, and stop ALL active nature sounds simultaneously. Color-coded buttons provide
                 clear visual feedback: green (play), orange (pause), red (stop).</p>
 
-                <h3 style="color: #2E8B57;">🎛️ Individual Player Buttons</h3>
+                <h3 style="color: #2E8B57;">Individual Player Buttons</h3>
                 <p>Each channel has its own button showing name, state, and status. Single-click toggles
                 play/pause. Color indicates status: green (playing), orange (paused), gray (disabled).</p>
 
-                <h3 style="color: #2E8B57;">📊 Master Volume Control</h3>
+                <h3 style="color: #2E8B57;">Master Volume Control</h3>
                 <p>Slider controls overall ambient sound level with perceptual volume curve for natural
                 human hearing response.</p>
             </div>
 
-            <h2 style="color: #9b59b6; border-bottom: 2px solid #9b59b6; padding-bottom: 5px;">💾 Preset System</h2>
+            <h2 style="color: #9b59b6; border-bottom: 2px solid #9b59b6; padding-bottom: 5px;">Preset System</h2>
 
             <div style="margin: 20px 0;">
-                <h3 style="color: #9b59b6;">💽 Save Configurations</h3>
+                <h3 style="color: #9b59b6;">Save Configurations</h3>
                 <p>Store complete sound setups including audio files, volumes, names, and enabled states.</p>
 
-                <h3 style="color: #9b59b6;">📂 Load Presets</h3>
+                <h3 style="color: #9b59b6;">Load Presets</h3>
                 <p>Quickly switch between saved environments like "Rainy Forest", "Ocean Waves", or "Focus Study".</p>
 
-                <h3 style="color: #9b59b6;">🔄 Reset Function</h3>
+                <h3 style="color: #9b59b6;">Reset Function</h3>
                 <p>One-click restoration to default settings with confirmation dialog for safety.</p>
             </div>
 
-            <h2 style="color: #e67e22; border-bottom: 2px solid #e67e22; padding-bottom: 5px;">🎵 Player Capabilities</h2>
+            <h2 style="color: #e67e22; border-bottom: 2px solid #e67e22; padding-bottom: 5px;">Player Capabilities</h2>
 
             <div style="margin: 20px 0;">
-                <h3 style="color: #e67e22;">🎧 Multi-Format Audio</h3>
+                <h3 style="color: #e67e22;">Multi-Format Audio</h3>
                 <p>Supports MP3, WAV, OGG, FLAC, and M4A files with integrated file browser.</p>
 
-                <h3 style="color: #e67e22;">🔤 Custom Naming</h3>
+                <h3 style="color: #e67e22;">Custom Naming</h3>
                 <p>Give each channel descriptive names up to 10 characters (e.g., "Rain", "Birds", "Thunder").</p>
 
-                <h3 style="color: #e67e22;">🔁 Auto-Repeat</h3>
+                <h3 style="color: #e67e22;">Auto-Repeat</h3>
                 <p>Loop audio files seamlessly for continuous background ambience.</p>
 
-                <h3 style="color: #e67e22;">📏 Individual Volume</h3>
+                <h3 style="color: #e67e22;">Individual Volume</h3>
                 <p>Fine-tune each channel's volume independently (0-100%).</p>
 
-                <h3 style="color: #e67e22;">⏱️ Progress Tracking</h3>
+                <h3 style="color: #e67e22;">Progress Tracking</h3>
                 <p>See playback progress with seek capability in detailed settings dialog.</p>
             </div>
 
-            <h2 style="color: #3498db; border-bottom: 2px solid #3498db; padding-bottom: 5px;">🖥️ Interface Design</h2>
+            <h2 style="color: #3498db; border-bottom: 2px solid #3498db; padding-bottom: 5px;">Interface Design</h2>
 
             <div style="margin: 20px 0;">
-                <h3 style="color: #3498db;">🎨 Non-Destructive Dialogs</h3>
+                <h3 style="color: #3498db;">Non-Destructive Dialogs</h3>
                 <p>Player settings dialogs hide instead of close, preserving your configuration state.</p>
 
-                <h3 style="color: #3498db;">👁️ Visual Status Indicators</h3>
+                <h3 style="color: #3498db;">Visual Status Indicators</h3>
                 <p>Buttons show real-time status with icons and colors for instant recognition.</p>
 
-                <h3 style="color: #3498db;">🔍 Tooltip Guidance</h3>
+                <h3 style="color: #3498db;">Tooltip Guidance</h3>
                 <p>All controls have descriptive tooltips explaining their function.</p>
 
-                <h3 style="color: #3498db;">📱 Responsive Layout</h3>
+                <h3 style="color: #3498db;">Responsive Layout</h3>
                 <p>Clean toolbar design that integrates seamlessly with existing interface.</p>
             </div>
 
-            <h2 style="color: #1abc9c; border-bottom: 2px solid #1abc9c; padding-bottom: 5px;">🚀 Quick Start Guide</h2>
+            <h2 style="color: #1abc9c; border-bottom: 2px solid #1abc9c; padding-bottom: 5px;">Quick Start Guide</h2>
 
             <div style="margin: 20px 0;">
-                <h3 style="color: #1abc9c;">🎯 Enhanced Workflow Integration</h3>
+                <h3 style="color: #1abc9c;">Enhanced Workflow Integration</h3>
                 <p>Combine all new features for powerful audio experiences:</p>
                 <ol style="margin-left: 20px; padding-left: 0;">
                     <li><strong>Drag-and-drop</strong> music files directly into the application</li>
@@ -955,7 +992,7 @@ QString HelpMenuDialog::getWhatsNewContent()
                     <li><strong>Enable visual entrainment</strong> via the ✦ button for full audiovisual stimulation</li>
                 </ol>
 
-                <h3 style="color: #1abc9c;">⚡ Getting Started</h3>
+                <h3 style="color: #1abc9c;">Getting Started</h3>
                 <ol style="margin-left: 20px; padding-left: 0;">
                     <li><strong>Power On</strong>: Click the ○ button to activate the system</li>
                     <li><strong>Add Sounds</strong>: Click any player button (P1-P5) to open settings</li>
@@ -965,10 +1002,10 @@ QString HelpMenuDialog::getWhatsNewContent()
                     <li><strong>Control Playback</strong>: Use master controls or click individual buttons</li>
                 </ol>
 
-                <h3 style="color: #1abc9c;">🎵 Download Nature Sounds</h3>
+                <h3 style="color: #1abc9c;">Download Nature Sounds</h3>
                 <p>Get high-quality, royalty-free ambient sounds from:</p>
                 <div style="background-color: #f0f9ff; padding: 15px; border-radius: 8px; border-left: 4px solid #3498db; margin: 15px 0;">
-                    <p><strong>🌐 Pixabay Sound Effects:</strong> <a href="https://pixabay.com/sound-effects/search/nature/" style="color: #3498db; text-decoration: none;">https://pixabay.com/sound-effects/search/nature/</a></p>
+                    <p><strong>Pixabay Sound Effects:</strong> <a href="https://pixabay.com/sound-effects/search/nature/" style="color: #3498db; text-decoration: none;">https://pixabay.com/sound-effects/search/nature/</a></p>
                     <p>After downloading, place your audio files in:</p>
                     <div style="background-color: #e8f4f8; padding: 10px; border-radius: 6px; font-family: monospace; margin: 10px 0;">
                         ~/Documents/BinauralPlayer/ambient-tracks/
@@ -981,10 +1018,10 @@ QString HelpMenuDialog::getWhatsNewContent()
                         <li>Streams & Rivers</li>
                         <li>Wind & Nature Ambience</li>
                     </ul>
-                    <p style="font-style: italic; margin-top: 10px;">💡 <strong>Tip:</strong> The ambient player will automatically look for files in this directory when browsing!</p>
+                    <p style="font-style: italic; margin-top: 10px;">Tip: The ambient player will automatically look for files in this directory when browsing!</p>
                 </div>
 
-                <h3 style="color: #1abc9c;">💡 Pro Tips</h3>
+                <h3 style="color: #1abc9c;">Pro Tips</h3>
                 <ul style="margin-left: 20px; padding-left: 0;">
                     <li>Start with 2-3 complementary sounds for best results</li>
                     <li>Save your favorite mixes as presets for quick access</li>
@@ -997,7 +1034,7 @@ QString HelpMenuDialog::getWhatsNewContent()
             </div>
 
             <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; text-align: center; margin-top: 30px;">
-                <h3 style="color: #2c3e50; margin-top: 0;">🌟 Transform Your Audio Environment</h3>
+                <h3 style="color: #2c3e50; margin-top: 0;">Transform Your Audio Environment</h3>
                 <p style="margin-bottom: 0;">BinauralPlayer now offers comprehensive audio control: from dynamic tone generation and programmable multi-stage sessions to ambient sound mixing, precise file navigation, and full OpenGL-powered audiovisual brainwave entrainment. Create your perfect audio environment for relaxation, focus, meditation, or therapeutic purposes with our complete toolkit!</p>
             </div>
         </div>
@@ -1011,7 +1048,7 @@ QString HelpMenuDialog::getShortcutsContent()
 QString HelpMenuDialog::getAboutContent() {
     return QString(R"(
         <div style="text-align: center; font-family: Arial, sans-serif;">
-            <h1 style="color: #2c3e50; margin-bottom: 10px;">🎧 BinauralPlayer</h1>
+            <h1 style="color: #2c3e50; margin-bottom: 10px;">BinauralPlayer</h1>
             <h3 style="color: #7f8f8d; margin-bottom: 20px;">Multimedia & Brainwave Audio Engine</h3>
             <p style="font-size: 16px; margin-bottom: 20px;">
                 A powerful desktop application for media playback, binaural and isochronic
@@ -1038,7 +1075,7 @@ QString HelpMenuDialog::getAboutContent() {
                     • Safety warnings and customizable UI elements
                 </p>
 
-                <p><strong style="color: #27ae60;">✓ Free for Linux on Flathub</strong></p>
+                <p><strong style="color: #27ae60;">Free for Linux on Flathub</strong></p>
 
                 <p><strong>Windows & macOS Binaries:</strong><br>
                 <a href="https://jnanadhakini.gumroad.com/l/ffllx">
@@ -1066,7 +1103,7 @@ QString HelpMenuDialog::getAboutContent() {
 
             <div style="margin: 20px 0;">
                 <p style="font-size: 14px; color: #7f8f8d;">
-                    Crafted with ❤️ for audio explorers, meditators, and frequency enthusiasts
+                    Crafted with for audio explorers, meditators, and frequency enthusiasts
                 </p>
             </div>
         </div>
@@ -1078,7 +1115,7 @@ QString HelpMenuDialog::getFeaturesContent()
 {
     return R"(
         <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #2c3e50;">
-            <h1 style="color: #8e44ad; text-align: center; margin-bottom: 20px;">🎧 BinauralPlayer Features</h1>
+            <h1 style="color: #8e44ad; text-align: center; margin-bottom: 20px;">BinauralPlayer Features</h1>
 
             <div style="background-color: #ecf0f1; padding: 15px; border-radius: 8px; margin-bottom: 25px;">
                 <h2 style="color: #2c3e50; margin-top: 0;">Multimedia Player & Brainwave Generator</h2>
@@ -1086,126 +1123,126 @@ QString HelpMenuDialog::getFeaturesContent()
                 binaural/isochronic tone generation for meditation, focus, and audio experimentation.</p>
             </div>
 
-            <h2 style="color: #3498db; border-bottom: 2px solid #3498db; padding-bottom: 5px;">🎵 Media Playback Features</h2>
+            <h2 style="color: #3498db; border-bottom: 2px solid #3498db; padding-bottom: 5px;">Media Playback Features</h2>
 
             <div style="margin: 20px 0;">
-                <h3 style="color: #e67e22;">🎶 Multi-Format Support</h3>
+                <h3 style="color: #e67e22;">Multi-Format Support</h3>
                 <p>Plays MP3, WAV, FLAC, OGG, M4A, MP4, M4V, AVI, MKV and more.</p>
 
-                <h3 style="color: #e67e22;">📑 Tabbed Playlists</h3>
+                <h3 style="color: #e67e22;">Tabbed Playlists</h3>
                 <p>Create, rename, and manage multiple playlists with a tabbed interface.</p>
 
-                <h3 style="color: #e67e22;">🎛 Advanced Controls</h3>
+                <h3 style="color: #e67e22;">Advanced Controls</h3>
                 <p>Shuffle, repeat, seek, mute, and real-time position tracking.</p>
 
-                <h3 style="color: #e67e22;">🌐 Streaming Support</h3>
+                <h3 style="color: #e67e22;">Streaming Support</h3>
                 <p>Play audio directly from HTTP/HTTPS URLs.</p>
 
-                <h3 style="color: #e67e22;">🔍 In-Playlist Search</h3>
+                <h3 style="color: #e67e22;">In-Playlist Search</h3>
                 <p>Quick filtering of tracks inside the active playlist.</p>
             </div>
 
-            <h2 style="color: #9b59b6; border-bottom: 2px solid #9b59b6; padding-bottom: 5px;">🧠 Brainwave Generation</h2>
+            <h2 style="color: #9b59b6; border-bottom: 2px solid #9b59b6; padding-bottom: 5px;">Brainwave Generation</h2>
 
             <div style="margin: 20px 0;">
-                <h3 style="color: #9b59b6;">🔊 Three Synthesis Modes</h3>
+                <h3 style="color: #9b59b6;">Three Synthesis Modes</h3>
                 <p>Binaural Beats (headphones), Isochronic Tones, and general Audio Generator mode.</p>
 
-                <h3 style="color: #9b59b6;">⚡ Real-Time Engine</h3>
+                <h3 style="color: #9b59b6;">Real-Time Engine</h3>
                 <p>DynamicEngine processes audio instantly with no pre-rendered buffers.</p>
 
-                <h3 style="color: #9b59b6;">📡 Full Frequency Control</h3>
+                <h3 style="color: #9b59b6;">Full Frequency Control</h3>
                 <p>Left/right channels independently adjustable from 20Hz–20kHz.</p>
 
-                <h3 style="color: #9b59b6;">📉 Multiple Waveforms</h3>
+                <h3 style="color: #9b59b6;">Multiple Waveforms</h3>
                 <p>Sine, Square, Triangle, and Sawtooth.</p>
 
-                <h3 style="color: #9b59b6;">⏱ Session Timer</h3>
+                <h3 style="color: #9b59b6;">Session Timer</h3>
                 <p>Optional auto-stop timer from 1–45 minutes with visual countdown.</p>
             </div>
 
-            <h2 style="color: #e67e22; border-bottom: 2px solid #e67e22; padding-bottom: 5px;">✦ Visual Brainwave Entrainment</h2>
+            <h2 style="color: #e67e22; border-bottom: 2px solid #e67e22; padding-bottom: 5px;">Visual Brainwave Entrainment</h2>
 
             <div style="margin: 20px 0;">
-                <h3 style="color: #e67e22;">🖥 OpenGL Flicker Engine</h3>
+                <h3 style="color: #e67e22;">OpenGL Flicker Engine</h3>
                 <p>The video screen pulses at the active beat frequency using a GPU-accelerated OpenGL renderer,
                 creating simultaneous audiovisual stimulation that reinforces the target brainwave band.</p>
 
-                <h3 style="color: #e67e22;">🎨 Customisable Flicker Colors</h3>
+                <h3 style="color: #e67e22;">Customisable Flicker Colors</h3>
                 <p>The on and off states of each flicker cycle can be set to any color via the color picker.
                 Choose classic high-contrast black and white, soft colored pulses, or any combination
                 that suits your session or protocol.</p>
 
-                <h3 style="color: #e67e22;">〰 Brightness Envelope</h3>
+                <h3 style="color: #e67e22;">Brightness Envelope</h3>
                 <p>The shape of each flicker pulse — sine (smooth fade), square (hard cut), or sawtooth
                 (gradual ramp with sharp reset) — syncs automatically to the active audio waveform.
                 An independent override lets you decouple the visual envelope from the audio waveform.</p>
 
-                <h3 style="color: #e67e22;">🔁 Frequency Sync with Override</h3>
+                <h3 style="color: #e67e22;">Frequency Sync with Override</h3>
                 <p>The flicker frequency locks to the active beat by default, with a live brainwave band
                 label (delta / theta / alpha / beta / gamma) always visible. An override spinbox
                 (0.5–100 Hz) allows the visual stimulus to target a different band than the audio —
                 useful for advanced cross-frequency AVE protocols.</p>
 
-                <h3 style="color: #e67e22;">💬 Subliminal Text Overlay</h3>
+                <h3 style="color: #e67e22;">Subliminal Text Overlay</h3>
                 <p>Display an affirmation or intention-setting message on the flicker screen during your
                 session. The receptive mental state induced by brainwave entrainment may enhance
                 absorption of the message. Three display modes are available: flash in sync with the
                 flicker pulse, always visible, or off. Font size, text foreground color, and background
                 color (with full alpha/transparency support) are all configurable via the color picker.</p>
 
-                <h3 style="color: #e67e22;">🎛 Control Panel</h3>
+                <h3 style="color: #e67e22;">Control Panel</h3>
                 <p>All visual entrainment settings are accessible from the ✦ button on the video toolbar.
                 The non-modal control panel stays open alongside your session so adjustments can be
                 made at any time without interrupting playback.</p>
 
-                <h3 style="color: #e67e22;">⚠ Safety</h3>
+                <h3 style="color: #e67e22;">Safety</h3>
                 <p>A photosensitivity warning is shown on first use. Intensity defaults to a conservative
                 level. Users with a history of photosensitive epilepsy, seizures, or light sensitivity
                 should not use this feature.</p>
             </div>
 
-            <h2 style="color: #27ae60; border-bottom: 2px solid #27ae60; padding-bottom: 5px;">📋 Playlist Management</h2>
+            <h2 style="color: #27ae60; border-bottom: 2px solid #27ae60; padding-bottom: 5px;">Playlist Management</h2>
 
             <div style="margin: 20px 0;">
-                <h3 style="color: #27ae60;">💽 JSON Playlist Storage</h3>
+                <h3 style="color: #27ae60;">JSON Playlist Storage</h3>
                 <p>Save and load playlists with persistent, readable JSON files.</p>
 
-                <h3 style="color: #27ae60;">🗑 Track Operations</h3>
+                <h3 style="color: #27ae60;">Track Operations</h3>
                 <p>Add, remove, clear tracks with smart selection tracking.</p>
             </div>
 
-            <h2 style="color: #e74c3c; border-bottom: 2px solid #e74c3c; padding-bottom: 5px;">🎨 User Interface</h2>
+            <h2 style="color: #e74c3c; border-bottom: 2px solid #e74c3c; padding-bottom: 5px;">User Interface</h2>
 
             <div style="margin: 20px 0;">
-                <h3 style="color: #e74c3c;">🧭 Custom Toolbars</h3>
+                <h3 style="color: #e74c3c;">Custom Toolbars</h3>
                 <p>Color-coded media/binaural/nature sections for clarity.</p>
 
-                <h3 style="color: #e74c3c;">📊 Split Status Bar</h3>
+                <h3 style="color: #e74c3c;">Split Status Bar</h3>
                 <p>Playback info on the left, binaural engine status on the right.</p>
 
-                <h3 style="color: #e74c3c;">🪟 Responsive Layout</h3>
+                <h3 style="color: #e74c3c;">Responsive Layout</h3>
                 <p>UI adapts cleanly to window resizing.</p>
 
-                <h3 style="color: #e74c3c;">⚠ Safety Notices</h3>
+                <h3 style="color: #e74c3c;">Safety Notices</h3>
                 <p>First-launch warning and optional brainwave activation warnings.</p>
             </div>
 
-            <h2 style="color: #1abc9c; border-bottom: 2px solid #1abc9c; padding-bottom: 5px;">🛠 Technical Highlights</h2>
+            <h2 style="color: #1abc9c; border-bottom: 2px solid #1abc9c; padding-bottom: 5px;">Technical Highlights</h2>
 
             <div style="margin: 20px 0;">
-                <h3 style="color: #1abc9c;">🎧 Dual Audio Pipelines</h3>
+                <h3 style="color: #1abc9c;">Dual Audio Pipelines</h3>
                 <p>Playback and generated audio run simultaneously with independent volume control.</p>
 
-                <h3 style="color: #1abc9c;">💾 Persistent Settings</h3>
+                <h3 style="color: #1abc9c;">Persistent Settings</h3>
                 <p>All preferences stored through QSettings.</p>
 
-                <h3 style="color: #1abc9c;">🧪 JSON Presets</h3>
+                <h3 style="color: #1abc9c;">JSON Presets</h3>
                 <p>Brainwave presets include metadata, versioning, and timestamps.</p>
             </div>
 
             <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; text-align: center; margin-top: 30px;">
-                <h3 style="color: #2c3e50; margin-top: 0;">🌟 Harmony of Technology & Sound</h3>
+                <h3 style="color: #2c3e50; margin-top: 0;">Harmony of Technology & Sound</h3>
                 <p style="margin-bottom: 0;">BinauralPlayer blends powerful multimedia features with real-time
                 audio synthesis for meditation, concentration, and audio experimentation.</p>
             </div>
@@ -1217,11 +1254,11 @@ QString HelpMenuDialog::getFeaturesContent()
 QString HelpMenuDialog::getInstructionsContent()
 {
     return R"(
-<div style=\"font-family: Arial, sans-serif; line-height: 1.6; color: #2c3e50;\">
-    <h1 style=\"color: #3498db; text-align: center; margin-bottom: 20px;\">🎧 How to Use BinauralPlayer</h1>
+<div style="font-family: Arial, sans-serif; line-height: 1.6; color: #2c3e50;">
+    <h1 style="color: #3498db; text-align: center; margin-bottom: 20px;">How to Use BinauralPlayer</h1>
 
 <div style="background-color: #ffeaa7; padding: 15px; border-radius: 8px; margin-bottom: 25px; border-left: 4px solid #fdcb6e;">
-        <h2 style="color: #2d3436; margin-top: 0;">⚠️ IMPORTANT: Enable the Toolbars</h2>
+        <h2 style="color: #2d3436; margin-top: 0;">IMPORTANT: Enable the Toolbars</h2>
         <p style="font-weight: bold; margin-bottom: 8px;">
             Before you start, make sure the <strong>Binaural Toolbar</strong> is turned ON:
         </p>
@@ -1230,30 +1267,30 @@ QString HelpMenuDialog::getInstructionsContent()
             <li>If you want to play ambient sounds, also enable the <strong>Ambience Toolbar</strong> using its ON/OFF button.</li>
         </ul>
         <p style="margin: 0; font-size: 14px; color: #636e72;">
-            💡 The toolbar buttons light up when active. Without these enabled, you won't hear anything!
+            The toolbar buttons light up when active. Without these enabled, you won't hear anything!
         </p>
     </div>
 
-    <div style=\"background-color: #ecf0f1; padding: 15px; border-radius: 8px; margin-bottom: 25px;\">
-        <h2 style=\"color: #2c3e50; margin-top: 0;\">🔊 Step 1: Choose Audio Type</h2>
+    <div style="background-color: #ecf0f1; padding: 15px; border-radius: 8px; margin-bottom: 25px;">
+        <h2 style="color: #2c3e50; margin-top: 0;">Step 1: Choose Audio Type</h2>
         <p>BinauralPlayer supports two forms of brainwave audio stimulation:</p>
-        <ul style=\"padding-left: 20px;\">
+        <ul style="padding-left: 20px;">
             <li><strong>Binaural Beats</strong> — requires headphones</li>
             <li><strong>Isochronic Tones</strong> — headphones optional</li>
         </ul>
         <p>Choose the mode from the interface before setting frequencies.</p>
     </div>
 
-    <h2 style=\"color: #9b59b6; border-bottom: 2px solid #9b59b6; padding-bottom: 5px;\">🎧 Step 2: Using Binaural Beats</h2>
+    <h2 style="color: #9b59b6; border-bottom: 2px solid #9b59b6; padding-bottom: 5px;">Step 2: Using Binaural Beats</h2>
 
-    <div style=\"background-color: #fff3cd; padding: 15px; border-radius: 8px; margin: 15px 0;\">
-        <h3 style=\"color: #856404; margin-top: 0;\">How Binaural Beats Work</h3>
+    <div style="background-color: #fff3cd; padding: 15px; border-radius: 8px; margin: 15px 0;">
+        <h3 style="color: #856404; margin-top: 0;">How Binaural Beats Work</h3>
         <p>Binaural beats are created when the left and right ears receive two <strong>slightly different</strong> frequencies. The brain perceives the difference as the beat.</p>
         <p><strong>Example:</strong> Left = 200 Hz, Right = 208 Hz → Beat = 8 Hz</p>
     </div>
 
-    <h3 style=\"color: #e67e22;\">Setting Up Binaural Beats:</h3>
-    <ol style=\"padding-left: 25px;\">
+    <h3 style="color: #e67e22;">Setting Up Binaural Beats:</h3>
+    <ol style="padding-left: 25px;">
         <li>Set <strong>Left Carrier Frequency</strong> (e.g., 200 Hz)</li>
         <li>Set <strong>Right Carrier Frequency</strong> to create the desired beat (e.g., 208 Hz → 8 Hz beat)</li>
         <li>Press <strong>Play</strong> to start the session</li>
@@ -1262,15 +1299,15 @@ QString HelpMenuDialog::getInstructionsContent()
     <p><strong>Tip:</strong> Binaural beats work best with high-quality headphones.</p>
     <p>You can safely use beats outside the 0–30 Hz range, such as 40–100 Hz for stimulation.</p>
 
-    <h2 style=\"color: #1abc9c; border-bottom: 2px solid #1abc9c; padding-bottom: 5px;\">🔵 Step 3: Using Isochronic Tones</h2>
+    <h2 style="color: #1abc9c; border-bottom: 2px solid #1abc9c; padding-bottom: 5px;">Step 3: Using Isochronic Tones</h2>
 
-    <div style=\"background-color: #e8f8f5; padding: 15px; border-radius: 8px; margin: 15px 0;\">
-        <h3 style=\"color: #117a65; margin-top: 0;\">How Isochronic Tones Work</h3>
+    <div style="background-color: #e8f8f5; padding: 15px; border-radius: 8px; margin: 15px 0;">
+        <h3 style="color: #117a65; margin-top: 0;">How Isochronic Tones Work</h3>
         <p>Isochronic tones use a <strong>single frequency</strong> that pulses on and off rapidly at the chosen beat frequency.</p>
     </div>
 
-    <h3 style=\"color: #e67e22;\">Setting Up Isochronic Tones:</h3>
-    <ol style=\"padding-left: 25px;\">
+    <h3 style="color: #e67e22;">Setting Up Isochronic Tones:</h3>
+    <ol style="padding-left: 25px;">
         <li>Set the <strong>Left Frequency</strong> (this will automatically copy to the right when you press Play)</li>
         <li>Enter the <strong>Isochronic Pulse Frequency</strong> (0–100 Hz)</li>
         <li>Press <strong>Play</strong> to generate pulses</li>
@@ -1279,12 +1316,12 @@ QString HelpMenuDialog::getInstructionsContent()
     <p><strong>Recommended:</strong> 0–30 Hz is best for brainwave entrainment.
     Headphones are optional for ISO — speakers often work great.</p>
 
-    <h2 style=\"color: #8e44ad; border-bottom: 2px solid #8e44ad; padding-bottom: 5px;\">🎛️ Step 4: Advanced Features</h2>
+    <h2 style="color: #8e44ad; border-bottom: 2px solid #8e44ad; padding-bottom: 5px;">Step 4: Advanced Features</h2>
 
-    <div style=\"background-color: #f5eef8; padding: 15px; border-radius: 8px; margin: 15px 0;\">
-        <h3 style=\"color: #8e44ad; margin-top: 0;\">📀 CUE Sheet Import</h3>
+    <div style="background-color: #f5eef8; padding: 15px; border-radius: 8px; margin: 15px 0;">
+        <h3 style="color: #8e44ad; margin-top: 0;">CUE Sheet Import</h3>
         <p>Load structured audio tracks from CUE files for albums, long meditation tracks, or audio books:</p>
-        <ol style=\"padding-left: 20px;\">
+        <ol style="padding-left: 20px;">
             <li>Click <strong>Load CUE File</strong> to import .cue sheet</li>
             <li>View track list with titles, performers, and start times</li>
             <li>Double-click any track to play from its exact start position</li>
@@ -1293,10 +1330,10 @@ QString HelpMenuDialog::getInstructionsContent()
         <p><strong>Tip:</strong> Great for navigating long audio files with multiple sections.</p>
     </div>
 
-    <div style=\"background-color: #e8f6f3; padding: 15px; border-radius: 8px; margin: 15px 0;\">
-        <h3 style=\"color: #1abc9c; margin-top: 0;\">🔄 Multi-Stage Session Manager</h3>
+    <div style="background-color: #e8f6f3; padding: 15px; border-radius: 8px; margin: 15px 0;">
+        <h3 style="color: #1abc9c; margin-top: 0;">Multi-Stage Session Manager</h3>
         <p>Create programmable sequences of audio stages for guided therapy sessions:</p>
-        <ol style=\"padding-left: 20px;\">
+        <ol style="padding-left: 20px;">
             <li>Enter stages in text format: <code>TYPE:LEFT:RIGHT:WAVE:DUR(min):VOL(%)</code></li>
             <li>Click <strong>Parse Stages</strong> to validate your session</li>
             <li>Save session as .txt or .bsession file for reuse</li>
@@ -1306,27 +1343,27 @@ QString HelpMenuDialog::getInstructionsContent()
         <p><strong>Example:</strong> <code>binaural:200:208:sine:10:15</code> creates a 10-minute binaural session with 8Hz beat</p>
     </div>
 
-    <div style=\"background-color: #fff8e1; padding: 15px; border-radius: 8px; margin: 15px 0;\">
-        <h3 style=\"color: #e67e22; margin-top: 0;\">⏱️ Digital Seek & Drag-and-Drop</h3>
-        <ul style=\"padding-left: 20px;\">
+    <div style="background-color: #fff8e1; padding: 15px; border-radius: 8px; margin: 15px 0;">
+        <h3 style="color: #e67e22; margin-top: 0;">Digital Seek & Drag-and-Drop</h3>
+        <ul style="padding-left: 20px;">
             <li><strong>Digital Seek:</strong> Enter exact time (MM:SS) to jump to any position in the track</li>
             <li><strong>Drag-and-Drop:</strong> Simply drag audio files from your computer directly into the application</li>
             <li><strong>Quick Import:</strong> No file dialogs needed for fast loading of music files</li>
         </ul>
     </div>
 
-    <h2 style=\"color: #e67e22; border-bottom: 2px solid #e67e22; padding-bottom: 5px;\">✦ Step 5: Visual Brainwave Entrainment</h2>
+    <h2 style="color: #e67e22; border-bottom: 2px solid #e67e22; padding-bottom: 5px;">Step 5: Visual Brainwave Entrainment</h2>
 
-    <div style=\"background-color: #fff8e1; padding: 15px; border-radius: 8px; margin: 15px 0;\">
-        <h3 style=\"color: #e67e22; margin-top: 0;\">What is Visual Entrainment?</h3>
+    <div style="background-color: #fff8e1; padding: 15px; border-radius: 8px; margin: 15px 0;">
+        <h3 style="color: #e67e22; margin-top: 0;">What is Visual Entrainment?</h3>
         <p>Visual entrainment reinforces your audio session by flickering the video screen at the same
         frequency as the playing beat. The combined audiovisual stimulus targets the same brainwave band
         simultaneously through both hearing and sight, which may deepen the entrainment effect.</p>
         <p><strong>Requires:</strong> The video player must be open (use the Video button on the main toolbar).</p>
     </div>
 
-    <h3 style=\"color: #e67e22;\">Getting Started:</h3>
-    <ol style=\"padding-left: 25px;\">
+    <h3 style="color: #e67e22;">Getting Started:</h3>
+    <ol style="padding-left: 25px;">
         <li>Start a binaural or isochronic session as normal</li>
         <li>Enable the video player using the <strong>Video</strong> button on the main toolbar</li>
         <li>Click the <strong>✦</strong> button on the video toolbar to open the Visual Stimulation panel</li>
@@ -1334,9 +1371,9 @@ QString HelpMenuDialog::getInstructionsContent()
         <li>Press <strong>▶ Start</strong> to begin the flicker — the video screen will pulse at the beat frequency</li>
     </ol>
 
-    <div style=\"background-color: #e8f6f3; padding: 15px; border-radius: 8px; margin: 15px 0;\">
-        <h3 style=\"color: #1abc9c; margin-top: 0;\">🎨 Customising the Flicker</h3>
-        <ul style=\"padding-left: 20px;\">
+    <div style="background-color: #e8f6f3; padding: 15px; border-radius: 8px; margin: 15px 0;">
+        <h3 style="color: #1abc9c; margin-top: 0;">Customising the Flicker</h3>
+        <ul style="padding-left: 20px;">
             <li><strong>On/Off colors:</strong> Click the color swatches to set the screen color at the peak and rest of each cycle. Try deep red on black for a warm low-stimulation session, or white on black for maximum contrast</li>
             <li><strong>Intensity:</strong> Controls peak brightness. Start low and increase gradually to a comfortable level</li>
             <li><strong>Envelope override:</strong> Check to decouple the flicker shape from the audio waveform and choose sine (smooth), square (hard cut), or sawtooth (ramp) independently</li>
@@ -1344,12 +1381,12 @@ QString HelpMenuDialog::getInstructionsContent()
         </ul>
     </div>
 
-    <div style=\"background-color: #f5eef8; padding: 15px; border-radius: 8px; margin: 15px 0;\">
-        <h3 style=\"color: #8e44ad; margin-top: 0;\">💬 Using the Subliminal Text Overlay</h3>
+    <div style="background-color: #f5eef8; padding: 15px; border-radius: 8px; margin: 15px 0;">
+        <h3 style="color: #8e44ad; margin-top: 0;">Using the Subliminal Text Overlay</h3>
         <p>The text overlay lets you display an affirmation or intention-setting message on the flicker screen
         during your session. The idea is that the receptive mental state induced by entrainment may enhance
         the absorption of a positive message.</p>
-        <ol style=\"padding-left: 20px;\">
+        <ol style="padding-left: 20px;">
             <li>Type your message in the <strong>Message</strong> box</li>
             <li>Choose a display mode: <strong>Flash</strong> (appears in sync with each pulse), <strong>Always</strong> (visible throughout), or <strong>Off</strong></li>
             <li>Set font size, foreground color, and background color (background supports full transparency via the alpha slider in the color picker)</li>
@@ -1359,28 +1396,28 @@ QString HelpMenuDialog::getInstructionsContent()
         genuinely subliminal effect — the message appears briefly at each pulse but is not consciously readable.</p>
     </div>
 
-    <div style=\"background-color: #fff3e0; border: 3px solid #e65100; padding: 20px; border-radius: 8px; margin: 15px 0;\">
-        <h3 style=\"color: #bf360c; text-align: center; margin-top: 0;\">⚠️ CRITICAL — Exiting Fullscreen During Flicker</h3>
-        <p style=\"font-weight: bold; color: #bf360c; text-align: center;\">
+    <div style="background-color: #fff3e0; border: 3px solid #e65100; padding: 20px; border-radius: 8px; margin: 15px 0;">
+        <h3 style="color: #bf360c; text-align: center; margin-top: 0;">CRITICAL — Exiting Fullscreen During Flicker</h3>
+        <p style="font-weight: bold; color: #bf360c; text-align: center;">
             When the flicker is running in fullscreen mode, the screen may be difficult or disorienting to look at.<br>
             You can exit fullscreen at any time using either of these methods:
         </p>
-        <ul style=\"padding-left: 20px; color: #bf360c;\">
+        <ul style="padding-left: 20px; color: #bf360c;">
             <li><strong>Press the Esc key</strong> — immediately exits fullscreen and stops the flicker</li>
             <li><strong>Right-click anywhere on the screen</strong> — opens the context menu, from which you can exit fullscreen or stop the session</li>
         </ul>
-        <p style=\"color: #bf360c;\"><strong>Remember these controls before entering fullscreen,</strong> especially if you are using high-intensity settings or are new to visual entrainment.</p>
+        <p style="color: #bf360c;"><strong>Remember these controls before entering fullscreen,</strong> especially if you are using high-intensity settings or are new to visual entrainment.</p>
     </div>
 
-    <h2 style=\"color: #e74c3c; border-bottom: 2px solid #e74c3c; padding-bottom: 5px;\">⚠️ Safety & Responsibility</h2>
+    <h2 style="color: #e74c3c; border-bottom: 2px solid #e74c3c; padding-bottom: 5px;">Safety & Responsibility</h2>
 
-    <div style=\"background-color: #ffebee; border: 2px solid #f44336; padding: 20px; border-radius: 8px; margin-bottom: 25px;\">
-        <h3 style=\"color: #c62828; text-align: center; margin-top: 0;\">Important Notice</h3>
-        <p style=\"font-weight: bold; text-align: center; color: #b71c1c;\">
+    <div style="background-color: #ffebee; border: 2px solid #f44336; padding: 20px; border-radius: 8px; margin-bottom: 25px;">
+        <h3 style="color: #c62828; text-align: center; margin-top: 0;">Important Notice</h3>
+        <p style="font-weight: bold; text-align: center; color: #b71c1c;">
             Brainwave entrainment affects your mental state.<br>
             Use responsibly and discontinue immediately if you feel discomfort.
         </p>
-        <ul style=\"padding-left: 20px; color: #b71c1c;\">
+        <ul style="padding-left: 20px; color: #b71c1c;">
             <li>Always start at a <strong>low or comfortable volume</strong></li>
             <li>Do NOT use while driving, operating machinery, or in unsafe environments</li>
             <li>If you have epilepsy or neurological conditions, consult a doctor first</li>
@@ -1389,9 +1426,9 @@ QString HelpMenuDialog::getInstructionsContent()
         </ul>
     </div>
 
-    <h2 style=\"color: #f39c12; border-bottom: 2px solid #f39c12; padding-bottom: 5px;\">🎯 Recommended Beat Ranges</h2>
+    <h2 style="color: #f39c12; border-bottom: 2px solid #f39c12; padding-bottom: 5px;">Recommended Beat Ranges</h2>
 
-    <ul style=\"padding-left: 20px;\">
+    <ul style="padding-left: 20px;">
         <li><strong>0.5–4 Hz (Delta):</strong> Deep sleep</li>
         <li><strong>4–8 Hz (Theta):</strong> Meditation & trance</li>
         <li><strong>8–14 Hz (Alpha):</strong> Relaxation & creativity</li>
@@ -1399,9 +1436,9 @@ QString HelpMenuDialog::getInstructionsContent()
         <li><strong>30–60+ Hz (Gamma):</strong> High cognition (binaural only)</li>
     </ul>
 
-    <div style=\"text-align: center; margin: 30px 0; padding: 20px; background-color: #f8f9fa; border-radius: 8px;\">
-        <h3 style=\"color: #495057; margin-top: 0;\">🌟 Complete Audio Toolkit</h3>
-        <p style=\"margin-bottom: 0;\">BinauralPlayer offers everything from basic binaural beats to advanced multi-stage sessions, structured audio navigation, and now full audiovisual brainwave entrainment. Combine features for powerful meditation, focus, or therapeutic experiences. Always use responsibly and enjoy your journey into audio-based brainwave entrainment.</p>
+    <div style="text-align: center; margin: 30px 0; padding: 20px; background-color: #f8f9fa; border-radius: 8px;">
+        <h3 style="color: #495057; margin-top: 0;">Complete Audio Toolkit</h3>
+        <p style="margin-bottom: 0;">BinauralPlayer offers everything from basic binaural beats to advanced multi-stage sessions, structured audio navigation, and now full audiovisual brainwave entrainment. Combine features for powerful meditation, focus, or therapeutic experiences. Always use responsibly and enjoy your journey into audio-based brainwave entrainment.</p>
     </div>
 </div>
     )";
@@ -1411,14 +1448,14 @@ QString HelpMenuDialog::getSecurityContent()
 {
     return R"(
         <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #2c3e50;">
-            <h1 style="color: #e74c3c; text-align: center; margin-bottom: 20px;">🔐 Security Features</h1>
+            <h1 style="color: #e74c3c; text-align: center; margin-bottom: 20px;">Security Features</h1>
 
             <div style="background-color: #ecf0f1; padding: 15px; border-radius: 8px; margin-bottom: 25px;">
                 <h2 style="color: #2c3e50; margin-top: 0;">Master Password Protection</h2>
                 <p>Jasmine includes a comprehensive security system to protect your saved websites, sessions, and sensitive data.</p>
             </div>
 
-            <h2 style="color: #3498db; border-bottom: 2px solid #3498db; padding-bottom: 5px;">🛡️ Password Protection Features</h2>
+            <h2 style="color: #3498db; border-bottom: 2px solid #3498db; padding-bottom: 5px;">Password Protection Features</h2>
 
             <div style="margin: 20px 0;">
                 <ul style="margin: 10px 0; padding-left: 20px;">
@@ -1429,7 +1466,7 @@ QString HelpMenuDialog::getSecurityContent()
                 </ul>
             </div>
 
-            <h2 style="color: #27ae60; border-bottom: 2px solid #27ae60; padding-bottom: 5px;">🔧 How to Enable Password Protection</h2>
+            <h2 style="color: #27ae60; border-bottom: 2px solid #27ae60; padding-bottom: 5px;">How to Enable Password Protection</h2>
 
             <div style="margin: 20px 0;">
                 <ol style="margin: 10px 0; padding-left: 25px;">
@@ -1442,7 +1479,7 @@ QString HelpMenuDialog::getSecurityContent()
             </div>
 
             <div style="background-color: #fff3cd; padding: 15px; border-radius: 8px; margin: 15px 0;">
-                <h3 style="color: #856404; margin-top: 0;">⚠️ Important Security Notes</h3>
+                <h3 style="color: #856404; margin-top: 0;">Important Security Notes</h3>
                 <ul style="margin: 10px 0; padding-left: 20px;">
                     <li>Choose a strong, memorable password</li>
                     <li>Write it down in a safe place</li>
@@ -1451,7 +1488,7 @@ QString HelpMenuDialog::getSecurityContent()
                 </ul>
             </div>
 
-            <h2 style="color: #f39c12; border-bottom: 2px solid #f39c12; padding-bottom: 5px;">🔄 Changing Your Master Password</h2>
+            <h2 style="color: #f39c12; border-bottom: 2px solid #f39c12; padding-bottom: 5px;">Changing Your Master Password</h2>
 
             <div style="margin: 20px 0;">
                 <ol style="margin: 10px 0; padding-left: 25px;">
@@ -1462,7 +1499,7 @@ QString HelpMenuDialog::getSecurityContent()
                 </ol>
             </div>
 
-            <h2 style="color: #e74c3c; border-bottom: 2px solid #e74c3c; padding-bottom: 5px;">🚨 Failed Login Protection</h2>
+            <h2 style="color: #e74c3c; border-bottom: 2px solid #e74c3c; padding-bottom: 5px;">Failed Login Protection</h2>
 
             <div style="margin: 20px 0;">
                 <p><strong>Maximum 5 password attempts allowed</strong></p>
@@ -1473,7 +1510,7 @@ QString HelpMenuDialog::getSecurityContent()
                 </ul>
             </div>
 
-            <h2 style="color: #9b59b6; border-bottom: 2px solid #9b59b6; padding-bottom: 5px;">🔄 Factory Reset</h2>
+            <h2 style="color: #9b59b6; border-bottom: 2px solid #9b59b6; padding-bottom: 5px;">Factory Reset</h2>
 
             <div style="margin: 20px 0;">
                 <p>If you forget your master password, factory reset will:</p>
@@ -1485,7 +1522,7 @@ QString HelpMenuDialog::getSecurityContent()
                 </ul>
             </div>
 
-            <h2 style="color: #1abc9c; border-bottom: 2px solid #1abc9c; padding-bottom: 5px;">⚙️ Security Menu Options</h2>
+            <h2 style="color: #1abc9c; border-bottom: 2px solid #1abc9c; padding-bottom: 5px;">Security Menu Options</h2>
 
             <div style="margin: 20px 0;">
                 <ul style="margin: 10px 0; padding-left: 20px;">
@@ -1494,7 +1531,7 @@ QString HelpMenuDialog::getSecurityContent()
                 </ul>
             </div>
 
-            <h2 style="color: #e67e22; border-bottom: 2px solid #e67e22; padding-bottom: 5px;">🔒 Protection States</h2>
+            <h2 style="color: #e67e22; border-bottom: 2px solid #e67e22; padding-bottom: 5px;">Protection States</h2>
 
             <div style="margin: 20px 0;">
                 <h3 style="color: #d35400;">When Password Protection is Active:</h3>
@@ -1512,7 +1549,7 @@ QString HelpMenuDialog::getSecurityContent()
                 </ul>
             </div>
 
-            <h2 style="color: #16a085; border-bottom: 2px solid #16a085; padding-bottom: 5px;">💡 Best Practices</h2>
+            <h2 style="color: #16a085; border-bottom: 2px solid #16a085; padding-bottom: 5px;">Best Practices</h2>
 
             <div style="margin: 20px 0;">
                 <ul style="margin: 10px 0; padding-left: 20px;">
@@ -1524,7 +1561,7 @@ QString HelpMenuDialog::getSecurityContent()
                 </ul>
             </div>
 
-            <h2 style="color: #8e44ad; border-bottom: 2px solid #8e44ad; padding-bottom: 5px;">🔐 Security Implementation</h2>
+            <h2 style="color: #8e44ad; border-bottom: 2px solid #8e44ad; padding-bottom: 5px;">Security Implementation</h2>
 
             <div style="margin: 20px 0;">
                 <ul style="margin: 10px 0; padding-left: 20px;">
@@ -1536,7 +1573,7 @@ QString HelpMenuDialog::getSecurityContent()
             </div>
 
             <div style="background-color: #d1ecf1; padding: 15px; border-radius: 8px; margin: 25px 0;">
-                <h3 style="color: #0c5460; margin-top: 0;">🛡️ Complete Protection</h3>
+                <h3 style="color: #0c5460; margin-top: 0;">Complete Protection</h3>
                 <p style="margin-bottom: 0;">This security system ensures your browsing profiles, saved websites, sessions, and any stored login references remain protected even if someone gains access to your computer.</p>
             </div>
         </div>
@@ -1547,20 +1584,20 @@ QString HelpMenuDialog::getTwoFAContent()
 {
     return R"(
         <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #2c3e50;">
-            <h1 style="color: #e74c3c; text-align: center; margin-bottom: 20px;">🔐 2FA Code Generator</h1>
+            <h1 style="color: #e74c3c; text-align: center; margin-bottom: 20px;">2FA Code Generator</h1>
 
             <div style="background-color: #ecf0f1; padding: 15px; border-radius: 8px; margin-bottom: 25px;">
                 <h2 style="color: #2c3e50; margin-top: 0;">Two-Factor Authentication Manager</h2>
                 <p>Jasmine includes a built-in Two-Factor Authentication (2FA) code generator that helps you manage and generate time-based one-time passwords (TOTP) for your accounts.</p>
             </div>
 
-            <h2 style="color: #3498db; border-bottom: 2px solid #3498db; padding-bottom: 5px;">❓ What is 2FA?</h2>
+            <h2 style="color: #3498db; border-bottom: 2px solid #3498db; padding-bottom: 5px;">What is 2FA?</h2>
 
             <div style="margin: 20px 0;">
                 <p>Two-Factor Authentication adds an extra layer of security to your accounts by requiring a second form of verification beyond just your password. This usually involves a 6-digit code that changes every 30 seconds.</p>
             </div>
 
-            <h2 style="color: #27ae60; border-bottom: 2px solid #27ae60; padding-bottom: 5px;">🚀 Key Features</h2>
+            <h2 style="color: #27ae60; border-bottom: 2px solid #27ae60; padding-bottom: 5px;">Key Features</h2>
 
             <div style="margin: 20px 0;">
                 <ul style="margin: 10px 0; padding-left: 20px;">
@@ -1573,7 +1610,7 @@ QString HelpMenuDialog::getTwoFAContent()
                 </ul>
             </div>
 
-            <h2 style="color: #f39c12; border-bottom: 2px solid #f39c12; padding-bottom: 5px;">📱 How to Access</h2>
+            <h2 style="color: #f39c12; border-bottom: 2px solid #f39c12; padding-bottom: 5px;">How to Access</h2>
 
             <div style="margin: 20px 0;">
                 <ul style="margin: 10px 0; padding-left: 20px;">
@@ -1583,7 +1620,7 @@ QString HelpMenuDialog::getTwoFAContent()
                 </ul>
             </div>
 
-            <h2 style="color: #9b59b6; border-bottom: 2px solid #9b59b6; padding-bottom: 5px;">➕ Adding 2FA Accounts</h2>
+            <h2 style="color: #9b59b6; border-bottom: 2px solid #9b59b6; padding-bottom: 5px;">Adding 2FA Accounts</h2>
 
             <div style="margin: 20px 0;">
                 <ol style="margin: 10px 0; padding-left: 25px;">
@@ -1596,7 +1633,7 @@ QString HelpMenuDialog::getTwoFAContent()
             </div>
 
             <div style="background-color: #fff3cd; padding: 15px; border-radius: 8px; margin: 15px 0;">
-                <h3 style="color: #856404; margin-top: 0;">🔍 Where to Find Secret Keys</h3>
+                <h3 style="color: #856404; margin-top: 0;">Where to Find Secret Keys</h3>
                 <p>When enabling 2FA on websites, they typically show:</p>
                 <ul style="margin: 10px 0; padding-left: 20px;">
                     <li>A QR code for mobile apps</li>
@@ -1605,7 +1642,7 @@ QString HelpMenuDialog::getTwoFAContent()
                 </ul>
             </div>
 
-            <h2 style="color: #e74c3c; border-bottom: 2px solid #e74c3c; padding-bottom: 5px;">🔢 Using Generated Codes</h2>
+            <h2 style="color: #e74c3c; border-bottom: 2px solid #e74c3c; padding-bottom: 5px;">Using Generated Codes</h2>
 
             <div style="margin: 20px 0;">
                 <ul style="margin: 10px 0; padding-left: 20px;">
@@ -1617,7 +1654,7 @@ QString HelpMenuDialog::getTwoFAContent()
                 </ul>
             </div>
 
-            <h2 style="color: #1abc9c; border-bottom: 2px solid #1abc9c; padding-bottom: 5px;">👁️ Visual Indicators</h2>
+            <h2 style="color: #1abc9c; border-bottom: 2px solid #1abc9c; padding-bottom: 5px;">Visual Indicators</h2>
 
             <div style="margin: 20px 0;">
                 <ul style="margin: 10px 0; padding-left: 20px;">
@@ -1628,7 +1665,7 @@ QString HelpMenuDialog::getTwoFAContent()
                 </ul>
             </div>
 
-            <h2 style="color: #e67e22; border-bottom: 2px solid #e67e22; padding-bottom: 5px;">⚙️ Account Management</h2>
+            <h2 style="color: #e67e22; border-bottom: 2px solid #e67e22; padding-bottom: 5px;">Account Management</h2>
 
             <div style="margin: 20px 0;">
                 <ul style="margin: 10px 0; padding-left: 20px;">
@@ -1639,7 +1676,7 @@ QString HelpMenuDialog::getTwoFAContent()
                 </ul>
             </div>
 
-            <h2 style="color: #8e44ad; border-bottom: 2px solid #8e44ad; padding-bottom: 5px;">🔒 Security Notes</h2>
+            <h2 style="color: #8e44ad; border-bottom: 2px solid #8e44ad; padding-bottom: 5px;">Security Notes</h2>
 
             <div style="margin: 20px 0;">
                 <ul style="margin: 10px 0; padding-left: 20px;">
@@ -1650,7 +1687,7 @@ QString HelpMenuDialog::getTwoFAContent()
                 </ul>
             </div>
 
-            <h2 style="color: #16a085; border-bottom: 2px solid #16a085; padding-bottom: 5px;">🌐 Supported Services</h2>
+            <h2 style="color: #16a085; border-bottom: 2px solid #16a085; padding-bottom: 5px;">Supported Services</h2>
 
             <div style="margin: 20px 0;">
                 <p>Works with any service that supports TOTP 2FA:</p>
@@ -1665,7 +1702,7 @@ QString HelpMenuDialog::getTwoFAContent()
                 </ul>
             </div>
 
-            <h2 style="color: #d35400; border-bottom: 2px solid #d35400; padding-bottom: 5px;">📋 Workflow Example</h2>
+            <h2 style="color: #d35400; border-bottom: 2px solid #d35400; padding-bottom: 5px;">Workflow Example</h2>
 
             <div style="margin: 20px 0;">
                 <ol style="margin: 10px 0; padding-left: 25px;">
@@ -1678,7 +1715,7 @@ QString HelpMenuDialog::getTwoFAContent()
                 </ol>
             </div>
 
-            <h2 style="color: #7b1fa2; border-bottom: 2px solid #7b1fa2; padding-bottom: 5px;">💡 Benefits Over Mobile Apps</h2>
+            <h2 style="color: #7b1fa2; border-bottom: 2px solid #7b1fa2; padding-bottom: 5px;">Benefits Over Mobile Apps</h2>
 
             <div style="margin: 20px 0;">
                 <ul style="margin: 10px 0; padding-left: 20px;">
@@ -1690,7 +1727,7 @@ QString HelpMenuDialog::getTwoFAContent()
                 </ul>
             </div>
 
-            <h2 style="color: #388e3c; border-bottom: 2px solid #388e3c; padding-bottom: 5px;">⏰ Time Synchronization</h2>
+            <h2 style="color: #388e3c; border-bottom: 2px solid #388e3c; padding-bottom: 5px;">Time Synchronization</h2>
 
             <div style="margin: 20px 0;">
                 <ul style="margin: 10px 0; padding-left: 20px;">
@@ -1702,7 +1739,7 @@ QString HelpMenuDialog::getTwoFAContent()
             </div>
 
             <div style="background-color: #d1ecf1; padding: 15px; border-radius: 8px; margin: 25px 0;">
-                <h3 style="color: #0c5460; margin-top: 0;">🌟 Integrated Security</h3>
+                <h3 style="color: #0c5460; margin-top: 0;">Integrated Security</h3>
                 <p style="margin-bottom: 0;">This 2FA manager eliminates the need for separate authenticator apps while providing the same security benefits, making it convenient to access your two-factor codes directly within Jasmine.</p>
             </div>
         </div>
@@ -1713,14 +1750,14 @@ QString HelpMenuDialog::getDataManagementContent()
 {
     return R"(
         <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #2c3e50;">
-            <h1 style="color: #e74c3c; text-align: center; margin-bottom: 20px;">🗂️ Data Management & Privacy</h1>
+            <h1 style="color: #e74c3c; text-align: center; margin-bottom: 20px;">Data Management & Privacy</h1>
 
             <div style="background-color: #ecf0f1; padding: 15px; border-radius: 8px; margin-bottom: 25px;">
                 <h2 style="color: #2c3e50; margin-top: 0;">Session & Profile Data Management</h2>
                 <p>Jasmine provides comprehensive tools to manage your browsing data, sessions, and privacy settings. Control what data is stored and when to clear it.</p>
             </div>
 
-            <h2 style="color: #3498db; border-bottom: 2px solid #3498db; padding-bottom: 5px;">🧹 Clean Current Session Data</h2>
+            <h2 style="color: #3498db; border-bottom: 2px solid #3498db; padding-bottom: 5px;">Clean Current Session Data</h2>
 
             <div style="margin: 20px 0;">
                 <p><strong>What it does:</strong></p>
@@ -1743,7 +1780,7 @@ QString HelpMenuDialog::getDataManagementContent()
                 </ul>
             </div>
 
-            <h2 style="color: #27ae60; border-bottom: 2px solid #27ae60; padding-bottom: 5px;">👥 Clean Shared Profile Data</h2>
+            <h2 style="color: #27ae60; border-bottom: 2px solid #27ae60; padding-bottom: 5px;">Clean Shared Profile Data</h2>
 
             <div style="margin: 20px 0;">
                 <p><strong>What it does:</strong></p>
@@ -1771,7 +1808,7 @@ QString HelpMenuDialog::getDataManagementContent()
                 </ul>
             </div>
 
-            <h2 style="color: #e74c3c; border-bottom: 2px solid #e74c3c; padding-bottom: 5px;">🏭 Restore Factory Defaults</h2>
+            <h2 style="color: #e74c3c; border-bottom: 2px solid #e74c3c; padding-bottom: 5px;">Restore Factory Defaults</h2>
 
             <div style="margin: 20px 0;">
                 <p><strong>What it does:</strong></p>
@@ -1790,7 +1827,7 @@ QString HelpMenuDialog::getDataManagementContent()
             </div>
 
             <div style="background-color: #f8d7da; padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #dc3545;">
-                <h3 style="color: #721c24; margin-top: 0;">⚠️ Factory Reset Warning</h3>
+                <h3 style="color: #721c24; margin-top: 0;">Factory Reset Warning</h3>
                 <p style="margin-bottom: 0;"><strong>This action cannot be undone!</strong></p>
                 <ul style="margin: 10px 0; padding-left: 20px;">
                     <li>All your saved data will be permanently lost</li>
@@ -1800,7 +1837,7 @@ QString HelpMenuDialog::getDataManagementContent()
                 </ul>
             </div>
 
-            <h2 style="color: #f39c12; border-bottom: 2px solid #f39c12; padding-bottom: 5px;">📍 How to Access These Features</h2>
+            <h2 style="color: #f39c12; border-bottom: 2px solid #f39c12; padding-bottom: 5px;">How to Access These Features</h2>
 
             <div style="margin: 20px 0;">
                 <p>All data management options are located in the <strong>Sessions</strong> menu:</p>
@@ -1812,7 +1849,7 @@ QString HelpMenuDialog::getDataManagementContent()
                 </ol>
             </div>
 
-            <h2 style="color: #9b59b6; border-bottom: 2px solid #9b59b6; padding-bottom: 5px;">🔄 Data Types Explained</h2>
+            <h2 style="color: #9b59b6; border-bottom: 2px solid #9b59b6; padding-bottom: 5px;">Data Types Explained</h2>
 
             <div style="margin: 20px 0;">
                 <h3 style="color: #8e44ad;">Cookies</h3>
@@ -1837,7 +1874,7 @@ QString HelpMenuDialog::getDataManagementContent()
                 </ul>
             </div>
 
-            <h2 style="color: #1abc9c; border-bottom: 2px solid #1abc9c; padding-bottom: 5px;">🛡️ Privacy Recommendations</h2>
+            <h2 style="color: #1abc9c; border-bottom: 2px solid #1abc9c; padding-bottom: 5px;">Privacy Recommendations</h2>
 
             <div style="margin: 20px 0;">
                 <h3 style="color: #16a085;">Regular Cleaning (Weekly)</h3>
@@ -1862,7 +1899,7 @@ QString HelpMenuDialog::getDataManagementContent()
                 </ul>
             </div>
 
-            <h2 style="color: #e67e22; border-bottom: 2px solid #e67e22; padding-bottom: 5px;">💡 Smart Usage Tips</h2>
+            <h2 style="color: #e67e22; border-bottom: 2px solid #e67e22; padding-bottom: 5px;">Smart Usage Tips</h2>
 
             <div style="margin: 20px 0;">
                 <ul style="margin: 10px 0; padding-left: 20px;">
@@ -1874,7 +1911,7 @@ QString HelpMenuDialog::getDataManagementContent()
                 </ul>
             </div>
 
-            <h2 style="color: #8e44ad; border-bottom: 2px solid #8e44ad; padding-bottom: 5px;">⚡ Performance Benefits</h2>
+            <h2 style="color: #8e44ad; border-bottom: 2px solid #8e44ad; padding-bottom: 5px;">Performance Benefits</h2>
 
             <div style="margin: 20px 0;">
                 <p><strong>Regular data cleaning provides:</strong></p>
@@ -1888,7 +1925,7 @@ QString HelpMenuDialog::getDataManagementContent()
             </div>
 
             <div style="background-color: #d1ecf1; padding: 15px; border-radius: 8px; margin: 25px 0;">
-                <h3 style="color: #0c5460; margin-top: 0;">🎯 Choose the Right Tool</h3>
+                <h3 style="color: #0c5460; margin-top: 0;">Choose the Right Tool</h3>
                 <p style="margin-bottom: 0;">
                     <strong>Shared Profile Clean:</strong> For routine maintenance<br>
                     <strong>Current Session Clean:</strong> For thorough privacy cleaning<br>
@@ -1903,14 +1940,14 @@ QString HelpMenuDialog::getDownloadManagerContent()
 {
     return R"(
         <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #2c3e50;">
-            <h1 style="color: #e74c3c; text-align: center; margin-bottom: 20px;">📥 Download Manager</h1>
+            <h1 style="color: #e74c3c; text-align: center; margin-bottom: 20px;">Download Manager</h1>
 
             <div style="background-color: #ecf0f1; padding: 15px; border-radius: 8px; margin-bottom: 25px;">
                 <h2 style="color: #2c3e50; margin-top: 0;">Integrated Download Management</h2>
                 <p>Jasmine includes a comprehensive download manager that handles all your file downloads with progress tracking, organization, and easy access to downloaded files.</p>
             </div>
 
-            <h2 style="color: #3498db; border-bottom: 2px solid #3498db; padding-bottom: 5px;">🚀 Key Features</h2>
+            <h2 style="color: #3498db; border-bottom: 2px solid #3498db; padding-bottom: 5px;">Key Features</h2>
 
             <div style="margin: 20px 0;">
                 <ul style="margin: 10px 0; padding-left: 20px;">
@@ -1925,7 +1962,7 @@ QString HelpMenuDialog::getDownloadManagerContent()
                 </ul>
             </div>
 
-            <h2 style="color: #27ae60; border-bottom: 2px solid #27ae60; padding-bottom: 5px;">📍 How to Access Downloads</h2>
+            <h2 style="color: #27ae60; border-bottom: 2px solid #27ae60; padding-bottom: 5px;">How to Access Downloads</h2>
 
             <div style="margin: 20px 0;">
                 <h3 style="color: #229954;">Opening the Download Manager</h3>
@@ -1943,7 +1980,7 @@ QString HelpMenuDialog::getDownloadManagerContent()
                 </ul>
             </div>
 
-            <h2 style="color: #f39c12; border-bottom: 2px solid #f39c12; padding-bottom: 5px;">📊 Download Progress Tracking</h2>
+            <h2 style="color: #f39c12; border-bottom: 2px solid #f39c12; padding-bottom: 5px;">Download Progress Tracking</h2>
 
             <div style="margin: 20px 0;">
                 <h3 style="color: #d68910;">Real-time Information</h3>
@@ -1964,7 +2001,7 @@ QString HelpMenuDialog::getDownloadManagerContent()
                 </ul>
             </div>
 
-            <h2 style="color: #9b59b6; border-bottom: 2px solid #9b59b6; padding-bottom: 5px;">🎛️ Download Controls</h2>
+            <h2 style="color: #9b59b6; border-bottom: 2px solid #9b59b6; padding-bottom: 5px;">Download Controls</h2>
 
             <div style="margin: 20px 0;">
                 <h3 style="color: #8e44ad;">During Download</h3>
@@ -1982,7 +2019,7 @@ QString HelpMenuDialog::getDownloadManagerContent()
                 </ul>
             </div>
 
-            <h2 style="color: #1abc9c; border-bottom: 2px solid #1abc9c; padding-bottom: 5px;">🗂️ File Organization</h2>
+            <h2 style="color: #1abc9c; border-bottom: 2px solid #1abc9c; padding-bottom: 5px;">File Organization</h2>
 
             <div style="margin: 20px 0;">
                 <h3 style="color: #16a085;">Automatic Organization</h3>
@@ -2001,7 +2038,7 @@ QString HelpMenuDialog::getDownloadManagerContent()
                 </ul>
             </div>
 
-            <h2 style="color: #e67e22; border-bottom: 2px solid #e67e22; padding-bottom: 5px;">🧹 Download Management</h2>
+            <h2 style="color: #e67e22; border-bottom: 2px solid #e67e22; padding-bottom: 5px;">Download Management</h2>
 
             <div style="margin: 20px 0;">
                 <h3 style="color: #d35400;">Window Controls</h3>
@@ -2020,7 +2057,7 @@ QString HelpMenuDialog::getDownloadManagerContent()
                 </ul>
             </div>
 
-            <h2 style="color: #8e44ad; border-bottom: 2px solid #8e44ad; padding-bottom: 5px;">💡 Download States</h2>
+            <h2 style="color: #8e44ad; border-bottom: 2px solid #8e44ad; padding-bottom: 5px;">Download States</h2>
 
             <div style="margin: 20px 0;">
                 <h3 style="color: #7b1fa2;">Active Downloads</h3>
@@ -2040,7 +2077,7 @@ QString HelpMenuDialog::getDownloadManagerContent()
                 </ul>
             </div>
 
-            <h2 style="color: #d32f2f; border-bottom: 2px solid #d32f2f; padding-bottom: 5px;">⚡ Performance Features</h2>
+            <h2 style="color: #d32f2f; border-bottom: 2px solid #d32f2f; padding-bottom: 5px;">Performance Features</h2>
 
             <div style="margin: 20px 0;">
                 <ul style="margin: 10px 0; padding-left: 20px;">
@@ -2052,7 +2089,7 @@ QString HelpMenuDialog::getDownloadManagerContent()
                 </ul>
             </div>
 
-            <h2 style="color: #388e3c; border-bottom: 2px solid #388e3c; padding-bottom: 5px;">🔧 Technical Details</h2>
+            <h2 style="color: #388e3c; border-bottom: 2px solid #388e3c; padding-bottom: 5px;">Technical Details</h2>
 
             <div style="margin: 20px 0;">
                 <h3 style="color: #2e7d32;">File Size Formatting</h3>
@@ -2070,7 +2107,7 @@ QString HelpMenuDialog::getDownloadManagerContent()
                 </ul>
             </div>
 
-            <h2 style="color: #5d4037; border-bottom: 2px solid #5d4037; padding-bottom: 5px;">🎯 Usage Tips</h2>
+            <h2 style="color: #5d4037; border-bottom: 2px solid #5d4037; padding-bottom: 5px;">Usage Tips</h2>
 
             <div style="margin: 20px 0;">
                 <ul style="margin: 10px 0; padding-left: 20px;">
@@ -2084,14 +2121,14 @@ QString HelpMenuDialog::getDownloadManagerContent()
             </div>
 
             <div style="background-color: #fff3cd; padding: 15px; border-radius: 8px; margin: 15px 0;">
-                <h3 style="color: #856404; margin-top: 0;">📁 Platform-Specific Notes</h3>
+                <h3 style="color: #856404; margin-top: 0;">Platform-Specific Notes</h3>
                 <p><strong>Flathub Version:</strong> Shows download location in dialog</p>
                 <p><strong>Standard Version:</strong> Opens file manager directly</p>
                 <p style="margin-bottom: 0;"><strong>All Platforms:</strong> Downloads saved to system Downloads folder under "Jasmine" subdirectory</p>
             </div>
 
             <div style="background-color: #d1ecf1; padding: 15px; border-radius: 8px; margin: 25px 0;">
-                <h3 style="color: #0c5460; margin-top: 0;">🌟 Integrated Experience</h3>
+                <h3 style="color: #0c5460; margin-top: 0;">Integrated Experience</h3>
                 <p style="margin-bottom: 0;">The download manager seamlessly integrates with your browsing experience, automatically handling all file downloads while providing full control and visibility over the download process.</p>
             </div>
         </div>
@@ -2268,7 +2305,7 @@ QString HelpMenuDialog::getOnNamedProfilesContent()
             <hr style="margin: 30px 0; border: 1px solid #bdc3c7;">
 
             <div style="margin: 20px 0;">
-                <p style="font-size: 14px; color: #7f8c8d;">
+                <p style="font-size: 14px; color: #7f8f8d;">
                     Organize your digital life with contextual browsing environments
                 </p>
             </div>
@@ -2340,7 +2377,3 @@ QString HelpMenuDialog::getSupportusContent()
     return QString();
 
 }
-
-
-
-
