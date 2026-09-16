@@ -3619,6 +3619,7 @@ QString MainWindow::formatBinauralString() {
 }
 
 
+
 void MainWindow::onStreamFromUrl() {
     bool ok;
     QString userUrl = QInputDialog::getText(
@@ -3645,8 +3646,12 @@ void MainWindow::onStreamFromUrl() {
         userUrl.contains(".hevc") || userUrl.contains(".m3u")) {
         addStreamToPlaylist(userUrl, userUrl);
     }
+    else if (userUrl.contains("youtube.com") || userUrl.contains("youtu.be")) {
+        extractYouTubeAndAddToPlaylist(userUrl);
+    }
     else {
-        extractAndAddToPlaylist(userUrl);  // Single unified function for everything
+        extractAndAddToPlaylist(userUrl);
+
     }
 }
 
@@ -3717,6 +3722,12 @@ void MainWindow::extractAndAddToPlaylist(const QString &url) {
             QString displayTitle = title + " " + tag;
             addStreamToPlaylist(streamUrl, displayTitle);
             statusBar()->showMessage("Added: " + title, 3000);
+            //playRemoteStream(streamUrl);
+            if (!m_mediaPlayer ||
+                (m_mediaPlayer->playbackState() != QMediaPlayer::PlayingState &&
+                 m_mediaPlayer->playbackState() != QMediaPlayer::PausedState)) {
+                playRemoteStream(streamUrl);
+            }
         } else {
             statusBar()->showMessage("Failed to get stream URL", 3000);
         }
@@ -3846,6 +3857,7 @@ void MainWindow::addStreamToPlaylist(const QString &streamUrl, const QString &di
     statusBar()->showMessage(QString("Stream added to '%1'").arg(playlistName), 2000);
 }
 
+/*
 void MainWindow::extractYouTubeAndAddToPlaylist(const QString &youtubeUrl) {
     statusBar()->showMessage("Extracting YouTube stream...", 0);
 
@@ -3885,6 +3897,71 @@ void MainWindow::extractYouTubeAndAddToPlaylist(const QString &youtubeUrl) {
                         // m_streamDurations[streamUrl] = duration.toInt();
 
                         statusBar()->showMessage("Added: " + title, 3000);
+                    } else {
+                        statusBar()->showMessage("Failed to get stream URL", 3000);
+                    }
+                }
+                urlProcess->deleteLater();
+            });
+        } else {
+            statusBar()->showMessage("Failed to extract YouTube info", 3000);
+        }
+        process->deleteLater();
+    });
+
+    process->start("yt-dlp", args);
+}
+*/
+
+void MainWindow::extractYouTubeAndAddToPlaylist(const QString &youtubeUrl) {
+    statusBar()->showMessage("Extracting YouTube stream...", 0);
+
+    QProcess *process = new QProcess(this);
+
+    // Get title and duration in one command
+    QStringList args;
+    args << "--no-playlist" << "--quiet"
+         << "--extractor-args" << "youtube:player_client=web_embedded"
+         << "--print" << "%(title)s|%(duration)s"
+         << youtubeUrl;
+
+    connect(process, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished),
+        this, [this, process, youtubeUrl](int exitCode, QProcess::ExitStatus exitStatus) {
+
+        if (exitStatus == QProcess::NormalExit && exitCode == 0) {
+            QString output = QString::fromUtf8(process->readAllStandardOutput()).trimmed();
+            QStringList parts = output.split('|');
+
+            QString title = parts.value(0, "YouTube Video");
+            QString duration = parts.value(1, "0");
+
+            // Now get the actual stream URL
+            QProcess *urlProcess = new QProcess(this);
+
+            QStringList urlArgs;
+            urlArgs << "--no-progress" << "--no-playlist" << "--quiet"
+                    << "--extractor-args" << "youtube:player_client=web_embedded"
+                    << "-f" << "best[ext=mp4]/best"
+                    << "-g" << youtubeUrl;
+
+            urlProcess->start("yt-dlp", urlArgs);
+
+            connect(urlProcess, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished),
+                this, [this, urlProcess, title, duration](int exitCode2, QProcess::ExitStatus exitStatus2) {
+
+                if (exitStatus2 == QProcess::NormalExit && exitCode2 == 0) {
+                    QString streamUrl = QString::fromUtf8(urlProcess->readAllStandardOutput()).trimmed();
+                    qDebug() << "streamurl  " << streamUrl;
+                    if (!streamUrl.isEmpty()) {
+                        QString displayTitle = title + " [YouTube]";
+                        addStreamToPlaylist(streamUrl, displayTitle);
+                        statusBar()->showMessage("Added: " + title, 3000);
+                        //playRemoteStream(streamUrl);
+                        if (!m_mediaPlayer ||
+                            (m_mediaPlayer->playbackState() != QMediaPlayer::PlayingState &&
+                             m_mediaPlayer->playbackState() != QMediaPlayer::PausedState)) {
+                            playRemoteStream(streamUrl);
+                        }
                     } else {
                         statusBar()->showMessage("Failed to get stream URL", 3000);
                     }

@@ -495,6 +495,30 @@ QString HelpMenuDialog::getWhatsNewContent()
     return R"(
 
 <div style="background-color: #e8f5e9; padding: 15px; border-radius: 8px; margin-bottom: 25px; border-left: 5px solid #2e7d32;">
+    <h2 style="color: #1b5e20; margin-top: 0;">YouTube Stream Extraction Fix — Version 1.7.1 <span style="font-size: 0.75em; background-color: #2e7d32; color: white; padding: 2px 8px; border-radius: 12px; vertical-align: middle;">NEW</span></h2>
+    <p>Version 1.7.1 fixes YouTube stream extraction that was broken by recent changes on YouTube's side.</p>
+
+    <div style="background-color: #e8f5e9; padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #2e7d32;">
+        <h3 style="color: #1b5e20; margin-top: 0;">Fixed: YouTube Stream Extraction</h3>
+        <ul>
+            <li><strong>Restored playback</strong> — YouTube links play again in the player</li>
+            <li><strong>New player client</strong> — switched YouTube extraction to the web_embedded client</li>
+            <li><strong>Single merged stream</strong> — YouTube URLs now return one MP4 with video and audio together</li>
+            <li><strong>Dedicated path</strong> — YouTube now uses its own extraction method, other sites unchanged</li>
+        </ul>
+    </div>
+
+    <div style="background-color: #e3f2fd; padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #1565c0;">
+        <h3 style="color: #1565c0; margin-top: 0;">Other Streaming Sites</h3>
+        <ul>
+            <li><strong>No changes</strong> — Dailymotion, Rumble, Odysee, Vimeo keep the existing extraction path</li>
+            <li><strong>Stable behavior</strong> — those sites still serve pre-merged formats, so nothing needed to change</li>
+        </ul>
+    </div>
+</div>
+
+
+<div style="background-color: #e8f5e9; padding: 15px; border-radius: 8px; margin-bottom: 25px; border-left: 5px solid #2e7d32;">
     <h2 style="color: #1b5e20; margin-top: 0;">Isochronic Tone Fix & Sessions Directory — Version 1.7.0 <span style="font-size: 0.75em; background-color: #2e7d32; color: white; padding: 2px 8px; border-radius: 12px; vertical-align: middle;">NEW</span></h2>
     <p>Version 1.7.0 fixes the long-standing isochronic tone clicking issue and introduces a dedicated sessions directory for better preset organization.</p>
 

@@ -102,6 +102,19 @@
 
   <releases>
 
+<release version="1.7.1" date="2026-09-16">
+  <description>
+    <p>Release v1.7.1:</p>
+    <ul>
+      <li>Fixed YouTube stream extraction broken by recent YouTube changes</li>
+      <li>Switched YouTube to the web_embedded player client</li>
+      <li>YouTube URLs now return a single merged MP4 stream instead of separate video and audio tracks</li>
+      <li>Added dedicated YouTube extraction path, other streaming sites unchanged</li>
+      <li>Restored playback of YouTube links in the player</li>
+    </ul>
+  </description>
+</release>
+
 <release version="1.7.0" date="2026-08-19">
   <description>
     <p>Release v1.7.0:</p>

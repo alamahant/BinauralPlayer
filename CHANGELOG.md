@@ -1,5 +1,17 @@
 # Changelog
 
+## [2026-09-16] - Release v1.7.1
+
+### Fixed
+- **YouTube Stream Extraction**
+  - Fixed YouTube stream extraction broken by recent YouTube changes
+  - Switched YouTube to the web_embedded player client
+  - YouTube URLs now return a single merged MP4 stream instead of separate video and audio tracks
+  - Added dedicated YouTube extraction path; other streaming sites unchanged
+  - Restored playback of YouTube links in the player
+
+---
+
 ## [2026-08-19] - Release v1.7.0
 
 ### Fixed
