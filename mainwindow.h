@@ -455,6 +455,11 @@ private:
     RssNotificationDialog* rssDialog = nullptr;
     QAction *rssAction;
     QAction* loadSessionAction;
+    QString jsRuntimeArg() const;
+
+private slots:
+    void showDenoHelpDialog();
+
 
 };
 #endif // MAINWINDOW_H

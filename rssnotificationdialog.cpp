@@ -27,25 +27,20 @@ RssNotificationDialog::RssNotificationDialog(QWidget *parent)
     setMinimumSize(600, 400);
     resize(700, 500);
 
-    // Load enabled setting
     QSettings settings;
     m_enabled = settings.value("Rss/enabled", false).toBool();
 
-    // Setup UI
     QVBoxLayout *mainLayout = new QVBoxLayout(this);
 
-    // ========== Card View (Single Item Display) ==========
     QVBoxLayout *cardLayout = new QVBoxLayout();
 
     m_textBrowser = new QTextBrowser(this);
     cardLayout->addWidget(m_textBrowser);
 
-    // Progress label (e.g., "Item 3 of 7")
     m_progressLabel = new QLabel(this);
     m_progressLabel->setAlignment(Qt::AlignCenter);
     cardLayout->addWidget(m_progressLabel);
 
-    // Navigation buttons
     QHBoxLayout *navLayout = new QHBoxLayout();
     m_prevButton = new QPushButton("◀ Previous", this);
     m_nextButton = new QPushButton("Next ▶", this);
@@ -53,7 +48,6 @@ RssNotificationDialog::RssNotificationDialog(QWidget *parent)
     navLayout->addWidget(m_nextButton);
     cardLayout->addLayout(navLayout);
 
-    // Mark as Read row
     QHBoxLayout *markLayout = new QHBoxLayout();
     m_markReadCheckBox = new QCheckBox("Mark as read", this);
     m_markReadButton = new QPushButton("Apply", this);
@@ -64,7 +58,6 @@ RssNotificationDialog::RssNotificationDialog(QWidget *parent)
 
     mainLayout->addLayout(cardLayout);
 
-    // ========== Bottom Controls (Existing) ==========
     QHBoxLayout *bottomLayout = new QHBoxLayout();
 
     m_enableCheckBox = new QCheckBox("Enable RSS feed", this);
@@ -84,13 +77,11 @@ RssNotificationDialog::RssNotificationDialog(QWidget *parent)
 
     mainLayout->addLayout(bottomLayout);
 
-    // Connect navigation and mark read signals
     connect(m_prevButton, &QPushButton::clicked, this, &RssNotificationDialog::onPrevClicked);
     connect(m_nextButton, &QPushButton::clicked, this, &RssNotificationDialog::onNextClicked);
     connect(m_markReadButton, &QPushButton::clicked, this, &RssNotificationDialog::onMarkCurrentRead);
 
 
-    // Initial fetch if enabled
     loadCache();
     if (m_enabled && shouldCheckForUpdates()) {
         fetchFeed();
@@ -112,7 +103,6 @@ void RssNotificationDialog::checkForUpdates()
 
 void RssNotificationDialog::fetchFeed()
 {
-    // Update timestamp
     QSettings settings;
     settings.setValue("Rss/lastCheck", QDateTime::currentDateTime().toString(Qt::ISODate));
     QUrl url(m_feedUrl);
@@ -156,14 +146,11 @@ void RssNotificationDialog::parseFeed(const QByteArray &data)
                     if (xml.name() == "title") {
                         item.title = xml.readElementText();
                     } else if (xml.name() == "description") {
-                        //item.description = xml.readElementText();
-                        // enable rich html
                         item.description = xml.readElementText(QXmlStreamReader::IncludeChildElements);
                     } else if (xml.name() == "link") {
                         item.link = xml.readElementText();
                     } else if (xml.name() == "pubDate") {
                         QString dateStr = xml.readElementText();
-                        //item.pubDate = QDateTime::fromString(dateStr, "ddd, dd MMM yyyy HH:mm:ss 'GMT'");
                         item.pubDate = QDateTime::fromString(dateStr, Qt::RFC2822Date);
                         if (!item.pubDate.isValid()) {
                             item.pubDate = QDateTime::fromString(dateStr, Qt::ISODate);
@@ -172,8 +159,6 @@ void RssNotificationDialog::parseFeed(const QByteArray &data)
                 }
             }
 
-            // All items are considered "new" for the red button logic
-            // (Individual read status is tracked separately via m_readIndices)
             item.isNew = true;
             foundNew = true;
 
@@ -187,10 +172,8 @@ void RssNotificationDialog::parseFeed(const QByteArray &data)
         return;
     }
 
-    // Load previously saved read status
     loadReadStatus();
 
-    // Update new content flag based on whether there are any unread items
     bool hasUnread = false;
     for (int i = 0; i < m_items.size(); ++i) {
         if (!m_readIndices.contains(i)) {
@@ -206,7 +189,6 @@ void RssNotificationDialog::parseFeed(const QByteArray &data)
         emit newContentAvailable(m_hasNewContent);
     }
 
-    // Start at the first unread item, or first item if all read
     m_currentIndex = 0;
     for (int i = 0; i < m_items.size(); ++i) {
         if (!m_readIndices.contains(i)) {
@@ -230,29 +212,22 @@ void RssNotificationDialog::updateDisplay()
         return;
     }
 
-    // Update progress label
     m_progressLabel->setText(QString("Item %1 of %2")
                              .arg(m_currentIndex + 1)
                              .arg(m_items.size()));
 
-    // Enable/disable navigation buttons
     m_prevButton->setEnabled(m_currentIndex > 0);
     m_nextButton->setEnabled(m_currentIndex < m_items.size() - 1);
 
-    // Enable mark read controls
     m_markReadCheckBox->setEnabled(true);
     m_markReadButton->setEnabled(true);
 
-    // Get current item
     const RssItem &item = m_items[m_currentIndex];
 
-    // Build HTML for single item
     QString isReadMark = m_readIndices.contains(m_currentIndex) ? " ✓ (Read)" : "";
     QString html = "<html><body>";
     html += "<div style='padding: 20px;'>";
     html += "<h2>" + item.title.toHtmlEscaped() + isReadMark + "</h2>";
-    //html += "<p style='font-size: 1.1em; margin-top: 20px;'>" + item.description.toHtmlEscaped() + "</p>";
-    // rich html
     html += "<p style='font-size: 1.1em; margin-top: 20px;'>" + item.description + "</p>";
     html += "<p style='color: #888; margin-top: 20px;'>📅 " +
             item.pubDate.toString("ddd, dd MMM yyyy HH:mm") + " GMT</p>";
@@ -265,9 +240,7 @@ void RssNotificationDialog::updateDisplay()
     m_textBrowser->setHtml(html);
     m_textBrowser->setOpenExternalLinks(true);
 
-    // Update checkbox state
     m_markReadCheckBox->setChecked(m_readIndices.contains(m_currentIndex));
-    //m_markReadCheckBox->setText(m_readIndices.contains(m_currentIndex) ? "Mark as unread" : "Mark as read");
     m_markReadCheckBox->setText("Mark as read");  // Always say "Mark as read"
 }
 
@@ -290,27 +263,20 @@ void RssNotificationDialog::onNextClicked()
 
 void RssNotificationDialog::onMarkCurrentRead()
 {
-    // Checkbox checked = mark as read
-    // Checkbox unchecked = mark as unread
     bool wantRead = m_markReadCheckBox->isChecked();
     bool isCurrentlyRead = m_readIndices.contains(m_currentIndex);
 
-    // Only act if the desired state is different from current
     if (wantRead && !isCurrentlyRead) {
-        // Mark as read
         m_readIndices.insert(m_currentIndex);
     } else if (!wantRead && isCurrentlyRead) {
-        // Mark as unread
         m_readIndices.remove(m_currentIndex);
     } else {
-        // No change needed
         return;
     }
 
     saveReadStatus();
     updateDisplay();
 
-    // Update the global "has new content" flag
     bool hasUnread = false;
     for (int i = 0; i < m_items.size(); ++i) {
         if (!m_readIndices.contains(i)) {

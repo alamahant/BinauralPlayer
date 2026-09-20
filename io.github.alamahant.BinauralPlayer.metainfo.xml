@@ -102,6 +102,19 @@
 
   <releases>
 
+<release version="1.7.2" date="2026-09-20">
+  <description>
+    <p>Release v1.7.2:</p>
+    <ul>
+      <li>Updated yt-dlp to the latest release</li>
+      <li>Bundled QuickJS in the Flatpak for JavaScript runtime support</li>
+      <li>Added an optional Deno runtime path for faster extraction</li>
+      <li>Added a Help menu entry explaining how to install Deno manually for full-speed extraction</li>
+      <li>Other streaming sites unchanged</li>
+    </ul>
+  </description>
+</release>
+
 <release version="1.7.1" date="2026-09-16">
   <description>
     <p>Release v1.7.1:</p>

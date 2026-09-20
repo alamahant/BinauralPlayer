@@ -18,7 +18,6 @@ double currentBinFreq = 7.83;
 double currentIsonFreq = 7.83;
 /*
 const QStringList audioExtensions = {
-    // Lossy formats
     ".mp3",     // MPEG Audio Layer 3
     ".aac",     // Advanced Audio Coding
     ".ogg",     // Ogg Vorbis
@@ -28,7 +27,6 @@ const QStringList audioExtensions = {
     ".ac3",     // Dolby Digital AC-3
     ".eac3",    // Enhanced AC-3
 
-    // Lossless formats
     ".wav",     // Waveform Audio
     ".flac",    // Free Lossless Audio Codec
     ".alac",    // Apple Lossless Audio Codec
@@ -40,7 +38,6 @@ const QStringList audioExtensions = {
     ".tta",     // True Audio
     ".wv",      // WavPack
 
-    // Legacy formats
     ".aiff",    // Audio Interchange File Format
     ".au",      // Sun Audio
     ".mid",     // MIDI
@@ -63,7 +60,6 @@ const QStringList videoExtensions = {".mp4", ".m4v", ".avi", ".mkv", ".mov", ".w
 
 
 const QStringList allMediaExtensions = {
-    // ===== VIDEO FORMATS =====
     ".mp4",     // MPEG-4 Video
     ".m4v",     // MPEG-4 Video
     ".avi",     // Audio Video Interleave
@@ -86,7 +82,6 @@ const QStringList allMediaExtensions = {
     ".ogv",     // Ogg Video
     ".ts",      // MPEG Transport Stream
 
-    // ===== LOSSY AUDIO FORMATS =====
     ".mp3",     // MPEG Audio Layer 3
     ".aac",     // Advanced Audio Coding
     ".ogg",     // Ogg Vorbis
@@ -96,7 +91,6 @@ const QStringList allMediaExtensions = {
     ".ac3",     // Dolby Digital AC-3
     ".eac3",    // Enhanced AC-3
 
-    // ===== LOSSLESS AUDIO FORMATS =====
     ".wav",     // Waveform Audio
     ".flac",    // Free Lossless Audio Codec
     ".alac",    // Apple Lossless Audio Codec
@@ -108,7 +102,6 @@ const QStringList allMediaExtensions = {
     ".tta",     // True Audio
     ".wv",      // WavPack
 
-    // ===== LEGACY/SPECIALTY AUDIO FORMATS =====
     ".aiff",    // Audio Interchange File Format
     ".au",      // Sun Audio
     ".mid",     // MIDI

@@ -1,4 +1,16 @@
-# Changelog
+# Changelog 
+
+## [2026-09-20] - Release v1.7.2
+
+### Fixed
+- **YouTube Stream Extraction**
+  - Updated yt-dlp to the latest release
+  - Bundled QuickJS in the Flatpak for JavaScript runtime support
+  - Added an optional Deno runtime path for faster extraction
+  - Added a Help menu entry explaining how to install Deno manually for full-speed extraction
+  - Other streaming sites unchanged
+
+---
 
 ## [2026-09-16] - Release v1.7.1
 

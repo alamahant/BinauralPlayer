@@ -109,7 +109,6 @@ bool DynamicEngine::startDynamicPlayback()
               int16_t* samples = reinterpret_cast<int16_t*>(data);
               int sampleCount = maxlen / (2 * sizeof(int16_t));
 
-              // Load engine settings
               double leftFreq = m_engine->m_leftFrequency.load();
               double rightFreq = m_engine->m_rightFrequency.load();
               double amplitude = m_engine->m_amplitude.load();
@@ -118,7 +117,6 @@ bool DynamicEngine::startDynamicPlayback()
               double pulseFreq = m_engine->m_pulseFrequency;
               bool isIsochronic = (ConstantGlobals::currentToneType == 1);
 
-              // Load noise settings once per buffer
               bool noiseEnabled = m_engine->m_noiseEnabled.load();
               int noiseType = m_engine->m_noiseType.load();
               double noiseLevel = m_engine->m_noiseLevel.load();
@@ -127,14 +125,10 @@ bool DynamicEngine::startDynamicPlayback()
                   double leftSample = 0.0;
                   double rightSample = 0.0;
 
-                  // ============================================================
-                  // STEP 1: GENERATE TONE
-                  // ============================================================
                   if (isIsochronic) {
                       double carrierPhaseInc = (2.0 * M_PI * leftFreq) / sampleRate;
                       double pulsePhaseInc = (2.0 * M_PI * pulseFreq) / sampleRate;
 
-                      // Generate carrier waveform
                       double carrier = 0.0;
                       switch (waveform) {
                           case SINE_WAVE: carrier = sin(m_phaseLeft); break;
@@ -143,36 +137,28 @@ bool DynamicEngine::startDynamicPlayback()
                           case SAWTOOTH_WAVE: carrier = m_engine->calculateSawtoothSample(m_phaseLeft); break;
                       }
 
-                      // Determine if pulse should be ON or OFF
                       bool pulseOn = (sin(m_phaseRight) >= 0.0);
 
-                      // ============================================================
-                      // SMOOTH ENVELOPE WITH ATTACK/RELEASE (FIXES CLICKING)
-                      // ============================================================
                       const double attackTime = 0.01;   // 10ms attack (adjustable)
                       const double releaseTime = 0.01;  // 10ms release (adjustable)
                       const double attackSteps = attackTime * sampleRate;
                       const double releaseSteps = releaseTime * sampleRate;
 
                       if (pulseOn) {
-                          // Attack: ramp up
                           if (m_pulseEnvelope < 1.0) {
                               m_pulseEnvelope += 1.0 / attackSteps;
                               if (m_pulseEnvelope > 1.0) m_pulseEnvelope = 1.0;
                           }
                       } else {
-                          // Release: ramp down
                           if (m_pulseEnvelope > 0.0) {
                               m_pulseEnvelope -= 1.0 / releaseSteps;
                               if (m_pulseEnvelope < 0.0) m_pulseEnvelope = 0.0;
                           }
                       }
 
-                      // Apply smooth envelope to carrier
                       leftSample = carrier * m_pulseEnvelope;
                       rightSample = leftSample; // Stereo identical
 
-                      // Update phases
                       m_phaseLeft += carrierPhaseInc;
                       m_phaseRight += pulsePhaseInc;
                   } else {
@@ -186,9 +172,6 @@ bool DynamicEngine::startDynamicPlayback()
                       m_phaseRight += rightPhaseInc;
                   }
 
-                  // ============================================================
-                  // STEP 2: GENERATE AND MIX NOISE (UNIVERSAL)
-                  // ============================================================
                   if (noiseEnabled && noiseType > 0 && noiseLevel > 0.0) {
                       double noiseSample = 0.0;
                       switch (noiseType) {
@@ -200,26 +183,19 @@ bool DynamicEngine::startDynamicPlayback()
                           default: noiseSample = 0.0; break;
                       }
 
-                      // Mix tone with noise (crossfade)
                       leftSample = (leftSample * (1.0 - noiseLevel)) + (noiseSample * noiseLevel);
                       rightSample = (rightSample * (1.0 - noiseLevel)) + (noiseSample * noiseLevel);
                   }
 
-                  // ============================================================
-                  // STEP 3: APPLY AMPLITUDE AND OUTPUT
-                  // ============================================================
                   leftSample *= amplitude;
                   rightSample *= amplitude;
 
-                  // Clamp
                   leftSample = qBound(-1.0, leftSample, 1.0);
                   rightSample = qBound(-1.0, rightSample, 1.0);
 
-                  // Write to buffer
                   samples[2 * i] = static_cast<int16_t>(leftSample * 32767);
                   samples[2 * i + 1] = static_cast<int16_t>(rightSample * 32767);
 
-                  // Phase wrapping
                   if (m_phaseLeft > 2.0 * M_PI) m_phaseLeft -= 2.0 * M_PI;
                   if (m_phaseRight > 2.0 * M_PI) m_phaseRight -= 2.0 * M_PI;
               }
@@ -632,9 +608,6 @@ double DynamicEngine::calculateSawtoothSample(double phase)
 }
 
 
-// ============================================================
-// NOISE CONTROL
-// ============================================================
 
 void DynamicEngine::setNoiseType(int type)
 {
@@ -678,9 +651,6 @@ bool DynamicEngine::isNoiseEnabled() const
     return m_noiseEnabled;
 }
 
-// ============================================================
-// NOISE GENERATION
-// ============================================================
 
 double DynamicEngine::generateWhiteNoise()
 {
@@ -690,35 +660,29 @@ double DynamicEngine::generateWhiteNoise()
 
 double DynamicEngine::generatePinkNoise()
 {
-    // Voss-McCartney algorithm
     static const int numStages = 8;
     static int index = 0;
     static double values[numStages] = {0.0};
     static double runningSum = 0.0;
 
-    // Generate new white noise for stage 0
     values[0] = generateWhiteNoise();
 
-    // For each stage, update at 2^stage intervals
     for (int i = 1; i < numStages; ++i) {
         if (index % (1 << i) == 0) {
             values[i] = generateWhiteNoise();
         }
     }
 
-    // Sum all stages
     runningSum = 0.0;
     for (int i = 0; i < numStages; ++i) {
         runningSum += values[i];
     }
 
-    // Update index
     ++index;
     if (index >= (1 << (numStages - 1))) {
         index = 0;
     }
 
-    // Scale to match original amplitude
     double pink = (runningSum / numStages) * 2.0;  // Multiply by 2 to restore volume
 
     return qBound(-1.0, pink, 1.0);
@@ -730,12 +694,10 @@ double DynamicEngine::generateGreyNoise()
     static double prev = 0.0;
     double white = generateWhiteNoise();
 
-    // Original grey (soft)
     double grey = 0.7 * prev + 0.3 * white;
     prev = grey;
 
 
-    // Boost lows and highs slightly, attenuate mids
     static double midFilter = 0.0;
     midFilter = 0.5 * midFilter + 0.5 * grey;
     double shaped = grey - (0.15 * midFilter);  // Slight mid cut

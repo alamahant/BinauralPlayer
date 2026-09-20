@@ -84,7 +84,6 @@ MainWindow::MainWindow(QWidget *parent)
     addActions();
 
     setupMenus();
-    //createInfoDialog();
     setupConnections();
     model = qobject_cast<QStandardItemModel *>(m_waveformCombo->model());
     squareWaveItem = model->item(1);
@@ -119,7 +118,6 @@ MainWindow::MainWindow(QWidget *parent)
     toggleTheme(isDarkTheme);
     showPresetExtractionNotice();
 
-    //radConsole->setWindowFlags(Qt::Window);
     radConsole->setWindowFlags(Qt::Window | Qt::WindowMinimizeButtonHint | Qt::WindowCloseButtonHint);
     connect(radConsole, &RadionicsConsole::structuralLinkCaptured, this, [this](double combinedSeed, double leftFreq, double rightFreq,
             double baseFreq, double offset, QString trend, QString target){
@@ -143,7 +141,6 @@ MainWindow::MainWindow(QWidget *parent)
     });
     connect(radConsole, &RadionicsConsole::durationChanged, this, [this](int minutes){
         if(minutes > 45 && !unlimitedDurationAction->isChecked()){
-            //unlimitedDurationAction->setChecked(true);
             unlimitedDurationAction->trigger();
         }
         m_brainwaveDuration->setValue(minutes);
@@ -156,7 +153,6 @@ MainWindow::MainWindow(QWidget *parent)
 
         if (hasNew) {
             rssAction->setIcon(QIcon(":/icons/rss-green.svg"));
-            // rssAction->setIcon(QIcon(":/icons/rss-red.svg"));
         } else {
             rssAction->setIcon(QIcon(":/icons/rss.svg"));
 
@@ -455,7 +451,6 @@ QToolBar *MainWindow::createBinauralToolbarExt() {
                 return; // User canceled, don't proceed
             }
 
-            //m_binauralEngine->stop();
             m_binauralStopButton->click();
         }
         toneTypeCombo->setCurrentIndex(0); // Binaural
@@ -470,7 +465,6 @@ QToolBar *MainWindow::createBinauralToolbarExt() {
         noiseTypeCombo->setCurrentIndex(0); // White
         noiseLevelSpin->setValue(0.30);
 
-        // Reset engine noise state
         if (m_binauralEngine) {
             m_binauralEngine->setNoiseEnabled(false);
             m_binauralEngine->setNoiseType(0); // Off
@@ -504,7 +498,6 @@ QToolBar *MainWindow::createBinauralToolbarExt() {
     m_binauralStopButton->setEnabled(false);
     toolbar->addWidget(m_binauralStopButton);
 
-    //noise controls
     toolbar->addSeparator();
     noiseEnableBtn = new QPushButton(this);
     noiseEnableBtn->setToolTip("Enable/disable background noise (White, Pink, or Brown)");
@@ -529,23 +522,17 @@ QToolBar *MainWindow::createBinauralToolbarExt() {
     noiseLevelSpin->setRange(0.0, 1.0);
     noiseLevelSpin->setSingleStep(0.05);
     noiseLevelSpin->setValue(0.30);
-    //noiseLevelSpin->setPrefix("L:");
     noiseLevelSpin->setDecimals(2);
     noiseLevelSpin->setFixedWidth(55);
 
-    // Add to toolbar
     toolbar->addWidget(noiseEnableBtn);
     toolbar->addWidget(noiseTypeCombo);
     toolbar->addWidget(noiseLevelSpin);
-    //toolbar->addSeparator();
 
 
-    // Connections
     connect(noiseEnableBtn, &QPushButton::toggled,
             this, [this](bool checked) {
                 m_binauralEngine->setNoiseEnabled(checked);
-                //noiseTypeCombo->setEnabled(checked);
-                //noiseLevelSpin->setEnabled(checked);
 
                 if (checked) {
                     int currentIndex = noiseTypeCombo->currentIndex();
@@ -565,11 +552,9 @@ QToolBar *MainWindow::createBinauralToolbarExt() {
                 m_binauralEngine->setNoiseLevel(value);
             });
 
-    // Start disabled
     noiseEnableBtn->setEnabled(false);
     noiseTypeCombo->setEnabled(false);
     noiseLevelSpin->setEnabled(false);
-    //
 
     durationLabel = new QLabel("Timer:", toolbar);
     durationLabel->setToolTip("Auto-stop after selected duration");
@@ -610,7 +595,6 @@ QToolBar *MainWindow::createBinauralToolbarExt() {
 
     toolbar->addWidget(m_openSessionManagerButton);
 
-    //toolbar->addSeparator();
     m_visStimButton = new QPushButton("Visual", toolbar);
     m_visStimButton->setCheckable(true);
     m_visStimButton->setToolTip("Visual Stimulation");
@@ -626,7 +610,6 @@ QToolBar *MainWindow::createBinauralToolbarExt() {
             m_flickerFloatingWindow->show();
             m_flickerFloatingWindow->raise();
             if (m_flickerWidget) {
-                //m_flickerWidget->startFlicker();
             }
             if (m_visStimDialog) {
                 m_visStimDialog->show();
@@ -646,19 +629,16 @@ QToolBar *MainWindow::createBinauralToolbarExt() {
 
     toolbar->addWidget(m_visStimButton);
 
-    //toolbar->addSeparator();
     radDialogButton = new QPushButton("Radionics", this);
     radDialogButton ->setCheckable(true);
     radDialogButton->setChecked(false);
     connect(radDialogButton, &QPushButton::clicked, this, [this](bool checked){
-        //toggleTheme(checked);
         wasDark = isDarkTheme;
         if(!isDarkTheme) toggleTheme(true);
         if(checked) {
             radConsole->show();
             radConsole->raise();
             m_binauralPowerButton->setChecked(true);
-            //onToneTypeComboIndexChanged(2);
             toneTypeCombo->setCurrentIndex(2);
 
         }else{
@@ -992,7 +972,6 @@ void MainWindow::setupConnections() {
             }
             m_videoFloatingWindow->show();
             m_videoFloatingWindow->raise();
-            //m_mediaPlayer->setVideoOutput(videoWidget);
         } else {
             if (m_videoFloatingWindow) {
                 m_videoFloatingWindow->hide();
@@ -1984,7 +1963,6 @@ void MainWindow::onPlaylistItemClicked(QListWidgetItem *item) {
     m_currentTrackIndex = index;
     m_currentPlaylistName = playlistName;
 
-    // Store the selected track index for this playlist
     m_playlistLastTrackIndex[playlistName] = index;
 }
 
@@ -2292,19 +2270,16 @@ void MainWindow::onRenamePlaylistClicked() {
         int currentIndex = m_playlistTabs->currentIndex();
         m_playlistTabs->setTabText(currentIndex, newName);
 
-        // Rename in files map
         if (m_playlistFiles.contains(oldName)) {
             m_playlistFiles[newName] = m_playlistFiles.take(oldName);
         }
 
-        // Rename in track index map
         if (m_playlistLastTrackIndex.contains(oldName)) {
             int savedIndex = m_playlistLastTrackIndex[oldName];
             m_playlistLastTrackIndex[newName] = savedIndex;
             m_playlistLastTrackIndex.remove(oldName);
         }
 
-        // Update current playlist name if needed
         if (m_currentPlaylistName == oldName) {
             m_currentPlaylistName = newName;
         }
@@ -2323,7 +2298,6 @@ void MainWindow::onClosePlaylistTab(int index) {
 
     QString playlistName = m_playlistTabs->tabText(index);
 
-    // First, check if playlist has tracks and confirm with user
     QListWidget *playlist = qobject_cast<QListWidget *>(m_playlistTabs->widget(index));
     if (playlist && playlist->count() > 0) {
         QMessageBox::StandardButton reply;
@@ -2337,7 +2311,6 @@ void MainWindow::onClosePlaylistTab(int index) {
             return;  // User cancelled - don't remove anything
     }
 
-    // User confirmed (or playlist empty) - now remove from maps and tabs
     m_playlistLastTrackIndex.remove(playlistName);
     m_playlistFiles.remove(playlistName);
     m_playlistTabs->removeTab(index);
@@ -2347,27 +2320,21 @@ void MainWindow::onClosePlaylistTab(int index) {
 }
 
 void MainWindow::onPlaylistTabChanged(int index) {
-    // Save current playlist's track index BEFORE switching
     if (!m_currentPlaylistName.isEmpty() && m_currentTrackIndex >= 0) {
         m_playlistLastTrackIndex[m_currentPlaylistName] = m_currentTrackIndex;
     }
 
     updateCurrentPlaylistReference();
 
-    // Get new playlist name
     QString newPlaylistName = currentPlaylistName();
 
-    // Reset to -1 initially
     m_currentTrackIndex = -1;
     m_currentPlaylistName = newPlaylistName;
 
-    // Restore saved track index for new playlist if it exists and is valid
     if (m_playlistLastTrackIndex.contains(newPlaylistName)) {
         int savedIndex = m_playlistLastTrackIndex[newPlaylistName];
-        // Check if saved index is within bounds of current playlist
         if (savedIndex >= 0 && savedIndex < m_playlistFiles[newPlaylistName].size()) {
             m_currentTrackIndex = savedIndex;
-            // Also highlight the selected track in the UI
             QListWidget *playlist = currentPlaylistWidget();
             if (playlist) {
                 playlist->setCurrentRow(m_currentTrackIndex);
@@ -2398,10 +2365,8 @@ void MainWindow::onLoadMusicClicked() {
         QListWidget *playlist = currentPlaylistWidget();
         QString playlistName = currentPlaylistName();
 
-        // Remember if playlist was empty before adding
         bool wasEmpty = (playlist->count() == 0);
 
-        // Create QSet of existing file paths for duplicate checking
         QSet<QString> existingFiles;
         for (const QString &existingPath : m_playlistFiles[playlistName]) {
             existingFiles.insert(existingPath);
@@ -2411,14 +2376,11 @@ void MainWindow::onLoadMusicClicked() {
         QStringList skippedFiles;
         QStringList duplicateFiles;
 
-        // Validate each file against allowed extensions and check for duplicates
         foreach (const QString &file, files) {
             QString fileExtension = QFileInfo(file).suffix().toLower();
             QString filePath = QFileInfo(file).absoluteFilePath();
 
-            // Check if file is supported
             if (ConstantGlobals::allMediaExtensions.contains("." + fileExtension)) {
-                // Check for duplicate
                 if (existingFiles.contains(filePath)) {
                     duplicateFiles.append(QFileInfo(file).fileName());
                 } else {
@@ -2430,7 +2392,6 @@ void MainWindow::onLoadMusicClicked() {
             }
         }
 
-        // Show duplicate files notice if any
         if (!duplicateFiles.isEmpty()) {
             QString duplicateList = duplicateFiles.join("\n• ");
             QMessageBox::information(this, "Duplicate Files Skipped",
@@ -2439,7 +2400,6 @@ void MainWindow::onLoadMusicClicked() {
                 .arg(duplicateList));
         }
 
-        // Show unsupported files notice if any
         if (!skippedFiles.isEmpty()) {
             QString skippedList = skippedFiles.join("\n• ");
             QMessageBox::information(this, "Unsupported Files Skipped",
@@ -2450,25 +2410,20 @@ void MainWindow::onLoadMusicClicked() {
                 .arg(skippedList));
         }
 
-        // Add valid files to playlist
         foreach (const QString &file, validFiles) {
             QString fileName = QFileInfo(file).fileName();
             playlist->addItem(fileName);
             m_playlistFiles[playlistName].append(file);
         }
 
-        // Update UI and status bar
         if (!validFiles.isEmpty()) {
-            // ONLY select the first new item if the playlist was EMPTY before adding
             if (wasEmpty && playlist->count() > 0) {
                 playlist->setCurrentRow(0);
                 playlist->scrollToItem(playlist->item(0));
-                // Store the selected track index
                 m_playlistLastTrackIndex[playlistName] = 0;
                 m_currentTrackIndex = 0;
                 m_currentPlaylistName = playlistName;
             }
-            // Otherwise do nothing - keep existing selection
 
             QString message = QString("Added %1 file(s) to '%2'")
                 .arg(validFiles.size())
@@ -2500,41 +2455,25 @@ void MainWindow::onRemoveTrackClicked() {
     int selectedRow = playlist->currentRow();
     if (selectedRow >= 0 && selectedRow < m_playlistFiles[playlistName].size()) {
 
-        // FIXED: Use m_currentTrackIndex instead of playingIndex
-        //if (playlistName == m_currentPlaylistName && selectedRow == m_currentTrackIndex) {
-          //  QMessageBox::warning(
-            //            this, "Cannot Remove Track",
-              //          "Cannot remove the currently playing track. Stop playback first.");
-            //return;
-       // }
 
-        // Remove the track
         QListWidgetItem *item = playlist->takeItem(selectedRow);
         delete item;
         m_playlistFiles[playlistName].removeAt(selectedRow);
 
-        // Update current track index if this is the current playlist
         if (playlistName == m_currentPlaylistName) {
             if (selectedRow < m_currentTrackIndex) {
-                // Removed track is BEFORE current selection - decrement index
                 m_currentTrackIndex--;
             }
-            // If selectedRow > m_currentTrackIndex, index unchanged
-            // If selectedRow == m_currentTrackIndex, already handled above
 
-            // Update the map with new index
             m_playlistLastTrackIndex[playlistName] = m_currentTrackIndex;
 
-            // Update UI selection
             if (m_currentTrackIndex >= 0 && m_currentTrackIndex < playlist->count()) {
                 playlist->setCurrentRow(m_currentTrackIndex);
             } else if (playlist->count() > 0) {
-                // If current index is now invalid, select first track
                 playlist->setCurrentRow(0);
                 m_currentTrackIndex = 0;
                 m_playlistLastTrackIndex[playlistName] = 0;
             } else {
-                // Playlist is empty
                 m_currentTrackIndex = -1;
                 m_playlistLastTrackIndex[playlistName] = -1;
             }
@@ -2603,7 +2542,6 @@ void MainWindow::onPlaylistItemDoubleClicked(QListWidgetItem *item) {
     if (index >= 0 && index < m_playlistFiles[playlistName].size()) {
         m_currentPlaylistName = playlistName;
         m_currentTrackIndex = index;
-        // Store the selected track index for this playlist
         m_playlistLastTrackIndex[playlistName] = index;
         QString filePath = m_playlistFiles[playlistName][index];
         m_mediaPlayer->setSource(QUrl::fromLocalFile(filePath));
@@ -3006,7 +2944,6 @@ void MainWindow::onSaveAllPlaylistsClicked() {
 */
 
 void MainWindow::onSaveAllPlaylistsClicked() {
-    // First, warn about overwriting
     QMessageBox::StandardButton confirm = QMessageBox::question(
         this, "Confirm Save All",
         "This will save ALL playlists to:\n" + ConstantGlobals::playlistFilePath + "\n\n"
@@ -3041,7 +2978,6 @@ void MainWindow::onSaveAllPlaylistsClicked() {
 
         QListWidget *playlist = currentPlaylistWidget();
 
-        // Check for empty playlist
         if (!playlist || playlist->count() == 0) {
             emptyCount++;
             emptyPlaylists.append(playlistName);
@@ -3059,7 +2995,6 @@ void MainWindow::onSaveAllPlaylistsClicked() {
         }
     }
 
-    // Build detailed result message
     QString resultMessage;
     if (failCount == 0 && emptyCount == 0) {
         resultMessage = QString("✓ All %1 playlist(s) saved successfully!").arg(successCount);
@@ -3091,7 +3026,6 @@ void MainWindow::onSaveAllPlaylistsClicked() {
         QMessageBox::warning(this, "Save Complete with Errors", resultMessage);
     }
 
-    // Status bar summary
     QString statusMsg = QString("Saved: %1").arg(successCount);
     if (emptyCount > 0) statusMsg += QString(", Empty: %1").arg(emptyCount);
     if (errorCount > 0) statusMsg += QString(", Failed: %1").arg(errorCount);
@@ -3147,7 +3081,6 @@ bool MainWindow::savePlaylistToFile(const QString &filename,
 
 bool MainWindow::loadPlaylistFromFile(const QString &filename) {
 
-    // Show warning dialog before loading
     QMessageBox::StandardButton confirm = QMessageBox::question(
         this, "Confirm Load Playlist",
         "This will load the playlist into the CURRENT tab.\n\n"
@@ -3244,7 +3177,6 @@ bool MainWindow::loadPlaylistFromFile(const QString &filename) {
     }
 
 
-    // INITIALIZE MAP ENTRY FOR THIS PLAYLIST
     m_playlistLastTrackIndex[playlistName] = -1;
     QListWidget *playlist = currentPlaylistWidget();
     playlist->clear();
@@ -3259,7 +3191,6 @@ bool MainWindow::loadPlaylistFromFile(const QString &filename) {
         m_playlistFiles[playlistName].append(track.filePath);
     }
 
-    // AUTO-SELECT THE FIRST TRACK IF PLAYLIST IS NOT EMPTY
     if (playlist->count() > 0) {
         playlist->setCurrentRow(0);
         m_playlistLastTrackIndex[playlistName] = 0;
@@ -3341,7 +3272,6 @@ void MainWindow::setupMenus() {
     fileMenu->addAction(streamAction);
     fileMenu->addSeparator();
 
-    //
     rssAction = fileMenu->addAction("&RSS Notifications");
     rssAction->setShortcut(QKeySequence("Ctrl+R"));
     rssAction->setIcon(QIcon(":/icons/rss.svg"));
@@ -3351,7 +3281,6 @@ void MainWindow::setupMenus() {
     fileMenu->addAction(rssAction);
     fileMenu->addSeparator();
 
-    //
 
     QAction *openFolderAction = fileMenu->addAction("&Open Data Directory");
     connect(openFolderAction, &QAction::triggered, this, &MainWindow::openFolder);
@@ -3476,7 +3405,6 @@ void MainWindow::setupMenus() {
                 return; // User canceled, don't proceed
             }
 
-            //m_binauralEngine->stop();
             m_binauralStopButton->click();
         }
 
@@ -3492,7 +3420,6 @@ void MainWindow::setupMenus() {
         noiseTypeCombo->setCurrentIndex(0); // White
         noiseLevelSpin->setValue(0.30);
 
-        // Reset engine noise state
         if (m_binauralEngine) {
             m_binauralEngine->setNoiseEnabled(false);
             m_binauralEngine->setNoiseType(0); // Off
@@ -3533,6 +3460,9 @@ void MainWindow::setupMenus() {
         HelpMenuDialog dialog(HelpType::WhatsNew, this);
         dialog.exec();
     });
+
+    QAction *denoHelpAction = helpMenu->addAction(tr("Faster YouTube Extraction (Optional)"));
+    connect(denoHelpAction, &QAction::triggered, this, &MainWindow::showDenoHelpDialog);
 
 
     QAction *radionicsAction = helpMenu->addAction("Radionics Console");
@@ -3628,7 +3558,6 @@ void MainWindow::onStreamFromUrl() {
 
     if (!ok || userUrl.isEmpty()) return;
 
-    // Check if it's a direct media URL
     if (userUrl.contains(".mp4") || userUrl.contains(".mkv") ||
         userUrl.contains(".avi") || userUrl.contains(".mov") ||
         userUrl.contains(".mp3") || userUrl.contains(".m3u8") ||
@@ -3650,15 +3579,15 @@ void MainWindow::onStreamFromUrl() {
         extractYouTubeAndAddToPlaylist(userUrl);
     }
     else {
-        extractAndAddToPlaylist(userUrl);
+        extractGenericAndAddToPlaylist(userUrl);
 
     }
 }
 
+
 void MainWindow::extractAndAddToPlaylist(const QString &url) {
     statusBar()->showMessage("Extracting stream URL...", 0);
 
-    // Clean up previous process if exists (add member variable m_ytProcess to your MainWindow class)
     if (m_ytProcess) {
         disconnect(m_ytProcess, nullptr, this, nullptr);
         if (m_ytProcess->state() == QProcess::Running) {
@@ -3671,25 +3600,34 @@ void MainWindow::extractAndAddToPlaylist(const QString &url) {
     m_ytProcess = new QProcess(this);
     m_outputBuffer.clear();  // Add QByteArray m_outputBuffer as member variable
 
-    QStringList args;
+
+
 
     QString userAgent = "Mozilla/5.0 (X11; Linux x86_64) "
                         "AppleWebKit/537.36 (KHTML, like Gecko) "
                         "Chrome/136.0 Safari/537.36";
 
-    // Use the exact same args as your working code
-    args << "--no-progress" << "--no-playlist" << "--quiet" << "-f" << "best" << "-g" << url;
+    QStringList args;
+#ifdef FLATPAK_BUILD
+    args << "--js-runtimes" << "quickjs:/app/bin/qjs";
+#endif
+    args << "--no-progress" << "--no-playlist" << "--quiet"
+         << "-f" << "best"
+         << "-g" << url;
 
-    // Collect output as it comes
+
     connect(m_ytProcess, &QProcess::readyReadStandardOutput, this, [this]() {
         m_outputBuffer.append(m_ytProcess->readAllStandardOutput());
     });
 
-    // Single timer - wait 9 seconds then get URL
-    QTimer::singleShot(9000, this, [this, url]() {
+#ifdef FLATPAK_BUILD
+    const int duration = 20000;
+#else
+    const int duration = 9000;
+#endif
+    QTimer::singleShot(duration, this, [this, url]() {
         if (!m_ytProcess) return;
 
-        // Kill the process if still running
         if (m_ytProcess->state() == QProcess::Running) {
             m_ytProcess->kill();
         }
@@ -3707,10 +3645,8 @@ void MainWindow::extractAndAddToPlaylist(const QString &url) {
         }
 
         if (!streamUrl.isEmpty()) {
-            // Try to get title (optional)
             QString title = getTitleFromUrl(url);
 
-            // Determine site for display tag
             QString tag;
             if (url.contains("youtube.com") || url.contains("youtu.be")) tag = "[YouTube]";
             else if (url.contains("dailymotion.com")) tag = "[Dailymotion]";
@@ -3722,7 +3658,6 @@ void MainWindow::extractAndAddToPlaylist(const QString &url) {
             QString displayTitle = title + " " + tag;
             addStreamToPlaylist(streamUrl, displayTitle);
             statusBar()->showMessage("Added: " + title, 3000);
-            //playRemoteStream(streamUrl);
             if (!m_mediaPlayer ||
                 (m_mediaPlayer->playbackState() != QMediaPlayer::PlayingState &&
                  m_mediaPlayer->playbackState() != QMediaPlayer::PausedState)) {
@@ -3736,7 +3671,6 @@ void MainWindow::extractAndAddToPlaylist(const QString &url) {
         m_ytProcess = nullptr;
     });
 
-    // Handle errors
     connect(m_ytProcess, &QProcess::errorOccurred, this, [this](QProcess::ProcessError error) {
         statusBar()->showMessage("Extraction error", 3000);
         if (m_ytProcess) {
@@ -3748,10 +3682,17 @@ void MainWindow::extractAndAddToPlaylist(const QString &url) {
     m_ytProcess->start("yt-dlp", args);
 }
 
-// Helper function to get title (non-blocking, optional)
+
+
+
 QString MainWindow::getTitleFromUrl(const QString &url) {
     QProcess titleProcess;
+
     QStringList titleArgs;
+
+    #ifdef FLATPAK_BUILD
+    #endif
+
     titleArgs << "--print" << "%(title)s" << "--quiet" << url;
 
     titleProcess.start("yt-dlp", titleArgs);
@@ -3769,8 +3710,10 @@ void MainWindow::extractGenericAndAddToPlaylist(const QString &url) {
 
     QProcess *process = new QProcess(this);
 
-    // Get title first
     QStringList titleArgs;
+#ifdef FLATPAK_BUILD
+#endif
+
     titleArgs << "--print" << "%(title)s";
     titleArgs << url;
 
@@ -3786,18 +3729,18 @@ void MainWindow::extractGenericAndAddToPlaylist(const QString &url) {
             }
         }
 
-        // Now get the stream URL with just -g
         QProcess *urlProcess = new QProcess(this);
 
-        // Use -f best for Vimeo, otherwise just -g
         QStringList urlArgs;
+#ifdef FLATPAK_BUILD
+#endif
+
         if (url.contains("vimeo.com")) {
             urlArgs << "--no-progress" << "-f" << "best" << "-g" << url;
         } else {
             urlArgs << "-g" << url;
         }
 
-        //urlProcess->start("yt-dlp", QStringList() << "-g" << url);
         urlProcess->start("yt-dlp", urlArgs);
 
         connect(urlProcess, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished),
@@ -3807,7 +3750,6 @@ void MainWindow::extractGenericAndAddToPlaylist(const QString &url) {
                 QString streamUrl = QString::fromUtf8(urlProcess->readAllStandardOutput()).trimmed();
 
                 if (!streamUrl.isEmpty()) {
-                    // Determine site for display tag
                     QString tag;
                     if (url.contains("dailymotion.com")) tag = "[Dailymotion]";
                     else if (url.contains("rumble.com")) tag = "[Rumble]";
@@ -3842,13 +3784,10 @@ void MainWindow::addStreamToPlaylist(const QString &streamUrl, const QString &di
         return;
     }
 
-    // Add to list widget (what user sees)
     playlist->addItem(displayTitle);
 
-    // Store the URL (what player uses)
     m_playlistFiles[playlistName].append(streamUrl);
 
-    // Auto-select the new item
     int newIndex = playlist->count() - 1;
 
     m_playlistLastTrackIndex[playlistName] = newIndex;
@@ -3857,69 +3796,20 @@ void MainWindow::addStreamToPlaylist(const QString &streamUrl, const QString &di
     statusBar()->showMessage(QString("Stream added to '%1'").arg(playlistName), 2000);
 }
 
-/*
-void MainWindow::extractYouTubeAndAddToPlaylist(const QString &youtubeUrl) {
-    statusBar()->showMessage("Extracting YouTube stream...", 0);
-
-    QProcess *process = new QProcess(this);
-
-    // Get title and duration in one command
-    QStringList args;
-    args << "--print" << "%(title)s|%(duration)s";
-    args << youtubeUrl;
-
-    connect(process, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished),
-        this, [this, process, youtubeUrl](int exitCode, QProcess::ExitStatus exitStatus) {
-
-        if (exitStatus == QProcess::NormalExit && exitCode == 0) {
-            QString output = QString::fromUtf8(process->readAllStandardOutput()).trimmed();
-            QStringList parts = output.split('|');
-
-            QString title = parts.value(0, "YouTube Video");
-            QString duration = parts.value(1, "0");
-
-            // Now get the actual stream URL
-            QProcess *urlProcess = new QProcess(this);
-            urlProcess->start("yt-dlp", QStringList() << "--no-progress" << "-f" << "best" << "-g" << youtubeUrl);
-
-            connect(urlProcess, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished),
-                this, [this, urlProcess, title, duration](int exitCode2, QProcess::ExitStatus exitStatus2) {
-
-                if (exitStatus2 == QProcess::NormalExit && exitCode2 == 0) {
-                    QString streamUrl = QString::fromUtf8(urlProcess->readAllStandardOutput()).trimmed();
-                    qDebug() << "streamurl  " << streamUrl;
-                    if (!streamUrl.isEmpty()) {
-                        // Add to playlist with custom display title
-                        QString displayTitle = title + " [YouTube]";
-                        addStreamToPlaylist(streamUrl, displayTitle);
-
-                        // Optionally store duration for later use
-                        // m_streamDurations[streamUrl] = duration.toInt();
-
-                        statusBar()->showMessage("Added: " + title, 3000);
-                    } else {
-                        statusBar()->showMessage("Failed to get stream URL", 3000);
-                    }
-                }
-                urlProcess->deleteLater();
-            });
-        } else {
-            statusBar()->showMessage("Failed to extract YouTube info", 3000);
-        }
-        process->deleteLater();
-    });
-
-    process->start("yt-dlp", args);
-}
-*/
 
 void MainWindow::extractYouTubeAndAddToPlaylist(const QString &youtubeUrl) {
     statusBar()->showMessage("Extracting YouTube stream...", 0);
 
     QProcess *process = new QProcess(this);
 
-    // Get title and duration in one command
     QStringList args;
+
+
+
+    #ifdef FLATPAK_BUILD
+    args << "--js-runtimes" << jsRuntimeArg();
+    #endif
+
     args << "--no-playlist" << "--quiet"
          << "--extractor-args" << "youtube:player_client=web_embedded"
          << "--print" << "%(title)s|%(duration)s"
@@ -3935,13 +3825,16 @@ void MainWindow::extractYouTubeAndAddToPlaylist(const QString &youtubeUrl) {
             QString title = parts.value(0, "YouTube Video");
             QString duration = parts.value(1, "0");
 
-            // Now get the actual stream URL
             QProcess *urlProcess = new QProcess(this);
-
             QStringList urlArgs;
+
+            #ifdef FLATPAK_BUILD
+            urlArgs << "--js-runtimes" << jsRuntimeArg();
+            #endif
+
             urlArgs << "--no-progress" << "--no-playlist" << "--quiet"
                     << "--extractor-args" << "youtube:player_client=web_embedded"
-                    << "-f" << "best[ext=mp4]/best"
+                    << "-f" << "b"
                     << "-g" << youtubeUrl;
 
             urlProcess->start("yt-dlp", urlArgs);
@@ -3956,11 +3849,9 @@ void MainWindow::extractYouTubeAndAddToPlaylist(const QString &youtubeUrl) {
                         QString displayTitle = title + " [YouTube]";
                         addStreamToPlaylist(streamUrl, displayTitle);
                         statusBar()->showMessage("Added: " + title, 3000);
-                        //playRemoteStream(streamUrl);
                         if (!m_mediaPlayer ||
                             (m_mediaPlayer->playbackState() != QMediaPlayer::PlayingState &&
                              m_mediaPlayer->playbackState() != QMediaPlayer::PausedState)) {
-                            playRemoteStream(streamUrl);
                         }
                     } else {
                         statusBar()->showMessage("Failed to get stream URL", 3000);
@@ -3975,6 +3866,24 @@ void MainWindow::extractYouTubeAndAddToPlaylist(const QString &youtubeUrl) {
     });
 
     process->start("yt-dlp", args);
+}
+
+QString MainWindow::jsRuntimeArg() const
+{
+#ifdef FLATPAK_BUILD
+    QString denoPath = ConstantGlobals::appDirPath + "/deno";
+    if (QFile::exists(denoPath)) {
+        QFile::setPermissions(denoPath,
+            QFile::ReadOwner | QFile::WriteOwner | QFile::ExeOwner |
+            QFile::ReadGroup | QFile::ExeGroup |
+            QFile::ReadOther | QFile::ExeOther);
+        return QString("deno:%1").arg(denoPath);
+    }
+    QString qjsPath = QApplication::applicationDirPath() + "/qjs";
+    return QString("quickjs:%1").arg(qjsPath);
+#else
+    return QString();
+#endif
 }
 
 void MainWindow::playRemoteStream(const QString &urlString) {
@@ -4014,43 +3923,6 @@ void MainWindow::playRemoteStream(const QString &urlString) {
     statusBar()->showMessage("Streaming: " + displayName);
 }
 
-/*
-void MainWindow::onFileOpened(const QString &filePath) {
-    QFileInfo fileInfo(filePath);
-    if (!fileInfo.exists() || !fileInfo.isFile()) {
-        return;
-    }
-
-    QString suffix = fileInfo.suffix().toLower();
-    QStringList supportedExtensions = {"mp3", "wav", "flac", "ogg", "m4a",
-                                       "mp4", "m4v", "avi",  "mkv"};
-
-    if (!supportedExtensions.contains(suffix)) {
-        statusBar()->showMessage("Unsupported file format: ." + suffix, 3000);
-        return;
-    }
-
-    QString playlistName = currentPlaylistName();
-    QString fileName = fileInfo.fileName();
-
-    // Add to playlist
-    currentPlaylistWidget()->addItem(fileName);
-    m_playlistFiles[playlistName].append(filePath);
-
-    // Select the newly added item
-    int newIndex = currentPlaylistWidget()->count() - 1;
-    currentPlaylistWidget()->setCurrentRow(newIndex);
-
-    // Store in map and update current track
-    m_playlistLastTrackIndex[playlistName] = newIndex;
-    m_currentTrackIndex = newIndex;
-    m_currentPlaylistName = playlistName;
-
-    // Play the file
-    m_playMusicButton->click();
-    statusBar()->showMessage("Opened: " + fileName, 3000);
-}
-*/
 
 
 void MainWindow::onFileOpened(const QString &filePath) {
@@ -4062,7 +3934,6 @@ void MainWindow::onFileOpened(const QString &filePath) {
     QString suffix = fileInfo.suffix().toLower();
     QString fileName = fileInfo.fileName();
 
-    // Use constants for supported extensions
     if (!ConstantGlobals::allMediaExtensions.contains("." + suffix)) {
         statusBar()->showMessage("Unsupported file format: ." + suffix, 3000);
         return;
@@ -4070,20 +3941,16 @@ void MainWindow::onFileOpened(const QString &filePath) {
 
     QString playlistName = currentPlaylistName();
 
-    // Add to playlist
     currentPlaylistWidget()->addItem(fileName);
     m_playlistFiles[playlistName].append(filePath);
 
-    // Select the newly added item
     int newIndex = currentPlaylistWidget()->count() - 1;
     currentPlaylistWidget()->setCurrentRow(newIndex);
 
-    // Store in map and update current track
     m_playlistLastTrackIndex[playlistName] = newIndex;
     m_currentTrackIndex = newIndex;
     m_currentPlaylistName = playlistName;
 
-    // Play the file
     m_playMusicButton->click();
     statusBar()->showMessage("Opened: " + fileName, 3000);
 }
@@ -4091,7 +3958,6 @@ void MainWindow::onFileOpened(const QString &filePath) {
 QString MainWindow::getTrackMetadata() {
     metaData = m_mediaPlayer->metaData();
 
-    //QString displayMetaData = "Metadata:\n";
     QString displayMetaData = "\n\n";
 
     QList<QMediaMetaData::Key> allKeys = {
@@ -4224,29 +4090,22 @@ void MainWindow::createInfoDialog() {
     trackInfoDialog->setWindowTitle("Track Information");
     trackInfoDialog->setWindowModality(Qt::NonModal);
     trackInfoDialog->resize(500, 600); // Increased height for image
-    // Ensure dialog is not deleted when closed
     trackInfoDialog->setAttribute(Qt::WA_DeleteOnClose, false);
 
-    // Create widgets
     coverArtLabel = new QLabel(trackInfoDialog);
     coverArtLabel->setAlignment(Qt::AlignCenter);
-    //coverArtLabel->setMinimumSize(200, 200);
-    //coverArtLabel->setMaximumSize(300, 300);
     originalCoverArtSize = QSize(200, 200);
     coverArtLabel->setFixedSize(originalCoverArtSize);
     coverArtLabel->installEventFilter(this);
     coverArtLabel->setCursor(Qt::PointingHandCursor);
     coverArtLabel->setScaledContents(false);  // So we control scaling
-    //coverArtLabel->setScaledContents(true);
     coverArtLabel->setStyleSheet("QLabel { border: 1px solid gray; background-color: #f0f0f0; }");
 
     metadataBrowser = new QTextBrowser(trackInfoDialog);
-    //metadataBrowser->setAlignment(Qt::AlignCenter);
     metadataBrowser->setReadOnly(true);
     metadataBrowser->setFont(QFont("Monospace", 10));
     metadataBrowser->setMinimumHeight(300);
 
-    // Layout
     QVBoxLayout *layout = new QVBoxLayout(trackInfoDialog);
     layout->addWidget(coverArtLabel, 0, Qt::AlignCenter);
     layout->addWidget(metadataBrowser);
@@ -4267,27 +4126,19 @@ void MainWindow::handleMetaDataUpdated() {
         metadataBrowser->setText(currentTrackMetadata);
     }
 
-    // Try to get cover art
     if (coverArtLabel) {
         QImage coverArt;
 
-        // First try Qt (might work for some formats)
         QVariant coverVariant = m_mediaPlayer->metaData().value(QMediaMetaData::CoverArtImage);
         if (coverVariant.isValid() && coverVariant.canConvert<QImage>()) {
             coverArt = coverVariant.value<QImage>();
         }
 
-        // If Qt failed, use ffmpeg
         if (coverArt.isNull() && m_mediaPlayer->source().isLocalFile()) {
             coverArt = extractCoverArt(m_mediaPlayer->source().toLocalFile());
         }
 
-        // Display result
         if (!coverArt.isNull()) {
-            //QPixmap pixmap = QPixmap::fromImage(coverArt);
-            //coverArtLabel->setPixmap(pixmap.scaled(coverArtLabel->size(),
-              //                                     Qt::KeepAspectRatio,
-                //                                   Qt::SmoothTransformation));
 
             originalCoverArtImage = coverArt;  // Store original
             QPixmap pixmap = QPixmap::fromImage(coverArt);
@@ -4910,7 +4761,6 @@ void MainWindow::dragEnterEvent(QDragEnterEvent *event) {
             QString filePath = url.toLocalFile();
             QString suffix = QFileInfo(filePath).suffix().toLower();
 
-            // Check if extension is in the allowed media extensions list
             if (!ConstantGlobals::allMediaExtensions.contains("." + suffix)) {
                 allSupported = false;
                 break;
@@ -4946,10 +4796,8 @@ void MainWindow::processDroppedFiles(const QStringList &filePaths) {
     QString playlistName = currentPlaylistName();
     QListWidget *playlist = currentPlaylistWidget();
 
-    // Remember if playlist was empty before adding
     bool wasEmpty = (playlist->count() == 0);
 
-    // Create QSet of existing file paths for duplicate checking
     QSet<QString> existingFiles;
     for (const QString &existingPath : m_playlistFiles[playlistName]) {
         existingFiles.insert(existingPath);
@@ -4958,11 +4806,9 @@ void MainWindow::processDroppedFiles(const QStringList &filePaths) {
     QStringList validFiles;
     QStringList duplicateFiles;
 
-    // Only check for duplicates - extension already validated by dragEnterEvent
     foreach (const QString &filePath, filePaths) {
         QString absolutePath = QFileInfo(filePath).absoluteFilePath();
 
-        // Check for duplicate
         if (existingFiles.contains(absolutePath)) {
             duplicateFiles.append(QFileInfo(filePath).fileName());
         } else {
@@ -4971,7 +4817,6 @@ void MainWindow::processDroppedFiles(const QStringList &filePaths) {
         }
     }
 
-    // Show duplicate files notice if any
     if (!duplicateFiles.isEmpty()) {
         QString duplicateList = duplicateFiles.join("\n• ");
         QMessageBox::information(this, "Duplicate Files Skipped",
@@ -4980,16 +4825,13 @@ void MainWindow::processDroppedFiles(const QStringList &filePaths) {
             .arg(duplicateList));
     }
 
-    // Add valid files to playlist
     foreach (const QString &filePath, validFiles) {
         QString fileName = QFileInfo(filePath).fileName();
         playlist->addItem(fileName);
         m_playlistFiles[playlistName].append(filePath);
     }
 
-    // Update UI and status bar
     if (!validFiles.isEmpty()) {
-        // Only select the first new item if the playlist was EMPTY before adding
         if (wasEmpty && playlist->count() > 0) {
             playlist->setCurrentRow(0);
             playlist->scrollToItem(playlist->item(0));
@@ -4997,7 +4839,6 @@ void MainWindow::processDroppedFiles(const QStringList &filePaths) {
             m_currentTrackIndex = 0;
             m_currentPlaylistName = playlistName;
         }
-        // Otherwise do nothing - keep existing selection
 
         QString message = QString("Added %1 file(s) to '%2' via drag & drop")
             .arg(validFiles.size())
@@ -5167,7 +5008,6 @@ void MainWindow::setupVideoPlayer() {
 
         if (m_mediaPlayer) m_mediaPlayer->setVideoOutput(videoWidget);
 
-        // Use existing videoWidget and toolbar
         layout->addWidget(videoWidget);
         layout->addWidget(m_videoToolbar);
 
@@ -5245,7 +5085,6 @@ void MainWindow::createVideoToolbar() {
     QPushButton* clearStreamButton = new QPushButton(this);
     clearStreamButton->setFixedSize(32, 32);
     clearStreamButton->setIcon(QIcon(":/icons-white/cloud-off.svg"));
-    //clearStreamButton->setToolTip("Clear current stream - Disabled in full screen mode");
     connect(clearStreamButton, &QPushButton::clicked, this, [this](){
 
 
@@ -5265,7 +5104,6 @@ void MainWindow::createVideoToolbar() {
     loadStreamButton->setFixedSize(32, 32);
 
     loadStreamButton->setIcon(QIcon(":/icons-white/rss.svg"));
-    //loadStreamButton->setToolTip("Load Network Stream - Disabled in full screen mode");
     connect(loadStreamButton, &QPushButton::clicked, this, [this](){
 
         onStreamFromUrl();
@@ -5288,15 +5126,11 @@ void MainWindow::createVideoToolbar() {
     toolbarLayout->addWidget(clearStreamButton);
     toolbarLayout->addWidget(m_fullscreenButton);
 
-    //connect(m_playButton, &QPushButton::clicked, this,
-      //      &MainWindow::onPlayClicked);
     connect(m_playButton, &QPushButton::clicked, this, [this]() {
 
 
         onPlayClicked();
     });
-    //connect(m_pauseButton, &QPushButton::clicked, this,
-      //      &MainWindow::onPauseClicked);
 
     connect(m_pauseButton, &QPushButton::clicked, this, [this]() {
 
@@ -5305,8 +5139,6 @@ void MainWindow::createVideoToolbar() {
     });
 
 
-    //connect(m_stopButton, &QPushButton::clicked, this,
-      //      &MainWindow::onStopClicked);
 
     connect(m_stopButton, &QPushButton::clicked, this, [this]() {
 
@@ -5325,8 +5157,6 @@ void MainWindow::createVideoToolbar() {
     connect(videoWidget, &QVideoWidget::customContextMenuRequested, this,
             &MainWindow::onVideoContextMenu);
 
-    //connect(m_vpreviousButton, &QPushButton::clicked, this,
-      //  &MainWindow::playPreviousTrack);
 
     connect(m_vpreviousButton, &QPushButton::clicked, this, [this]() {
 
@@ -5334,8 +5164,6 @@ void MainWindow::createVideoToolbar() {
         playPreviousTrack();
     });
 
-    //connect(m_vnextButton, &QPushButton::clicked, this,
-      //  &MainWindow::playNextTrack);
 
     connect(m_vnextButton, &QPushButton::clicked, this, [this]() {
 
@@ -5412,13 +5240,11 @@ bool MainWindow::eventFilter(QObject *watched, QEvent *event) {
     if (watched == coverArtLabel) {
         if (event->type() == QEvent::Enter) {
             if (!originalCoverArtImage.isNull()) {
-                // Store current size before scaling
                 originalCoverArtSize = coverArtLabel->size();
 
                 QSize newSize(originalCoverArtSize.width() * 1.50,
                              originalCoverArtSize.height() * 1.50);
 
-                // Scale from ORIGINAL image every time
                 QPixmap scaled = QPixmap::fromImage(originalCoverArtImage)
                                 .scaled(newSize, Qt::KeepAspectRatio, Qt::SmoothTransformation);
                 coverArtLabel->setPixmap(scaled);
@@ -5428,7 +5254,6 @@ bool MainWindow::eventFilter(QObject *watched, QEvent *event) {
         }
         else if (event->type() == QEvent::Leave) {
             if (!originalCoverArtImage.isNull()) {
-                // Scale back to original size from ORIGINAL image
                 QPixmap scaled = QPixmap::fromImage(originalCoverArtImage)
                                 .scaled(originalCoverArtSize, Qt::KeepAspectRatio, Qt::SmoothTransformation);
                 coverArtLabel->setPixmap(scaled);
@@ -5457,17 +5282,14 @@ bool MainWindow::eventFilter(QObject *watched, QEvent *event) {
         }
     }
 
-    // Video window events - now using the floating window
     if (watched == m_videoFloatingWindow || watched == videoWidget || watched == m_videoToolbar) {
 
         if (event->type() == QEvent::Close) {
-            // Window is being closed (X button clicked)
             if (openVideoButton->isChecked()) {
                 openVideoButton->blockSignals(true);
                 openVideoButton->setChecked(false);
                 openVideoButton->blockSignals(false);
             }
-            // Hide instead of destroy
             m_videoFloatingWindow->hide();
             return true; // Accept the close event
         }
@@ -5560,7 +5382,6 @@ void MainWindow::setupFlickerWindow() {
         m_flickerFloatingWindow = new QWidget(this, Qt::Window);
         m_flickerFloatingWindow->setWindowTitle("Visual Stimulation");
         m_flickerFloatingWindow->setMinimumSize(800, 600);
-        //m_flickerFloatingWindow->resize(1024, 600);
         m_flickerFloatingWindow->installEventFilter(this);
         m_flickerFloatingWindow->setAttribute(Qt::WA_DeleteOnClose, false);
 
@@ -5568,7 +5389,6 @@ void MainWindow::setupFlickerWindow() {
         layout->setContentsMargins(0, 0, 0, 0);
         layout->setSpacing(0);
 
-        // Create or reparent existing flicker container
         if (!m_flickerContainer) {
             m_flickerContainer = new QWidget();
             QVBoxLayout *flickerLayout = new QVBoxLayout(m_flickerContainer);
@@ -5615,17 +5435,12 @@ void MainWindow::toggleFlickerFullscreen() {
     if (!m_flickerFloatingWindow) return;
 
     if (m_flickerFloatingWindow->isFullScreen()) {
-        // Exit fullscreen - restore normal window
         m_flickerFloatingWindow->showNormal();
         m_flickerFloatingWindow->setWindowFlags(Qt::Window);
-        //m_flickerFloatingWindow->setWindowState(Qt::WindowNoState);  // Clear maximized state
-        //m_flickerFloatingWindow->showNormal();
-        //m_flickerFloatingWindow->resize(600, 600);  // Restore original size
         m_flickerFloatingWindow->show();
         m_flickerFloatingWindow->raise();
 
     } else {
-        // Enter fullscreen - remove titlebar
         m_flickerFloatingWindow->setWindowFlags(Qt::Window | Qt::FramelessWindowHint);
         m_flickerFloatingWindow->showFullScreen();
     }
@@ -5757,7 +5572,6 @@ void MainWindow::toggleTheme(bool enableDark)
 }
 
 void MainWindow::onClearStreamProcess() {
-    // Kill yt-dlp process if running
     if (m_ytProcess && m_ytProcess->state() == QProcess::Running) {
         m_ytProcess->kill();
         m_ytProcess->waitForFinished(1000);
@@ -5765,16 +5579,13 @@ void MainWindow::onClearStreamProcess() {
         m_ytProcess = nullptr;
     }
 
-    // Clear the output buffer
     m_outputBuffer.clear();
 
-    // Unload source from media player
     if (m_mediaPlayer) {
         m_mediaPlayer->stop();
         m_mediaPlayer->setSource(QUrl());  // Clear/unload the source
     }
 
-    // Reset stream-related variables
     m_isStream = false;
     m_currentStreamUrl.clear();
 
@@ -5782,12 +5593,10 @@ void MainWindow::onClearStreamProcess() {
 }
 
 QImage MainWindow::extractCoverArt(const QString& filePath) {
-    // Check cache first
     if (coverArtCache.contains(filePath)) {
         return coverArtCache[filePath];
     }
 
-    // Extract image
     QTemporaryFile tempFile;
     if (!tempFile.open()) return QImage();
     QString tempPath = tempFile.fileName() + ".jpg";
@@ -5802,13 +5611,11 @@ QImage MainWindow::extractCoverArt(const QString& filePath) {
     cover.load(tempPath);
     QFile::remove(tempPath);
 
-    // Store in cache (even if null, to avoid re-trying broken files)
     coverArtCache[filePath] = cover;
 
     return cover;
 }
 
-// brainwave presets notice
 void MainWindow::showPresetExtractionNotice()
 {
     QSettings settings;
@@ -5817,7 +5624,6 @@ void MainWindow::showPresetExtractionNotice()
         return;
     }
 
-    // Copy the archive to the user's directory
     QString destPath = ConstantGlobals::sessionsFilePath + "/session_presets.tar.xz";
 
     if (!QFile::exists(destPath)) {
@@ -5825,7 +5631,6 @@ void MainWindow::showPresetExtractionNotice()
     }
 
 
-    // Create dialog
     QMessageBox msgBox(this);
     msgBox.setWindowTitle("Brainwave Presets Available");
     msgBox.setIcon(QMessageBox::Information);
@@ -5863,14 +5668,12 @@ void MainWindow::copyPresetsArchive()
 {
     QString destPath = ConstantGlobals::sessionsFilePath + "/session_presets.tar.xz";
 
-    // Check if already exists
     if (QFile::exists(destPath)) {
         QMessageBox::information(this, "Already Exists",
             "Sessions archive already exists at:\n" + destPath);
         return;
     }
 
-    // Confirm with user
     QMessageBox::StandardButton reply = QMessageBox::question(this, "Copy Sessions",
         "Copy brainwave sessions archive to:\n" + ConstantGlobals::sessionsFilePath + "?",
         QMessageBox::Yes | QMessageBox::No);
@@ -5883,13 +5686,91 @@ void MainWindow::copyPresetsArchive()
 }
 
 void MainWindow::openFolder() {
-    // Optional: Check if the folder exists
     QDir dir(ConstantGlobals::appDirPath);
     if (!dir.exists()) {
         return;
     }
 
-    // Convert local path to URL and open
     if (!QDesktopServices::openUrl(QUrl::fromLocalFile(ConstantGlobals::appDirPath))) {
     }
+}
+
+void MainWindow::showDenoHelpDialog()
+{
+    QDialog dlg(this);
+    dlg.setWindowTitle("Faster YouTube Extraction");
+    dlg.setMinimumSize(520, 400);
+
+    QVBoxLayout *layout = new QVBoxLayout(&dlg);
+
+    QTextBrowser *tb = new QTextBrowser(&dlg);
+    tb->setOpenExternalLinks(true);
+
+    QString denoPath = ConstantGlobals::appDirPath + "/deno";
+    bool installed = QFile::exists(denoPath);
+
+    QString status = installed
+        ? "<p style='color: green;'><b>Deno is installed.</b> "
+          "YouTube extraction is running at full speed.</p>"
+        : "<p style='color: #b88;'><b>Deno is not installed.</b> "
+          "Extraction falls back to QuickJS, which is slower.</p>";
+
+    tb->setHtml(QString(R"(
+        <h3>Faster YouTube Extraction</h3>
+        %1
+
+        <p>%3 uses <code>yt-dlp</code> to extract stream URLs from YouTube.
+        Some YouTube challenges require a JavaScript runtime. The app ships with
+        <b>QuickJS</b> (about 2 MB), which works but is slow — each challenge is
+        written to a temporary file and run from disk.</p>
+
+        <p><b>Deno</b> is a faster JavaScript runtime. When it is present,
+        extraction drops from a few seconds to under a second.</p>
+
+        <h4>How to install Deno</h4>
+        <ol>
+            <li>Go to the Deno releases page:<br>
+                <a href="https://github.com/denoland/deno/releases">
+                https://github.com/denoland/deno/releases</a></li>
+            <li>Download the archive for your platform:
+                <ul>
+                    <li><b>Linux x86_64:</b> <code>deno-x86_64-unknown-linux-gnu.zip</code></li>
+                    <li><b>Linux aarch64:</b> <code>deno-aarch64-unknown-linux-gnu.zip</code></li>
+                    <li><b>Windows x86_64:</b> <code>deno-x86_64-pc-windows-msvc.zip</code></li>
+                </ul>
+            </li>
+            <li>Extract the archive. It contains a single file called
+                <code>deno</code> (or <code>deno.exe</code> on Windows).</li>
+            <li>Place that file in the folder shown below. Use the
+                <b>Open Data Folder</b> button to open it.</li>
+            <li>Restart Asteria. The next extraction will use Deno automatically.</li>
+        </ol>
+
+        <p><b>Expected file location:</b><br>
+        <code>%2</code></p>
+
+        <p>If you later want to go back to the default behavior, delete the
+        file. Asteria will fall back to QuickJS.</p>
+        )").arg(status, denoPath, QApplication::applicationName()));
+
+    layout->addWidget(tb);
+
+    QHBoxLayout *buttons = new QHBoxLayout();
+
+    QPushButton *openFolderBtn = new QPushButton("Open Data Folder", &dlg);
+    buttons->addWidget(openFolderBtn);
+    connect(openFolderBtn, &QPushButton::clicked, []() {
+        QDesktopServices::openUrl(
+            QUrl::fromLocalFile(ConstantGlobals::appDirPath));
+    });
+
+    buttons->addStretch();
+
+    QPushButton *closeBtn = new QPushButton("Close", &dlg);
+    buttons->addWidget(closeBtn);
+    connect(closeBtn, &QPushButton::clicked, &dlg, &QDialog::reject);
+
+    layout->addLayout(buttons);
+
+    dlg.exec();
 }

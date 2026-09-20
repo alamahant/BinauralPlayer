@@ -9,9 +9,6 @@
 #include<QJsonDocument>
 #include<QJsonObject>
 
-// ============================================================
-// SPIN KNOB CLASS
-// ============================================================
 
 SpinKnob::SpinKnob(const QString &label, QWidget *parent)
     : QDial(parent)
@@ -27,8 +24,6 @@ SpinKnob::SpinKnob(const QString &label, QWidget *parent)
     setNotchesVisible(true);
     setNotchTarget(10.0);
     setFixedSize(100, 100);
-    //setToolTip("Click and hold to spin · Release to lock");
-    //m_gen = QRandomGenerator::securelySeeded();
 
     m_valueLabel = new QLabel("0000", this);
     m_valueLabel->setAlignment(Qt::AlignCenter);
@@ -53,9 +48,6 @@ void SpinKnob::mousePressEvent(QMouseEvent *event)
     m_lockedValue = 0;
     m_valueLabel->setText("0000");
 
-    // Use m_gen instead of global()
-    //int randomStart = m_gen.bounded(10000);
-    //setValue(randomStart);
 
     m_isSpinning = true;
     m_timer.start();
@@ -68,7 +60,6 @@ void SpinKnob::mouseReleaseEvent(QMouseEvent *event)
         m_isSpinning = false;
         m_timer.stop();
         m_isLocked = true;
-       // m_lockedValue = value();
         m_lockedValue = m_currentRandomValue;
         m_valueLabel->setText(QString("%1").arg(m_lockedValue, 4, 10, QChar('0')));
 
@@ -82,10 +73,7 @@ void SpinKnob::spin()
 
     m_valueLabel->setText(
         QString("%1").arg(m_currentRandomValue, 4, 10, QChar('0')));
-   // int displayValue = m_currentRandomValue / 100;  // 0-9999 → 0-99
-    //setValue(displayValue);
 
-    //setValue(m_currentRandomValue); // purely visual
 }
 
 void SpinKnob::reset()
@@ -98,9 +86,6 @@ void SpinKnob::reset()
     m_timer.stop();
 }
 
-// ============================================================
-// RADIONICS CONSOLE
-// ============================================================
 
 RadionicsConsole::RadionicsConsole(QWidget *parent)
     : QDialog(parent)
@@ -123,9 +108,6 @@ RadionicsConsole::~RadionicsConsole()
     if (m_zoomPopup) delete m_zoomPopup;
 }
 
-// ============================================================
-// SETUP UI
-// ============================================================
 
 void RadionicsConsole::setupUI()
 {
@@ -136,19 +118,14 @@ void RadionicsConsole::setupUI()
     QVBoxLayout *mainLayout = new QVBoxLayout(this);
     mainLayout->setSpacing(15);
     mainLayout->setContentsMargins(25, 25, 25, 25);
-    // ============================================================
-    // TOP ROW: TARGET (LEFT) + TREND (RIGHT)
-    // ============================================================
     QHBoxLayout *topRow = new QHBoxLayout();
     topRow->setSpacing(20);
 
-    // -- Target (Left) --
     QVBoxLayout *targetLayout = new QVBoxLayout();
     QLabel *targetLabel = new QLabel("TARGET", this);
     targetLabel->setStyleSheet("color: #cccccc; font-weight: bold; font-size: 16px;");
     targetEdit = new QTextEdit(this);
     targetEdit->setPlaceholderText("Who is this for?");
-    //targetEdit->setStyleSheet("background: #2a2a2a; color: #ffffff; border: 1px solid #444; border-radius: 4px; padding: 8px; font-size: 14px;");
     targetEdit->setStyleSheet(
         "background: #2a2a2a; color: #ffffff; border: 1px solid #444; border-radius: 4px; "
         "padding: 8px; font-size: 14px;"
@@ -172,13 +149,11 @@ void RadionicsConsole::setupUI()
     targetLayout->addWidget(targetEdit);
     targetLayout->addLayout(targetImageLayout);
 
-    // -- Trend (Right) --
     QVBoxLayout *trendLayout = new QVBoxLayout();
     QLabel *trendLabel = new QLabel("TREND", this);
     trendLabel->setStyleSheet("color: #cccccc; font-weight: bold; font-size: 16px;");
     trendEdit = new QTextEdit(this);
     trendEdit->setPlaceholderText("What do you want to achieve?");
-    //trendEdit->setStyleSheet("background: #2a2a2a; color: #ffffff; border: 1px solid #444; border-radius: 4px; padding: 8px; font-size: 14px;");
     trendEdit->setStyleSheet(
         "background: #2a2a2a; color: #ffffff; border: 1px solid #444; border-radius: 4px; "
         "padding: 8px; font-size: 14px;"
@@ -202,7 +177,6 @@ void RadionicsConsole::setupUI()
     trendLayout->addLayout(trendImageLayout);
 
 
-    //
     bogusProgress = new QProgressBar(this);
     bogusProgress->setRange(0, 100);
     bogusProgress->setValue(50);  // Halfway
@@ -233,22 +207,17 @@ void RadionicsConsole::setupUI()
             bogusProgress->setValue(val + 1);
         }
     });
-    //
 
 
     topRow->addLayout(trendLayout);
-    //topRow->addStretch();
     topRow->addWidget(bogusProgress);
     topRow->addLayout(targetLayout);
 
-    // Store pointers
     m_targetLabel = targetLabel;
-    //targetEdit = targetEdit;
     m_targetImagePreview = targetImagePreview;
     m_targetUploadBtn = targetUploadBtn;
 
     m_trendLabel = trendLabel;
-    //trendEdit = trendEdit;
     m_trendImagePreview = trendImagePreview;
     m_trendUploadBtn = trendUploadBtn;
 
@@ -262,9 +231,6 @@ void RadionicsConsole::setupUI()
 
 
 
-    // ============================================================
-    // BASE FREQUENCY
-    // ============================================================
     QHBoxLayout *freqLayout = new QHBoxLayout();
     QLabel *freqLabel = new QLabel("BASE FREQUENCY", this);
     freqLabel->setStyleSheet("color: #cccccc; font-weight: bold; font-size: 14px;");
@@ -286,7 +252,6 @@ void RadionicsConsole::setupUI()
     m_baseFreqValue = freqValue;
 
 
-    // duration slider
 
     QHBoxLayout *durationLayout = new QHBoxLayout();
     QLabel *durationLabel = new QLabel("DURATION", this);
@@ -307,11 +272,7 @@ void RadionicsConsole::setupUI()
     m_durationLabel = durationLabel;
     m_durationSlider = durationSlider;
     m_durationValue = durationValue;
-    //
 
-    // ============================================================
-    // KNOBS SECTION
-    // ============================================================
     QLabel *knobLabel = new QLabel("INTENTION SEEDS", this);
     knobLabel->setStyleSheet("color: #888888; font-weight: bold; font-size: 14px; margin-top: 10px;");
     knobLabel->setAlignment(Qt::AlignLeft);
@@ -323,7 +284,6 @@ void RadionicsConsole::setupUI()
     m_knob2 = new SpinKnob("Dial 2", this);
     m_knob3 = new SpinKnob("Dial 3", this);
 
-    // Create labels for each knob
     QVBoxLayout *knob1Layout = new QVBoxLayout();
     knob1Layout->addWidget(m_knob1, 0, Qt::AlignCenter);
     QLabel *knob1Label = new QLabel("Dial 1", this);
@@ -353,14 +313,10 @@ void RadionicsConsole::setupUI()
     knobLayout->addLayout(knob3Layout);
     knobLayout->addStretch();
 
-    // Instruction label
     QLabel *knobInstruction = new QLabel("Click and hold a dial to spin · Release to lock", this);
     knobInstruction->setStyleSheet("color: #666666; font-size: 12px;");
     knobInstruction->setAlignment(Qt::AlignCenter);
 
-    // ============================================================
-    // STATUS DISPLAY
-    // ============================================================
     QHBoxLayout *statusLayout = new QHBoxLayout();
     statusLayout->setSpacing(25);
 
@@ -397,9 +353,6 @@ void RadionicsConsole::setupUI()
     m_leftFreqLabel = leftValue;
     m_rightFreqLabel = rightValue;
 
-    // ============================================================
-    // BOTTOM CONTROLS
-    // ============================================================
     QHBoxLayout *buttonLayout = new QHBoxLayout();
     buttonLayout->setSpacing(15);
 
@@ -432,9 +385,6 @@ void RadionicsConsole::setupUI()
     m_stopBtn = stopBtn;
     m_saveBtn = saveBtn;
 
-    // ============================================================
-    // ASSEMBLE
-    // ============================================================
     mainLayout->addStretch();  // pushes everything to the bottom
 
     mainLayout->addLayout(topRow);
@@ -453,9 +403,6 @@ void RadionicsConsole::setupUI()
     mainLayout->addSpacing(15);
     mainLayout->addLayout(buttonLayout);
     mainLayout->addStretch();  // pushes everything to the top
-    // ============================================================
-    // CONNECTIONS
-    // ============================================================
     connect(m_targetUploadBtn, &QPushButton::clicked, this, &RadionicsConsole::onUploadTargetImage);
     connect(m_trendUploadBtn, &QPushButton::clicked, this, &RadionicsConsole::onUploadTrendImage);
     connect(m_baseFreqSlider, &QSlider::valueChanged, this, &RadionicsConsole::onBaseFrequencyChanged);
@@ -472,16 +419,12 @@ void RadionicsConsole::setupUI()
             this, &RadionicsConsole::onDurationChanged);
     m_stopBtn->setEnabled(false);
 
-    // Create zoom popup (hidden by default)
     m_zoomPopup = new QLabel(nullptr, Qt::ToolTip | Qt::FramelessWindowHint);
     m_zoomPopup->setStyleSheet("border: 2px solid #444; border-radius: 8px; background: #1a1a1a;");
     m_zoomPopup->setAlignment(Qt::AlignCenter);
     m_zoomPopup->hide();
 }
 
-// ============================================================
-// IMAGE UPLOADS
-// ============================================================
 
 
 
@@ -519,9 +462,6 @@ void RadionicsConsole::onUploadTrendImage()
     }
 }
 
-// ============================================================
-// BASE FREQUENCY
-// ============================================================
 
 void RadionicsConsole::onBaseFrequencyChanged(int value)
 {
@@ -541,13 +481,9 @@ void RadionicsConsole::onBaseFrequencyChanged(int value)
     );
 }
 
-// ============================================================
-// KNOB HANDLING
-// ============================================================
 
 void RadionicsConsole::onKnobLocked(int value)
 {
-    // Determine which knob sent the signal
     SpinKnob *knob = qobject_cast<SpinKnob*>(sender());
     if (knob == m_knob1) {
         m_knob1Seed = value;
@@ -557,13 +493,11 @@ void RadionicsConsole::onKnobLocked(int value)
         m_knob3Seed = value;
     }
 
-    // Check if all three knobs are locked
     if (m_knob1->isLocked() && m_knob2->isLocked() && m_knob3->isLocked()) {
         m_isLocked = true;
         updateCombinedSeed();
         updateFrequencyDisplay();
 
-        // Emit the structural link signal
         emit structuralLinkCaptured(
             m_combinedSeed,
             m_leftFrequency,
@@ -625,7 +559,6 @@ void RadionicsConsole::onResetKnobs()
     m_leftFrequency = m_baseFrequency;
     m_rightFrequency = m_baseFrequency;
 
-    // ✅ Clear images and paths
     m_originalTargetPixmap = QPixmap();
     m_originalTrendPixmap = QPixmap();
     m_lastTargetImagePath.clear();
@@ -644,17 +577,12 @@ void RadionicsConsole::onExternalStopRequested()
     onStop();
 }
 
-// ============================================================
-// COMBINE SEEDS
-// ============================================================
 
 void RadionicsConsole::updateCombinedSeed()
 {
-    // Combine the three seeds (0-9999 each) into one (0.000-1.000)
     m_combinedSeed = (m_knob1Seed + m_knob2Seed + m_knob3Seed) / 30000.0;
     m_combinedSeed = qBound(0.0, m_combinedSeed, 1.0);
 
-    // Calculate offset and frequencies
     double maxOffset = 5.0;
     m_offset = m_combinedSeed * maxOffset;
     m_leftFrequency = m_baseFrequency + m_offset;
@@ -662,9 +590,6 @@ void RadionicsConsole::updateCombinedSeed()
 
 }
 
-// ============================================================
-// UPDATE DISPLAY
-// ============================================================
 
 void RadionicsConsole::updateFrequencyDisplay()
 {
@@ -681,9 +606,6 @@ void RadionicsConsole::updateFrequencyDisplay()
     }
 }
 
-// ============================================================
-// PLAY / STOP / SAVE
-// ============================================================
 
 void RadionicsConsole::onPlay()
 {
@@ -694,7 +616,6 @@ void RadionicsConsole::onPlay()
     }
     m_playBtn->setEnabled(false);
     m_stopBtn->setEnabled(true);
-    // ✅ Start progress bar animation
     m_bogusTimer->start();
     emit playRequested(m_leftFrequency, m_rightFrequency);
 }
@@ -703,7 +624,6 @@ void RadionicsConsole::onStop()
 {
     m_playBtn->setEnabled(true);
     m_stopBtn->setEnabled(false);
-    // ✅ Stop progress bar animation
     m_bogusTimer->stop();
     bogusProgress->setValue(50);  // Reset to halfway
     emit stopRequested();
@@ -716,7 +636,6 @@ void RadionicsConsole::onSave()
         return;
     }
 
-    // Get save file path
     QString filePath = QFileDialog::getSaveFileName(this,
         "Save Radionics Session",
         ConstantGlobals::radionicsFilePath + "/session_" + QDateTime::currentDateTime().toString("yyyyMMdd_hhmmss") + ".json",
@@ -733,34 +652,27 @@ void RadionicsConsole::saveSession(const QString &filePath)
 {
     QJsonObject session;
 
-    // Basic info
     session["timestamp"] = QDateTime::currentDateTime().toString(Qt::ISODate);
     session["version"] = "1.0";
 
-    // Target and Trend
     session["target"] = targetEdit->toPlainText().trimmed();
     session["trend"] = trendEdit->toPlainText().trimmed();
 
-    // Image paths (save relative paths if possible)
     session["targetImagePath"] = m_lastTargetImagePath;
     session["trendImagePath"] = m_lastTrendImagePath;
 
-    // Frequencies and seeds
     session["baseFrequency"] = m_baseFrequency;
     session["combinedSeed"] = m_combinedSeed;
     session["offset"] = m_offset;
     session["leftFrequency"] = m_leftFrequency;
     session["rightFrequency"] = m_rightFrequency;
 
-    // Knob values
     session["knob1Seed"] = m_knob1Seed;
     session["knob2Seed"] = m_knob2Seed;
     session["knob3Seed"] = m_knob3Seed;
 
-    // Duration
     session["durationMinutes"] = m_durationMinutes;
 
-    // Create JSON document and save
     QJsonDocument doc(session);
     QFile file(filePath);
     if (file.open(QIODevice::WriteOnly)) {
@@ -796,11 +708,9 @@ void RadionicsConsole::loadSession()
 
         QJsonObject session = doc.object();
 
-        // Restore everything
         targetEdit->setText(session["target"].toString());
         trendEdit->setText(session["trend"].toString());
 
-        // ✅ Restore image paths from JSON
         m_lastTargetImagePath = session["targetImagePath"].toString();
         m_lastTrendImagePath = session["trendImagePath"].toString();
 
@@ -857,7 +767,6 @@ void RadionicsConsole::loadSession()
 
 void RadionicsConsole::closeEvent(QCloseEvent *event)
 {
-    // Hide the window instead of closing it
     hide();
     emit closeRequested();
     event->ignore();  // Don't actually close
@@ -866,7 +775,6 @@ void RadionicsConsole::closeEvent(QCloseEvent *event)
 void RadionicsConsole::onDurationChanged(int value)
 {
     m_durationValue->setText(QString("%1 min").arg(value));
-    // Store the duration for later use
     m_durationMinutes = value;
     emit durationChanged(value);
 }
@@ -893,7 +801,6 @@ void RadionicsConsole::showZoomedImage(const QPixmap &pixmap, QLabel *sourceLabe
 {
     if (pixmap.isNull()) return;
 
-    // 2x zoom
     QPixmap zoomed = pixmap.scaled(
         pixmap.width() * 2,
         pixmap.height() * 2,
@@ -901,7 +808,6 @@ void RadionicsConsole::showZoomedImage(const QPixmap &pixmap, QLabel *sourceLabe
         Qt::SmoothTransformation
     );
 
-    // Limit size to fit screen
     QSize maxSize = QApplication::primaryScreen()->availableSize() * 0.6;
     if (zoomed.width() > maxSize.width() || zoomed.height() > maxSize.height()) {
         zoomed = zoomed.scaled(maxSize, Qt::KeepAspectRatio, Qt::SmoothTransformation);
@@ -910,10 +816,8 @@ void RadionicsConsole::showZoomedImage(const QPixmap &pixmap, QLabel *sourceLabe
     m_zoomPopup->setPixmap(zoomed);
     m_zoomPopup->adjustSize();
 
-    // Position near cursor
     QPoint pos = QCursor::pos() + QPoint(15, 15);
 
-    // Keep popup on screen
     QRect screen = QApplication::primaryScreen()->availableGeometry();
     if (pos.x() + m_zoomPopup->width() > screen.right()) {
         pos.setX(screen.right() - m_zoomPopup->width() - 5);
@@ -932,7 +836,6 @@ void RadionicsConsole::showZoomedImage(const QPixmap &pixmap, QLabel *sourceLabe
 {
     if (pixmap.isNull()) return;
 
-    //Show original size (no scaling at all)
     QPixmap original = pixmap;  // Just use the original pixmap
 
 
@@ -945,10 +848,8 @@ void RadionicsConsole::showZoomedImage(const QPixmap &pixmap, QLabel *sourceLabe
     m_zoomPopup->adjustSize();
     m_zoomPopup->setStyleSheet("border: 2px solid #444; border-radius: 8px; background: #1a1a1a;");
 
-    // Position near cursor
     QPoint pos = QCursor::pos() + QPoint(15, 15);
 
-    // Keep popup on screen
     QRect screen = QApplication::primaryScreen()->availableGeometry();
     if (pos.x() + m_zoomPopup->width() > screen.right()) {
         pos.setX(screen.right() - m_zoomPopup->width() - 5);

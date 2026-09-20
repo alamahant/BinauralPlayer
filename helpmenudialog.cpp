@@ -495,6 +495,38 @@ QString HelpMenuDialog::getWhatsNewContent()
     return R"(
 
 <div style="background-color: #e8f5e9; padding: 15px; border-radius: 8px; margin-bottom: 25px; border-left: 5px solid #2e7d32;">
+    <h2 style="color: #1b5e20; margin-top: 0;">yt-dlp Update &amp; Runtime Support — Version 1.7.2 <span style="font-size: 0.75em; background-color: #2e7d32; color: white; padding: 2px 8px; border-radius: 12px; vertical-align: middle;">NEW</span></h2>
+    <p>Version 1.7.2 updates yt-dlp and adds JavaScript runtime support for reliable YouTube extraction.</p>
+
+    <div style="background-color: #e8f5e9; padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #2e7d32;">
+        <h3 style="color: #1b5e20; margin-top: 0;">Updated: yt-dlp</h3>
+        <ul>
+            <li><strong>Latest release</strong> — yt-dlp updated to the newest version</li>
+            <li><strong>Bundled QuickJS</strong> — JavaScript runtime included in the Flatpak for YouTube challenge solving</li>
+            <li><strong>Automatic fallback</strong> — QuickJS used by default, no setup required</li>
+        </ul>
+    </div>
+
+    <div style="background-color: #e3f2fd; padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #1565c0;">
+        <h3 style="color: #1565c0; margin-top: 0;">Optional: Deno Runtime</h3>
+        <ul>
+            <li><strong>Faster extraction</strong> — Deno provides noticeably faster YouTube URL extraction than QuickJS</li>
+            <li><strong>Optional install</strong> — place a Deno binary in the app data folder and Asteria will use it automatically</li>
+            <li><strong>Help menu entry</strong> — new entry explains how to install Deno manually, with an Open Data Folder button</li>
+            <li><strong>No download built in</strong> — installation is manual, for users who want the speed</li>
+        </ul>
+    </div>
+
+    <div style="background-color: #fff3e0; padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #ef6c00;">
+        <h3 style="color: #e65100; margin-top: 0;">Other Streaming Sites</h3>
+        <ul>
+            <li><strong>No changes</strong> — Dailymotion, Rumble, Odysee, Vimeo keep the existing extraction path</li>
+            <li><strong>Stable behavior</strong> — those sites still serve pre-merged formats, so nothing needed to change</li>
+        </ul>
+    </div>
+</div>
+
+<div style="background-color: #e8f5e9; padding: 15px; border-radius: 8px; margin-bottom: 25px; border-left: 5px solid #2e7d32;">
     <h2 style="color: #1b5e20; margin-top: 0;">YouTube Stream Extraction Fix — Version 1.7.1 <span style="font-size: 0.75em; background-color: #2e7d32; color: white; padding: 2px 8px; border-radius: 12px; vertical-align: middle;">NEW</span></h2>
     <p>Version 1.7.1 fixes YouTube stream extraction that was broken by recent changes on YouTube's side.</p>
 

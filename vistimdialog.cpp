@@ -294,7 +294,6 @@ void VisStimDialog::buildUi()
         auto *spinRow = new QHBoxLayout();
         m_freqSpin = new QDoubleSpinBox();
         m_freqSpin->setRange(0.1, 100.0);
-        //m_freqSpin->setSingleStep(0.5);
         m_freqSpin->setDecimals(2);
         m_freqSpin->setSuffix(" Hz");
         m_freqSpin->setValue(m_syncedFreq);
