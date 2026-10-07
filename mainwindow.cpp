@@ -30,6 +30,7 @@
 #include<QProcess>
 #include<QPainter>
 #include<QTemporaryFile>
+#include<QStackedLayout>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent), m_binauralEngine(new DynamicEngine(this))
@@ -48,7 +49,8 @@ MainWindow::MainWindow(QWidget *parent)
       m_cueDialog(new CueSheetDialog(this)),
       videoWidget(new QVideoWidget(this)),
       radConsole(new RadionicsConsole(this)),
-      rssDialog(new RssNotificationDialog(this))
+      rssDialog(new RssNotificationDialog(this)),
+      subsManager(new SubtitleManager(this))
 {
     setWindowTitle("Binaural Media Player");
     setMinimumSize(900, 700);
@@ -118,7 +120,7 @@ MainWindow::MainWindow(QWidget *parent)
     toggleTheme(isDarkTheme);
     showPresetExtractionNotice();
 
-    radConsole->setWindowFlags(Qt::Window | Qt::WindowMinimizeButtonHint | Qt::WindowCloseButtonHint);
+    radConsole->setWindowFlags(Qt::Window | Qt::WindowMinimizeButtonHint | Qt::WindowMaximizeButtonHint | Qt::WindowCloseButtonHint);
     connect(radConsole, &RadionicsConsole::structuralLinkCaptured, this, [this](double combinedSeed, double leftFreq, double rightFreq,
             double baseFreq, double offset, QString trend, QString target){
 
@@ -336,6 +338,9 @@ QToolBar *MainWindow::createBinauralToolbar() {
     QLabel *leftLabel = new QLabel("L:", toolbar);
     toolbar->addWidget(leftLabel);
     m_leftFreqInput = new QDoubleSpinBox(toolbar);
+    height = m_leftFreqInput->sizeHint().height();
+    m_leftFreqInput->setFixedHeight(height);
+
     m_leftFreqInput->setRange(20.0, 20000.0);
     m_leftFreqInput->setValue(360.0);
     m_leftFreqInput->setDecimals(2);
@@ -349,6 +354,8 @@ QToolBar *MainWindow::createBinauralToolbar() {
     toolbar->addWidget(rightLabel);
 
     m_rightFreqInput = new QDoubleSpinBox(toolbar);
+    height = m_rightFreqInput->sizeHint().height();
+    m_rightFreqInput->setFixedHeight(height);
     m_rightFreqInput->setRange(20.0, 20000.0);
     m_rightFreqInput->setValue(367.83);
     m_rightFreqInput->setDecimals(2);
@@ -365,8 +372,8 @@ QToolBar *MainWindow::createBinauralToolbar() {
 
     m_beatFreqLabel->setMinimumWidth(95);
     m_beatFreqLabel->setAlignment(Qt::AlignLeft);
-    m_beatFreqLabel->setStyleSheet(
-                "background-color: #f0f0f0; padding: 2px; border: 1px solid #ccc;");
+   // m_beatFreqLabel->setStyleSheet(
+     //           "background-color: #f0f0f0; padding: 2px; border: 1px solid #ccc;");
     m_beatFreqLabel->setToolTip("Binaural beat frequency (Right - Left)");
     toolbar->addWidget(m_beatFreqLabel);
 
@@ -374,6 +381,8 @@ QToolBar *MainWindow::createBinauralToolbar() {
     toolbar->addWidget(isoPulseLabel);
 
     m_pulseFreqLabel = new QDoubleSpinBox(toolbar);
+    height = m_pulseFreqLabel->sizeHint().height();
+    m_pulseFreqLabel->setFixedHeight(height);
     m_pulseFreqLabel->setRange(0.0, 100.0);
     m_pulseFreqLabel->setValue(7.83);
     m_pulseFreqLabel->setDecimals(2);
@@ -395,10 +404,12 @@ QToolBar *MainWindow::createBinauralToolbar() {
 
 
     volLabel = new QLabel("Vol:", toolbar);
+
     toolbar->addWidget(volLabel);
 
     m_binauralVolumeInput = new QDoubleSpinBox(toolbar);
-
+    height = m_binauralVolumeInput->sizeHint().height();
+    m_binauralVolumeInput->setFixedHeight(height);
     m_binauralVolumeInput->setRange(0.0, 100.0);
     m_binauralVolumeInput->setValue(15.0);
     m_binauralVolumeInput->setDecimals(1);
@@ -505,7 +516,7 @@ QToolBar *MainWindow::createBinauralToolbarExt() {
 
     noiseEnableBtn->setCheckable(true);
     noiseEnableBtn->setChecked(false);
-    noiseEnableBtn->setFixedSize(20, 20);
+    noiseEnableBtn->setFixedWidth(20);
 
     noiseTypeCombo = new QComboBox(this);
     noiseTypeCombo->setToolTip("Select noise color: White, Pink, or Brown");
@@ -518,6 +529,8 @@ QToolBar *MainWindow::createBinauralToolbarExt() {
     noiseTypeCombo->setFixedWidth(70);
 
     noiseLevelSpin = new QDoubleSpinBox(this);
+    height = noiseLevelSpin->sizeHint().height();
+    noiseLevelSpin->setFixedHeight(height);
     noiseLevelSpin->setToolTip("Noise mix level (0.00 = tone only, 1.00 = noise only)");
     noiseLevelSpin->setRange(0.0, 1.0);
     noiseLevelSpin->setSingleStep(0.05);
@@ -561,6 +574,8 @@ QToolBar *MainWindow::createBinauralToolbarExt() {
     toolbar->addWidget(durationLabel);
 
     m_brainwaveDuration = new QSpinBox(toolbar);
+    height = m_brainwaveDuration->sizeHint().height();
+    m_brainwaveDuration->setFixedHeight(height);
     bool unlimited = settings.value("binaural/unlimitedDuration", false).toBool();
     if (unlimited) {
     m_brainwaveDuration->setRange(1, 360);
@@ -956,6 +971,11 @@ void MainWindow::setupConnections() {
     connect(m_mediaPlayer, &QMediaPlayer::metaDataChanged, this,
             &MainWindow::handleMetaDataUpdated);
 
+    connect(m_mediaPlayer, &QMediaPlayer::sourceChanged, this, [this](const QUrl &url) {
+        // A new media was loaded
+        clearSubtitles();
+    });
+
     connect(timeEditButton, &QPushButton::clicked, this, [this](bool checked) {
         timeEdit->setEnabled(checked);
         if (checked)
@@ -970,11 +990,27 @@ void MainWindow::setupConnections() {
             if (!m_videoFloatingWindow) {
                 setupVideoPlayer();
             }
+
             m_videoFloatingWindow->show();
             m_videoFloatingWindow->raise();
+            //
+            // Position the overlay after the window is laid out
+            QTimer::singleShot(0, this, [this]() {
+                updateSubtitleOverlayGeometry();
+                if (m_subtitleslabel) {
+                    m_subtitleslabel->show();
+                    m_subtitleslabel->raise();
+                }
+            });
+            //
+
         } else {
             if (m_videoFloatingWindow) {
                 m_videoFloatingWindow->hide();
+                if (m_subtitleslabel) {
+                     m_subtitleslabel->hide();
+                }
+
             }
         }
     });
@@ -1005,9 +1041,9 @@ void MainWindow::setupConnections() {
     connect(m_pulseFreqLabel, &QDoubleSpinBox::valueChanged, [this](double hz) {
         m_binauralEngine->setPulseFrequency(hz);
         m_binauralStatusLabel->setText(formatBinauralString());
-        ConstantGlobals::currentIsonFreq = hz;
+        PlayerGlobals::currentIsonFreq = hz;
 
-        if(m_flickerWidget && ConstantGlobals::currentToneType == ToneType::ISOCHRONIC){
+        if(m_flickerWidget && PlayerGlobals::currentToneType == ToneType::ISOCHRONIC){
            if (m_visStimDialog) m_visStimDialog->syncFrequency(hz);
             m_flickerWidget->setFrequency(hz);
         }
@@ -1311,9 +1347,6 @@ void MainWindow::onStopMusicClicked() {
     m_isStream = false;
     }
 
-
-
-
     if (!m_currentPlaylistName.isEmpty() && m_currentTrackIndex >= 0 &&
             m_currentTrackIndex < m_playlistFiles[m_currentPlaylistName].size()) {
 
@@ -1321,6 +1354,9 @@ void MainWindow::onStopMusicClicked() {
                 m_playlistFiles[m_currentPlaylistName].at(m_currentTrackIndex);
 
         m_mediaPlayer->stop();
+
+        if (m_subtitleslabel) m_subtitleslabel->clear();
+
         m_playMusicButton->setToolTip("Play Track");
         m_stopMusicButton->setToolTip("Stopped");
         m_pauseMusicButton->setToolTip("Pause Playback");
@@ -1403,9 +1439,9 @@ void MainWindow::onLeftFrequencyChanged(double value) {
     updateBinauralBeatDisplay();
     m_binauralStatusLabel->setText(formatBinauralString());
 
-    if(ConstantGlobals::currentToneType == ToneType::BINAURAL || ConstantGlobals::currentToneType == ToneType::GENERATOR){
+    if(PlayerGlobals::currentToneType == ToneType::BINAURAL || PlayerGlobals::currentToneType == ToneType::GENERATOR){
         double visualFrequency = std::abs(value - m_rightFreqInput->value());
-        ConstantGlobals::currentBinFreq = visualFrequency;
+        PlayerGlobals::currentBinFreq = visualFrequency;
         if (m_visStimDialog) m_visStimDialog->syncFrequency(visualFrequency);
         if(m_flickerWidget) m_flickerWidget->setFrequency(visualFrequency);
     }
@@ -1425,9 +1461,9 @@ void MainWindow::onRightFrequencyChanged(double value) {
     updateBinauralBeatDisplay();
     m_binauralStatusLabel->setText(formatBinauralString());
 
-    if(ConstantGlobals::currentToneType == ToneType::BINAURAL || ConstantGlobals::currentToneType == ToneType::GENERATOR){
+    if(PlayerGlobals::currentToneType == ToneType::BINAURAL || PlayerGlobals::currentToneType == ToneType::GENERATOR){
         double visualFrequency = std::abs(value - m_leftFreqInput->value());
-        ConstantGlobals::currentBinFreq = visualFrequency;
+        PlayerGlobals::currentBinFreq = visualFrequency;
         if (m_visStimDialog) m_visStimDialog->syncFrequency(visualFrequency);
 
         if(m_flickerWidget) m_flickerWidget->setFrequency(visualFrequency);
@@ -1451,13 +1487,13 @@ void MainWindow::onBinauralVolumeChanged(double value) {
 
 void MainWindow::onBinauralPlayClicked() {
 
-    if (ConstantGlobals::currentToneType == 1) {
+    if (PlayerGlobals::currentToneType == 1) {
         double leftInputValue = m_leftFreqInput->value();
         m_rightFreqInput->setValue(leftInputValue);
     }
     if (m_binauralEngine->start()) {
-        if (ConstantGlobals::currentToneType == 0 ||
-                ConstantGlobals::currentToneType == 2) {
+        if (PlayerGlobals::currentToneType == 0 ||
+                PlayerGlobals::currentToneType == 2) {
             m_leftFreqInput->setEnabled(true);
             m_rightFreqInput->setEnabled(true);
         } else {
@@ -1508,7 +1544,7 @@ void MainWindow::onBinauralStopClicked() {
 
     m_brainwaveDuration->setEnabled(true);
     m_countdownLabel->setText(m_brainwaveDuration->text());
-    if (ConstantGlobals::currentToneType == 1) {
+    if (PlayerGlobals::currentToneType == 1) {
         m_rightFreqInput->setDisabled(true);
     }
     m_binauralStatusLabel->setText("Binaural tones stopped");
@@ -1801,7 +1837,7 @@ void MainWindow::onPlaybackStateChanged(QMediaPlayer::PlaybackState state) {
         m_pauseMusicButton->setEnabled(true);
         m_stopMusicButton->setEnabled(true);
         m_playingTrackIndex = m_currentTrackIndex;
-        ConstantGlobals::playbackState = QMediaPlayer::PlayingState;
+        PlayerGlobals::playbackState = QMediaPlayer::PlayingState;
         break;
 
     case QMediaPlayer::PausedState:
@@ -1809,7 +1845,7 @@ void MainWindow::onPlaybackStateChanged(QMediaPlayer::PlaybackState state) {
         m_pauseMusicButton->setEnabled(false);
         m_stopMusicButton->setEnabled(true);
         m_pausedPosition = m_mediaPlayer->position();
-        ConstantGlobals::playbackState = QMediaPlayer::PausedState;
+        PlayerGlobals::playbackState = QMediaPlayer::PausedState;
 
         break;
 
@@ -1817,7 +1853,7 @@ void MainWindow::onPlaybackStateChanged(QMediaPlayer::PlaybackState state) {
         m_playMusicButton->setEnabled(true);
         m_pauseMusicButton->setEnabled(false);
         m_stopMusicButton->setEnabled(false);
-        ConstantGlobals::playbackState = QMediaPlayer::StoppedState;
+        PlayerGlobals::playbackState = QMediaPlayer::StoppedState;
 
         break;
     }
@@ -2086,33 +2122,33 @@ void MainWindow::onToneTypeComboIndexChanged(int index) {
     switch (toneValue) {
 
     case BINAURAL:
-        ConstantGlobals::currentToneType = 0; // Set to 0
+        PlayerGlobals::currentToneType = 0; // Set to 0
         m_rightFreqInput->setEnabled(true);
         m_leftFreqInput->setValue(360.00);
         m_rightFreqInput->setValue(367.83);
         m_pulseFreqLabel->setDisabled(true);
         m_binauralStatusLabel->setText(formatBinauralString());
-        if (m_flickerWidget) m_flickerWidget->setFrequency(ConstantGlobals::currentBinFreq);
+        if (m_flickerWidget) m_flickerWidget->setFrequency(PlayerGlobals::currentBinFreq);
         break;
     case ISOCHRONIC:
-        ConstantGlobals::currentToneType = 1; // Set to 0
+        PlayerGlobals::currentToneType = 1; // Set to 0
         m_leftFreqInput->setValue(360.00);
         m_pulseFreqLabel->setValue(7.83);
         m_rightFreqInput->setDisabled(true);
         m_pulseFreqLabel->setEnabled(true);
         m_binauralStatusLabel->setText(formatBinauralString());
-        if (m_flickerWidget) m_flickerWidget->setFrequency(ConstantGlobals::currentIsonFreq);
+        if (m_flickerWidget) m_flickerWidget->setFrequency(PlayerGlobals::currentIsonFreq);
 
         break;
 
     case GENERATOR:
-        ConstantGlobals::currentToneType = 2; // Set to 0
+        PlayerGlobals::currentToneType = 2; // Set to 0
         m_leftFreqInput->setValue(360.00);
         m_rightFreqInput->setValue(360.00);
         m_rightFreqInput->setEnabled(true);
         m_pulseFreqLabel->setDisabled(true);
         m_binauralStatusLabel->setText(formatBinauralString());
-        if (m_flickerWidget) m_flickerWidget->setFrequency(ConstantGlobals::currentBinFreq);
+        if (m_flickerWidget) m_flickerWidget->setFrequency(PlayerGlobals::currentBinFreq);
 
         break;
 
@@ -2356,11 +2392,11 @@ void MainWindow::onPlaylistTabChanged(int index) {
 
 void MainWindow::onLoadMusicClicked() {
     QStringList files = QFileDialog::getOpenFileNames(
-        this, "Select Media Files", ConstantGlobals::musicFilePath,
-        ConstantGlobals::getAllMediaFilterString());
+        this, "Select Media Files", PlayerGlobals::musicFilePath,
+        PlayerGlobals::getAllMediaFilterString());
 
     if (!files.isEmpty()) {
-        ConstantGlobals::lastMusicDirPath = QFileInfo(files.first()).absolutePath();
+        PlayerGlobals::lastMusicDirPath = QFileInfo(files.first()).absolutePath();
 
         QListWidget *playlist = currentPlaylistWidget();
         QString playlistName = currentPlaylistName();
@@ -2380,7 +2416,7 @@ void MainWindow::onLoadMusicClicked() {
             QString fileExtension = QFileInfo(file).suffix().toLower();
             QString filePath = QFileInfo(file).absoluteFilePath();
 
-            if (ConstantGlobals::allMediaExtensions.contains("." + fileExtension)) {
+            if (PlayerGlobals::allMediaExtensions.contains("." + fileExtension)) {
                 if (existingFiles.contains(filePath)) {
                     duplicateFiles.append(QFileInfo(file).fileName());
                 } else {
@@ -2404,7 +2440,7 @@ void MainWindow::onLoadMusicClicked() {
             QString skippedList = skippedFiles.join("\n• ");
             QMessageBox::information(this, "Unsupported Files Skipped",
                 QString("The following %1 file(s) are not supported and were skipped:\n\n• %2\n\n"
-                        "Supported formats are defined in ConstantGlobals::allMediaExtensions.\n"
+                        "Supported formats are defined in PlayerGlobals::allMediaExtensions.\n"
                         "Common formats include: MP3, WAV, FLAC, OGG, M4A, MP4, AVI, MKV, MOV, WEBM.")
                 .arg(skippedFiles.size())
                 .arg(skippedList));
@@ -2619,7 +2655,7 @@ MainWindow::PlaylistTrack::fromJson(const QJsonObject &json) {
 
 QString MainWindow::generateDefaultPresetName() const {
     QString toneType;
-    switch (ConstantGlobals::currentToneType) {
+    switch (PlayerGlobals::currentToneType) {
     case 0:
         toneType = "BIN";
         break;
@@ -2634,11 +2670,11 @@ QString MainWindow::generateDefaultPresetName() const {
         break;
     }
 
-    if (ConstantGlobals::currentToneType == 0) {
+    if (PlayerGlobals::currentToneType == 0) {
         double beatFreq =
                 qAbs(m_rightFreqInput->value() - m_leftFreqInput->value());
         return QString("%1-%2Hz").arg(toneType).arg(beatFreq, 0, 'f', 2);
-    } else if (ConstantGlobals::currentToneType == 1) {
+    } else if (PlayerGlobals::currentToneType == 1) {
         return QString("%1-%2Hz").arg(toneType).arg(m_pulseFreqLabel->value(), 0,
                                                     'f', 2);
     } else {
@@ -2670,7 +2706,7 @@ void MainWindow::onSavePresetClicked() {
 
     BrainwavePreset preset;
     preset.name = presetName;
-    preset.toneType = ConstantGlobals::currentToneType;
+    preset.toneType = PlayerGlobals::currentToneType;
     preset.leftFrequency = m_leftFreqInput->value();
     preset.rightFrequency = m_rightFreqInput->value();
     preset.waveform = m_waveformCombo->currentIndex();
@@ -2684,14 +2720,14 @@ void MainWindow::onSavePresetClicked() {
         return;
     }
 
-    if (!ensureDirectoryExists(ConstantGlobals::presetFilePath)) {
+    if (!ensureDirectoryExists(PlayerGlobals::presetFilePath)) {
         QMessageBox::warning(this, "Save Error",
                              "Cannot create presets directory.");
         return;
     }
 
     QString filename =
-            ConstantGlobals::presetFilePath + "/" + presetName + ".json";
+            PlayerGlobals::presetFilePath + "/" + presetName + ".json";
     if (savePresetToFile(filename, preset)) {
         statusBar()->showMessage("Preset saved: " + presetName, 3000);
     } else {
@@ -2700,13 +2736,13 @@ void MainWindow::onSavePresetClicked() {
 }
 
 void MainWindow::onLoadPresetClicked() {
-    QDir presetDir(ConstantGlobals::presetFilePath + "/");
+    QDir presetDir(PlayerGlobals::presetFilePath + "/");
     QStringList presetFiles = presetDir.entryList({"*.json"}, QDir::Files);
 
     if (presetFiles.isEmpty()) {
         QMessageBox::information(this, "No Presets",
                                  "No saved presets found in:\n" +
-                                 ConstantGlobals::presetFilePath);
+                                 PlayerGlobals::presetFilePath);
         return;
     }
 
@@ -2725,7 +2761,7 @@ void MainWindow::onLoadPresetClicked() {
     }
 
     QString filename =
-            ConstantGlobals::presetFilePath + "/" + selectedPreset + ".json";
+            PlayerGlobals::presetFilePath + "/" + selectedPreset + ".json";
     BrainwavePreset preset = loadPresetFromFile(filename);
 
     if (!preset.isValid()) {
@@ -2739,7 +2775,7 @@ void MainWindow::onLoadPresetClicked() {
         m_binauralEngine->stop();
     }
 
-    ConstantGlobals::currentToneType = preset.toneType;
+    PlayerGlobals::currentToneType = preset.toneType;
     toneTypeCombo->setCurrentIndex(preset.toneType);
     m_leftFreqInput->setValue(preset.leftFrequency);
     m_rightFreqInput->setValue(preset.rightFrequency);
@@ -2757,7 +2793,7 @@ void MainWindow::onLoadPresetClicked() {
 }
 
 void MainWindow::onManagePresetsClicked() {
-    QUrl presetUrl = QUrl::fromLocalFile(ConstantGlobals::presetFilePath);
+    QUrl presetUrl = QUrl::fromLocalFile(PlayerGlobals::presetFilePath);
     QDesktopServices::openUrl(presetUrl);
 }
 
@@ -2807,11 +2843,11 @@ MainWindow::loadPresetFromFile(const QString &filename) {
 
 QList<MainWindow::BrainwavePreset> MainWindow::loadAllPresets() {
     QList<BrainwavePreset> presets;
-    QDir presetDir(ConstantGlobals::presetFilePath);
+    QDir presetDir(PlayerGlobals::presetFilePath);
 
     QStringList presetFiles = presetDir.entryList({"*.json"}, QDir::Files);
     foreach (const QString &file, presetFiles) {
-        QString filepath = ConstantGlobals::presetFilePath + file;
+        QString filepath = PlayerGlobals::presetFilePath + file;
         BrainwavePreset preset = loadPresetFromFile(filepath);
         if (preset.isValid()) {
             presets.append(preset);
@@ -2826,7 +2862,7 @@ void MainWindow::onOpenPlaylistClicked() {
 
 
     QString filename = QFileDialog::getOpenFileName(
-                this, "Open Playlist", ConstantGlobals::playlistFilePath,
+                this, "Open Playlist", PlayerGlobals::playlistFilePath,
                 "Playlist Files (*.json);;All Files (*)");
 
     if (filename.isEmpty()) {
@@ -2851,14 +2887,14 @@ void MainWindow::onSaveCurrentPlaylistClicked() {
         return;
     }
 
-    if (!ensureDirectoryExists(ConstantGlobals::playlistFilePath)) {
+    if (!ensureDirectoryExists(PlayerGlobals::playlistFilePath)) {
         QMessageBox::warning(this, "Save Error",
                              "Cannot create playlists directory.");
         return;
     }
 
     QString filename =
-            ConstantGlobals::playlistFilePath + "/" + playlistName + ".json";
+            PlayerGlobals::playlistFilePath + "/" + playlistName + ".json";
     if (savePlaylistToFile(filename, playlistName)) {
         statusBar()->showMessage("Playlist saved: " + playlistName, 3000);
     } else {
@@ -2881,7 +2917,7 @@ void MainWindow::onSaveCurrentPlaylistAsClicked() {
 
     QString filename = QFileDialog::getSaveFileName(
                 this, "Save Playlist As",
-                ConstantGlobals::playlistFilePath + "/" + playlistName + ".json",
+                PlayerGlobals::playlistFilePath + "/" + playlistName + ".json",
                 "Playlist Files (*.json);;All Files (*)");
 
     if (filename.isEmpty()) {
@@ -2902,7 +2938,7 @@ void MainWindow::onSaveAllPlaylistsClicked() {
     int successCount = 0;
     int failCount = 0;
 
-    if (!ensureDirectoryExists(ConstantGlobals::playlistFilePath)) {
+    if (!ensureDirectoryExists(PlayerGlobals::playlistFilePath)) {
         QMessageBox::warning(this, "Save Error",
                              "Cannot create playlists directory.");
         return;
@@ -2918,7 +2954,7 @@ void MainWindow::onSaveAllPlaylistsClicked() {
         }
 
         QString filename =
-                ConstantGlobals::playlistFilePath + "/" + playlistName + ".json";
+                PlayerGlobals::playlistFilePath + "/" + playlistName + ".json";
 
         m_playlistTabs->setCurrentIndex(i);
         updateCurrentPlaylistReference();
@@ -2946,7 +2982,7 @@ void MainWindow::onSaveAllPlaylistsClicked() {
 void MainWindow::onSaveAllPlaylistsClicked() {
     QMessageBox::StandardButton confirm = QMessageBox::question(
         this, "Confirm Save All",
-        "This will save ALL playlists to:\n" + ConstantGlobals::playlistFilePath + "\n\n"
+        "This will save ALL playlists to:\n" + PlayerGlobals::playlistFilePath + "\n\n"
         "WARNING: Existing playlist files with the same name WILL BE OVERWRITTEN.\n\n"
         "Continue?",
         QMessageBox::Yes | QMessageBox::No,
@@ -2963,9 +2999,9 @@ void MainWindow::onSaveAllPlaylistsClicked() {
     QStringList failedPlaylists;
     QStringList emptyPlaylists;
 
-    if (!ensureDirectoryExists(ConstantGlobals::playlistFilePath)) {
+    if (!ensureDirectoryExists(PlayerGlobals::playlistFilePath)) {
         QMessageBox::warning(this, "Save Error",
-                             "Cannot create playlists directory:\n" + ConstantGlobals::playlistFilePath);
+                             "Cannot create playlists directory:\n" + PlayerGlobals::playlistFilePath);
         return;
     }
 
@@ -2984,7 +3020,7 @@ void MainWindow::onSaveAllPlaylistsClicked() {
             continue;
         }
 
-        QString filename = ConstantGlobals::playlistFilePath + "/" + playlistName + ".json";
+        QString filename = PlayerGlobals::playlistFilePath + "/" + playlistName + ".json";
 
         if (savePlaylistToFile(filename, playlistName)) {
             successCount++;
@@ -3045,7 +3081,11 @@ bool MainWindow::savePlaylistToFile(const QString &filename,
     QStringList filePaths = m_playlistFiles.value(playlistName, QStringList());
 
     QJsonObject playlistJson;
-    playlistJson["name"] = playlistName;
+
+    //playlistJson["name"] = playlistName;
+    QString storedName = QFileInfo(filename).completeBaseName();
+    playlistJson["name"] = storedName;
+
     playlistJson["version"] = "1.0";
     playlistJson["created"] = QDateTime::currentDateTime().toString(Qt::ISODate);
     playlistJson["trackCount"] = filePaths.size();
@@ -3078,7 +3118,7 @@ bool MainWindow::savePlaylistToFile(const QString &filename,
     return true;
 }
 
-
+/*
 bool MainWindow::loadPlaylistFromFile(const QString &filename) {
 
     QMessageBox::StandardButton confirm = QMessageBox::question(
@@ -3202,6 +3242,98 @@ bool MainWindow::loadPlaylistFromFile(const QString &filename) {
 
     return true;
 }
+*/
+
+
+bool MainWindow::loadPlaylistFromFile(const QString &filename)
+{
+    // --- 1. Read and parse ---
+    QFile file(filename);
+    if (!file.open(QIODevice::ReadOnly)) {
+        qWarning() << "Could not open playlist file:" << filename;
+        return false;
+    }
+    QByteArray data = file.readAll();
+    file.close();
+
+    QJsonParseError error;
+    QJsonDocument doc = QJsonDocument::fromJson(data, &error);
+    if (error.error != QJsonParseError::NoError) {
+        qWarning() << "JSON parse error:" << error.errorString();
+        return false;
+    }
+    if (!doc.isObject()) {
+        qWarning() << "Playlist file is not a valid JSON object";
+        return false;
+    }
+
+    QJsonObject playlistJson = doc.object();
+
+    // --- 2. Name from JSON (fallback to filename) ---
+    QString playlistName = playlistJson["name"].toString();
+    if (playlistName.isEmpty())
+        playlistName = QFileInfo(filename).completeBaseName();
+
+    // --- 3. Resolve collision — never overwrite ---
+    auto tabNameExists = [this](const QString &n) {
+        for (int i = 0; i < m_playlistTabs->count(); ++i)
+            if (m_playlistTabs->tabText(i) == n) return true;
+        return false;
+    };
+
+    if (tabNameExists(playlistName)) {
+        bool ok = false;
+        QString newName = QInputDialog::getText(
+            this, "Playlist Exists",
+            QString("A playlist named '%1' already exists.\n"
+                    "Enter a different name:").arg(playlistName),
+            QLineEdit::Normal, playlistName + "_copy", &ok);
+
+        if (!ok || newName.isEmpty())
+            return false;
+        if (tabNameExists(newName)) {
+            QMessageBox::warning(this, "Name In Use",
+                QString("'%1' is already used.").arg(newName));
+            return false;
+        }
+        playlistName = newName;
+    }
+
+    // --- 4. Create new tab with the JSON name ---
+    addNewPlaylist(playlistName);
+    // addNewPlaylist already sets it as current and updates m_currentPlaylistName
+
+    QListWidget *playlist = currentPlaylistWidget();
+    if (!playlist) {
+        qWarning() << "No playlist widget after addNewPlaylist";
+        return false;
+    }
+    playlist->clear();
+    m_playlistFiles[playlistName].clear();
+    m_playlistLastTrackIndex[playlistName] = -1;
+
+    // --- 5. Load tracks ---
+    QJsonArray tracksArray = playlistJson["tracks"].toArray();
+    for (const QJsonValue &trackValue : tracksArray) {
+        PlaylistTrack track = PlaylistTrack::fromJson(trackValue.toObject());
+        playlist->addItem(track.title);
+        m_playlistFiles[playlistName].append(track.filePath);
+    }
+
+    if (playlist->count() > 0) {
+        playlist->setCurrentRow(0);
+        m_playlistLastTrackIndex[playlistName] = 0;
+        m_currentTrackIndex = 0;
+        m_currentPlaylistName = playlistName;
+    }
+
+    updatePlaylistButtonsState();
+    statusBar()->showMessage(
+        QString("Loaded playlist '%1' (%2 tracks)")
+            .arg(playlistName).arg(playlist->count()));
+
+    return true;
+}
 
 
 
@@ -3211,6 +3343,8 @@ void MainWindow::updatePlaylistFromCurrentTab(const QString &filename) {
         savePlaylistToFile(filename, playlistName);
     }
 }
+
+
 
 void MainWindow::addActions() {
     savePresetAction = new QAction("Save &Preset...", this);
@@ -3368,6 +3502,119 @@ void MainWindow::setupMenus() {
 
     settingsMenu->addAction(unlimitedDurationAction);
 
+
+    //
+    settingsMenu->addSeparator();
+    QAction* scaleAction = settingsMenu->addAction("Set &Scale...");
+    scaleAction->setShortcut(QKeySequence("Ctrl+Shift+S"));
+    connect(scaleAction, &QAction::triggered, this, [this]() {
+        QSettings settings;
+        bool ok = false;
+        double current = settings.value("ui/scaleFactor", 1.0).toDouble();
+
+        double factor = QInputDialog::getDouble(
+            this, tr("UI Scale"),
+            tr("Scale factor (e.g. 0.9, 1.0, 1.1, 1.25):"),
+            current,          // initial value
+            0.5,              // min
+            3.0,              // max
+            2,                // decimals shown
+            &ok,
+            Qt::WindowFlags(),
+            0.05);             // ← step
+
+        if (!ok) return;
+
+        settings.setValue("ui/scaleFactor", factor);
+        settings.sync();
+
+        QMessageBox msg(this);
+        msg.setWindowTitle(tr("Restart Required"));
+        msg.setIcon(QMessageBox::Information);
+        msg.setText(tr("Please restart the application to apply the new scale."));
+        msg.setInformativeText(tr(
+            "If the new scale makes the app unusable, delete the settings file:\n\n%1\n\n"
+            "Note: this will reset all user-defined settings.")
+            .arg(QSettings().fileName()));
+
+
+        QPushButton *copyBtn   = msg.addButton(tr("Copy Command"), QMessageBox::ActionRole);
+        QPushButton *cancelBtn = msg.addButton(tr("Cancel"), QMessageBox::RejectRole);
+        QPushButton *okBtn     = msg.addButton(tr("OK"), QMessageBox::AcceptRole);
+
+        for (;;) {
+            msg.exec();
+            if (msg.clickedButton() != copyBtn)
+                break;
+
+        #ifdef Q_OS_WIN
+            const QString cmd = QString("Remove-Item \"%1\"").arg(QSettings().fileName());
+        #else
+            const QString cmd = QString("rm \"%1\"").arg(QSettings().fileName());
+        #endif
+            QGuiApplication::clipboard()->setText(cmd);
+
+            msg.setInformativeText(tr(
+                "Command copied to clipboard:\n\n%1\n\n"
+                "If the new scale makes the app unusable, delete the settings file above.")
+                .arg(cmd));
+        }
+
+        if (msg.clickedButton() == okBtn)
+            qApp->quit();
+
+    });
+
+    settingsMenu->addSeparator();
+    QAction* fontAction = settingsMenu->addAction("Set &Font Size...");
+    //fontAction->setVisible(false);
+    fontAction->setShortcut(QKeySequence("Ctrl+Shift+F"));
+    connect(fontAction, &QAction::triggered, this, [this]() {
+        QSettings settings;
+
+        QMessageBox box(this);
+        box.setWindowTitle(tr("Font Size"));
+        box.setIcon(QMessageBox::NoIcon);
+        box.setText(tr("Point size (e.g. 9, 10, 12, 14):"));
+
+        QSpinBox *spin = new QSpinBox(&box);
+        spin->setRange(6, 32);
+        spin->setSingleStep(1);
+
+        double current = settings.value("ui/fontSize", 0.0).toDouble();
+        if (current <= 0.0)
+            current = qApp->font().pointSizeF();
+        spin->setValue(qRound(current));
+
+        if (auto *grid = qobject_cast<QGridLayout*>(box.layout())) grid->addWidget(spin, 1, 1);
+        QPushButton *okBtn     = box.addButton(QMessageBox::Ok);
+        QPushButton *cancelBtn = box.addButton(QMessageBox::Cancel);
+        QPushButton *defaultBtn = box.addButton(tr("Default"), QMessageBox::ResetRole);
+        box.setDefaultButton(okBtn);
+
+        box.exec();
+
+        qreal size;
+        if (box.clickedButton() == defaultBtn) {
+            size = PlayerGlobals::DEFAULTFONTSIZE;
+        } else if (box.clickedButton() == okBtn) {
+            size = spin->value();
+        } else {
+            return;   // Cancel
+        }
+
+        PlayerGlobals::FONTSIZE = size;
+        settings.setValue("ui/fontSize", size);
+        settings.sync();
+
+        QFont f = qApp->font();
+        f.setPointSizeF(size);
+        qApp->setFont(f);
+        qApp->setStyleSheet(qApp->styleSheet());
+    });
+    //
+    //
+
     QMenu *presetsMenu = menuBar()->addMenu("&Presets");
 
     presetsMenu->addAction(savePresetAction);
@@ -3427,6 +3674,8 @@ void MainWindow::setupMenus() {
         }
 
         statusBar()->showMessage("Brainwave settings reset to defaults", 3000);
+        QMessageBox::information(this, "Settings Reset",
+            "Brainwave settings have been reset to their default values.");
     });
     presetsMenu->addAction(resetPresetsAction);
 
@@ -3464,6 +3713,9 @@ void MainWindow::setupMenus() {
     QAction *denoHelpAction = helpMenu->addAction(tr("Faster YouTube Extraction (Optional)"));
     connect(denoHelpAction, &QAction::triggered, this, &MainWindow::showDenoHelpDialog);
 
+#ifdef Q_OS_WIN
+    denoHelpAction->setVisible(false);
+#endif
 
     QAction *radionicsAction = helpMenu->addAction("Radionics Console");
     connect(radionicsAction, &QAction::triggered, [this]() {
@@ -3679,7 +3931,7 @@ void MainWindow::extractAndAddToPlaylist(const QString &url) {
         }
     });
 
-    m_ytProcess->start("yt-dlp", args);
+    m_ytProcess->start(ytdlpPath(), args);
 }
 
 
@@ -3695,7 +3947,7 @@ QString MainWindow::getTitleFromUrl(const QString &url) {
 
     titleArgs << "--print" << "%(title)s" << "--quiet" << url;
 
-    titleProcess.start("yt-dlp", titleArgs);
+    titleProcess.start(ytdlpPath(), titleArgs);
     if (titleProcess.waitForFinished(3000)) {
         QString output = QString::fromUtf8(titleProcess.readAllStandardOutput()).trimmed();
         if (!output.isEmpty()) {
@@ -3741,7 +3993,7 @@ void MainWindow::extractGenericAndAddToPlaylist(const QString &url) {
             urlArgs << "-g" << url;
         }
 
-        urlProcess->start("yt-dlp", urlArgs);
+        urlProcess->start(ytdlpPath(), urlArgs);
 
         connect(urlProcess, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished),
             this, [this, urlProcess, title, url](int exitCode2, QProcess::ExitStatus exitStatus2) {
@@ -3771,9 +4023,17 @@ void MainWindow::extractGenericAndAddToPlaylist(const QString &url) {
         process->deleteLater();
     });
 
-    process->start("yt-dlp", titleArgs);
+    process->start(ytdlpPath(), titleArgs);
 }
 
+QString MainWindow::ytdlpPath()
+{
+#ifdef Q_OS_WIN
+    return QCoreApplication::applicationDirPath() + "/yt-dlp.exe";
+#else
+    return "yt-dlp";
+#endif
+}
 
 void MainWindow::addStreamToPlaylist(const QString &streamUrl, const QString &displayTitle) {
     QListWidget *playlist = currentPlaylistWidget();
@@ -3806,9 +4066,9 @@ void MainWindow::extractYouTubeAndAddToPlaylist(const QString &youtubeUrl) {
 
 
 
-    #ifdef FLATPAK_BUILD
+    //#ifdef FLATPAK_BUILD
     args << "--js-runtimes" << jsRuntimeArg();
-    #endif
+    //#endif
 
     args << "--no-playlist" << "--quiet"
          << "--extractor-args" << "youtube:player_client=web_embedded"
@@ -3828,16 +4088,16 @@ void MainWindow::extractYouTubeAndAddToPlaylist(const QString &youtubeUrl) {
             QProcess *urlProcess = new QProcess(this);
             QStringList urlArgs;
 
-            #ifdef FLATPAK_BUILD
+           // #ifdef FLATPAK_BUILD
             urlArgs << "--js-runtimes" << jsRuntimeArg();
-            #endif
+            //#endif
 
             urlArgs << "--no-progress" << "--no-playlist" << "--quiet"
                     << "--extractor-args" << "youtube:player_client=web_embedded"
                     << "-f" << "b"
                     << "-g" << youtubeUrl;
 
-            urlProcess->start("yt-dlp", urlArgs);
+            urlProcess->start(ytdlpPath(), urlArgs);
 
             connect(urlProcess, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished),
                 this, [this, urlProcess, title, duration](int exitCode2, QProcess::ExitStatus exitStatus2) {
@@ -3865,13 +4125,14 @@ void MainWindow::extractYouTubeAndAddToPlaylist(const QString &youtubeUrl) {
         process->deleteLater();
     });
 
-    process->start("yt-dlp", args);
+    process->start(ytdlpPath(), args);
 }
 
+/*
 QString MainWindow::jsRuntimeArg() const
 {
-#ifdef FLATPAK_BUILD
-    QString denoPath = ConstantGlobals::appDirPath + "/deno";
+//#ifdef FLATPAK_BUILD
+    QString denoPath = PlayerGlobals::appDirPath + "/deno";
     if (QFile::exists(denoPath)) {
         QFile::setPermissions(denoPath,
             QFile::ReadOwner | QFile::WriteOwner | QFile::ExeOwner |
@@ -3881,9 +4142,32 @@ QString MainWindow::jsRuntimeArg() const
     }
     QString qjsPath = QApplication::applicationDirPath() + "/qjs";
     return QString("quickjs:%1").arg(qjsPath);
-#else
+//#else
     return QString();
+//#endif
+}
+*/
+
+QString MainWindow::jsRuntimeArg() const
+{
+    // Prefer deno if it exists in the app directory
+    QString denoPath = PlayerGlobals::appDirPath + "/deno";
+    if (QFile::exists(denoPath)) {
+        QFile::setPermissions(denoPath,
+            QFile::ReadOwner | QFile::WriteOwner | QFile::ExeOwner |
+            QFile::ReadGroup | QFile::ExeGroup |
+            QFile::ReadOther | QFile::ExeOther);
+        return QString("deno:%1").arg(denoPath);
+    }
+
+#ifdef Q_OS_WIN
+    // On Windows, look for the prebuilt QuickJS binary in the app dir
+    QString qjsPath = QApplication::applicationDirPath() + "/qjs-windows-x86_64.exe";
+#else
+    QString qjsPath = QApplication::applicationDirPath() + "/qjs";
 #endif
+
+    return QString("quickjs:%1").arg(qjsPath);
 }
 
 void MainWindow::playRemoteStream(const QString &urlString) {
@@ -3934,7 +4218,7 @@ void MainWindow::onFileOpened(const QString &filePath) {
     QString suffix = fileInfo.suffix().toLower();
     QString fileName = fileInfo.fileName();
 
-    if (!ConstantGlobals::allMediaExtensions.contains("." + suffix)) {
+    if (!PlayerGlobals::allMediaExtensions.contains("." + suffix)) {
         statusBar()->showMessage("Unsupported file format: ." + suffix, 3000);
         return;
     }
@@ -4305,7 +4589,7 @@ void MainWindow::onMasterVolumeChanged(int value) {
 
 void MainWindow::saveAmbientPreset(const QString &presetName) {
 
-    QString presetDir = ConstantGlobals::ambientPresetFilePath;
+    QString presetDir = PlayerGlobals::ambientPresetFilePath;
 
     QString defaultFileName = presetName.isEmpty()
             ? "ambient_preset.json"
@@ -4362,14 +4646,14 @@ void MainWindow::saveAmbientPreset(const QString &presetName) {
 
 void MainWindow::loadAmbientPreset(const QString &presetName) {
     QString fileName;
-    QString presetPath = ConstantGlobals::ambientPresetFilePath;
+    QString presetPath = PlayerGlobals::ambientPresetFilePath;
 
     if (!presetName.isEmpty()) {
         fileName =
                 QDir(presetPath).filePath(QString("ambient_%1.json").arg(presetName));
     } else {
         fileName = QFileDialog::getOpenFileName(
-                    this, "Load Ambient Preset", ConstantGlobals::ambientPresetFilePath,
+                    this, "Load Ambient Preset", PlayerGlobals::ambientPresetFilePath,
                     "JSON Files (*.json);;All Files (*)");
 
         if (fileName.isEmpty()) {
@@ -4500,7 +4784,7 @@ void MainWindow::loadAmbientPlayersSettings() {
 
 QStringList MainWindow::getAvailablePresets() const {
     QStringList presets;
-    QString presetPath = ConstantGlobals::ambientPresetFilePath;
+    QString presetPath = PlayerGlobals::ambientPresetFilePath;
     QDir presetDir(presetPath);
 
     if (presetDir.exists()) {
@@ -4541,20 +4825,20 @@ void MainWindow::copyUserFiles() {
     };
 
     copyFileWithPerms(":/files/AmbientNatureSounds.txt",
-                      ConstantGlobals::ambientFilePath +
+                      PlayerGlobals::ambientFilePath +
                       "/AmbientNatureSounds.txt");
 
     copyFileWithPerms(":/files/FrequencyList.txt",
-                      ConstantGlobals::presetFilePath + "/FrequencyList.txt");
+                      PlayerGlobals::presetFilePath + "/FrequencyList.txt");
 
     copyFileWithPerms(":/files/README.txt",
-                      ConstantGlobals::ambientFilePath + "/README.txt");
+                      PlayerGlobals::ambientFilePath + "/README.txt");
 
     copyFileWithPerms(":/files/README.txt",
-                      ConstantGlobals::presetFilePath + "/README.txt");
+                      PlayerGlobals::presetFilePath + "/README.txt");
 
     copyFileWithPerms(":/files/MUSIC.txt",
-                      ConstantGlobals::musicFilePath + "/MUSIC.txt");
+                      PlayerGlobals::musicFilePath + "/MUSIC.txt");
 
     settings.setValue("userFilesCopied", true);
 }
@@ -4761,7 +5045,7 @@ void MainWindow::dragEnterEvent(QDragEnterEvent *event) {
             QString filePath = url.toLocalFile();
             QString suffix = QFileInfo(filePath).suffix().toLower();
 
-            if (!ConstantGlobals::allMediaExtensions.contains("." + suffix)) {
+            if (!PlayerGlobals::allMediaExtensions.contains("." + suffix)) {
                 allSupported = false;
                 break;
             }
@@ -4791,7 +5075,7 @@ void MainWindow::dropEvent(QDropEvent *event) {
 void MainWindow::processDroppedFiles(const QStringList &filePaths) {
     if (filePaths.isEmpty()) return;
 
-    ConstantGlobals::lastMusicDirPath = QFileInfo(filePaths.first()).absolutePath();
+    PlayerGlobals::lastMusicDirPath = QFileInfo(filePaths.first()).absolutePath();
 
     QString playlistName = currentPlaylistName();
     QListWidget *playlist = currentPlaylistWidget();
@@ -4899,6 +5183,126 @@ void MainWindow::onVideoContextMenu(const QPoint &pos) {
     QAction* actionStretch = aspectMenu->addAction("Stretch");
 
 
+    //
+    menu.addSeparator();
+    QMenu *subsMenu = menu.addMenu("Subtitles");
+
+    // Load from file
+    QAction *loadSubsAction = subsMenu->addAction("Load Subtitle\u2026");
+    loadSubsAction->setIcon(QIcon(":/icons/folder.svg"));
+    connect(loadSubsAction, &QAction::triggered, this,
+            &MainWindow::onLoadSubtitleFromFile);
+
+    // Download from SubDL
+    QAction *downloadSubsAction = subsMenu->addAction("Download Subtitles(Soon)\u2026");
+    downloadSubsAction->setIcon(QIcon(":/icons/cloud.svg"));
+    connect(downloadSubsAction, &QAction::triggered, this,
+            &MainWindow::openSubtitleDownloadDialog);
+
+    subsMenu->addSeparator();
+
+    // Enable / disable toggle
+    QAction *subsEnabledAction = subsMenu->addAction("Subtitles Enabled");
+    subsEnabledAction->setCheckable(true);
+    subsEnabledAction->setChecked(m_subtitlesEnabled);
+    connect(subsEnabledAction, &QAction::toggled, this, [this](bool on) {
+        m_subtitlesEnabled = on;
+        if (m_subtitleslabel) {
+            m_subtitleslabel->setVisible(on);
+            if (!on) {
+                m_subtitleslabel->clear();
+                m_subtitleslabel->setVisible(false);
+            }
+        }
+    });
+
+    subsMenu->addSeparator();
+
+    // Loaded subtitles list
+
+
+    //
+    // ---- Embedded subtitle tracks (from QMediaPlayer) ----
+    const QList<QMediaMetaData> embedded = m_mediaPlayer
+                                            ? m_mediaPlayer->subtitleTracks()
+                                            : QList<QMediaMetaData>();
+
+    const int activeEmbedded = m_mediaPlayer
+                                ? m_mediaPlayer->activeSubtitleTrack()
+                                : -1;
+
+    if (!embedded.isEmpty()) {
+        // Header (non-clickable)
+        QAction *header = subsMenu->addAction("Embedded");
+        header->setEnabled(false);
+        QFont f = header->font();
+        f.setBold(true);
+        header->setFont(f);
+
+        for (int i = 0; i < embedded.size(); ++i) {
+            const QVariant langVar = embedded.at(i).value(QMediaMetaData::Language);
+            QString label = langVar.toString();
+            if (label.isEmpty())
+                label = QString("Track %1").arg(i + 1);
+
+            QAction *a = subsMenu->addAction(label);
+            a->setCheckable(true);
+            a->setChecked(i == activeEmbedded);
+
+            connect(a, &QAction::triggered, this, [this, i]() {
+                if (m_mediaPlayer)
+                    m_mediaPlayer->setActiveSubtitleTrack(i);
+
+                // Turn off the external subtitle system while embedded is active
+                m_subtitlesEnabled = false;
+                if (m_subtitleslabel) m_subtitleslabel->setVisible(false);
+            });
+        }
+
+        // "Disable embedded" entry
+        QAction *noneAction = subsMenu->addAction("None");
+        noneAction->setCheckable(true);
+        noneAction->setChecked(activeEmbedded == -1);
+        connect(noneAction, &QAction::triggered, this, [this]() {
+            if (m_mediaPlayer)
+                m_mediaPlayer->setActiveSubtitleTrack(-1);
+        });
+
+        subsMenu->addSeparator();
+    }
+    //
+
+    if (m_loadedSubtitles.isEmpty()) {
+        QAction *none = subsMenu->addAction("(no subtitles loaded)");
+        none->setEnabled(false);
+    } else {
+        for (int i = 0; i < m_loadedSubtitles.size(); ++i) {
+            const QString &path = m_loadedSubtitles.at(i);
+            const QString name  = QFileInfo(path).fileName();
+            const bool isActive = (i == m_activeSubtitleIndex);
+
+            QAction *a = subsMenu->addAction(name);
+            a->setCheckable(true);
+            a->setChecked(isActive);
+            if (isActive)
+                a->setIcon(QIcon(":/icons/check.svg"));
+
+            connect(a, &QAction::triggered, this, [this, i]() {
+                switchToSubtitle(i);
+            });
+        }
+
+        subsMenu->addSeparator();
+        QAction *clearAllAction = subsMenu->addAction("Clear All");
+        connect(clearAllAction, &QAction::triggered, this, [this]() {
+            m_loadedSubtitles.clear();
+            m_activeSubtitleIndex = -1;
+            if (subsManager) subsManager->clear();
+            if (m_subtitleslabel) m_subtitleslabel->clear();
+            statusBar()->showMessage("Subtitles cleared", 2000);
+        });
+    }
+    //
     connect(actionKeepAspect, &QAction::triggered, this, [this]() {
         if (videoWidget) {
             videoWidget->setAspectRatioMode(Qt::KeepAspectRatio);
@@ -4988,6 +5392,22 @@ void MainWindow::onVideoContextMenu(const QPoint &pos) {
 }
 
 
+void MainWindow::clearSubtitles()
+{
+    if (subsManager) subsManager->clear();
+
+    m_loadedSubtitles.clear();
+    m_activeSubtitleIndex = -1;
+    m_subtitlesEnabled = false;
+
+    if (m_subtitleslabel) {
+        m_subtitleslabel->clear();
+        m_subtitleslabel->setVisible(false);
+    }
+
+    statusBar()->showMessage("Subtitles cleared for new media", 2000);
+}
+
 void MainWindow::setupVideoPlayer() {
     if (!m_videoFloatingWindow) {
 
@@ -5008,16 +5428,109 @@ void MainWindow::setupVideoPlayer() {
 
         if (m_mediaPlayer) m_mediaPlayer->setVideoOutput(videoWidget);
 
+        if (!m_clickTimer) {
+            m_clickTimer = new QTimer(this);
+            m_clickTimer->setSingleShot(true);
+            m_clickTimer->setInterval(QApplication::doubleClickInterval());
+            connect(m_clickTimer, &QTimer::timeout, this, [this]() {
+                // Single click confirmed — toggle toolbar
+                if (m_videoToolbar->isVisible()) {
+                    m_videoToolbar->hide();
+                } else {
+                    m_videoToolbar->show();
+                    m_videoToolbar->raise();
+                }
+            });
+        }
+
+        subsFontSize = 50;
+        if (! m_subtitleslabel) m_subtitleslabel = new QLabel(m_videoFloatingWindow);
+
+        //
+
+        m_subtitleslabel->setWindowFlags(Qt::Tool
+                                         | Qt::FramelessWindowHint
+                                         | Qt::WindowTransparentForInput
+                                         | Qt::NoDropShadowWindowHint);
+        m_subtitleslabel->setAttribute(Qt::WA_TranslucentBackground);
+        m_subtitleslabel->setAttribute(Qt::WA_ShowWithoutActivating);
+
+        //m_subtitleslabel->setAttribute(Qt::WA_TransparentForMouseEvents, true);
+        //m_subtitleslabel->setFocusPolicy(Qt::NoFocus);
+        //
+
+        //m_subtitleslabel->setFixedHeight(70);
+        //m_subtitleslabel->setFixedWidth(500);
+       // m_subtitleslabel->setMinimumHeight(45);
+        //m_subtitleslabel->setMaximumHeight(75);
+
+        m_subtitleslabel->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Minimum);
+        m_subtitleslabel->setAlignment(Qt::AlignCenter);
+        m_subtitleslabel->setWordWrap(true);
+
+        m_subtitleslabel->setStyleSheet(
+            QString(
+             "QLabel {"
+             "  color: white;"
+             "  background: transparent;"
+             "  border: none;"
+             "  font-size: %1px;"
+             "  padding: 4px 8px;"
+             "}").arg(subsFontSize));
+
         layout->addWidget(videoWidget);
+        //layout->addWidget(m_subtitleslabel);
         layout->addWidget(m_videoToolbar);
-
-
-
         m_videoFloatingWindow->hide();
+        m_videoToolbar->setVisible(true);
+        //m_subtitleslabel->setVisible(false);
+        m_subtitleslabel->hide();
     }
+
 }
 
 
+/*
+void MainWindow::updateSubtitleOverlayGeometry()
+{
+    if (!m_subtitleslabel || !m_videoFloatingWindow) return;
+    if (!m_videoFloatingWindow->isVisible()) return;
+
+    const QRect wrect(m_videoFloatingWindow->mapToGlobal(QPoint(0, 0)),
+                      m_videoFloatingWindow->size());
+    if (wrect.width() <= 0 || wrect.height() <= 0) return;
+
+    const int h = 80;
+    m_subtitleslabel->setGeometry(wrect.x(),
+                                  wrect.y() + wrect.height() - h,
+                                  wrect.width(),
+                                  h);
+}
+*/
+
+void MainWindow::updateSubtitleOverlayGeometry()
+{
+    if (!m_subtitleslabel || !m_videoFloatingWindow) return;
+    if (!m_videoFloatingWindow->isVisible()) return;
+
+    const QRect wrect(m_videoFloatingWindow->mapToGlobal(QPoint(0, 0)),
+                      m_videoFloatingWindow->size());
+    if (wrect.width() <= 0 || wrect.height() <= 0) return;
+
+    const int labelH = 30 + subsFontSize * 2;
+
+    // Height of the toolbar (or 0 if it's hidden)
+    const int toolbarH = 50;
+    const int bottomMargin = 20;   // gap between toolbar and subtitle strip
+
+    const int y = wrect.y() + wrect.height()
+                  - labelH - toolbarH - bottomMargin;
+
+    m_subtitleslabel->setGeometry(wrect.x(),
+                                  y,
+                                  wrect.width(),
+                                  labelH);
+}
 
 void MainWindow::createVideoToolbar() {
     m_videoToolbar = new QWidget();
@@ -5217,10 +5730,10 @@ void MainWindow::createVideoToolbar() {
             "}"
             "#videoToolbar QSlider::handle:horizontal {"
             "    background: white;"
-            "    width: 10px; /* Smaller handle */"
-            "    height: 10px;"
-            "    margin: -3.5px 0; /* Adjusted for new height */"
-            "    border-radius: 5px;"
+            "    width: 16px; /* Smaller handle */"
+            "    height: 16px;"
+            "    margin: -6.5px 0; /* Adjusted for new height */"
+            "    border-radius: 8px;"
             "}";
 
     m_videoToolbar->setStyleSheet(toolbarStyle);
@@ -5264,6 +5777,8 @@ bool MainWindow::eventFilter(QObject *watched, QEvent *event) {
     }
 
     if (watched == m_flickerFloatingWindow) {
+
+
         if (event->type() == QEvent::KeyPress) {
             QKeyEvent *keyEvent = static_cast<QKeyEvent *>(event);
             if (keyEvent->key() == Qt::Key_Escape) {
@@ -5284,6 +5799,24 @@ bool MainWindow::eventFilter(QObject *watched, QEvent *event) {
 
     if (watched == m_videoFloatingWindow || watched == videoWidget || watched == m_videoToolbar) {
 
+        if(watched == m_videoFloatingWindow) {
+
+        if (event->type() == QEvent::Show) {
+            updateSubtitleOverlayGeometry();
+            if (m_subtitleslabel) {
+                m_subtitleslabel->show();
+                m_subtitleslabel->raise();
+            }
+        }
+        if (event->type() == QEvent::Hide || event->type() == QEvent::Close) {
+            if (m_subtitleslabel) m_subtitleslabel->hide();
+        }
+        if (event->type() == QEvent::Move || event->type() == QEvent::Resize) {
+            updateSubtitleOverlayGeometry();
+        }
+
+        }
+
         if (event->type() == QEvent::Close) {
             if (openVideoButton->isChecked()) {
                 openVideoButton->blockSignals(true);
@@ -5293,17 +5826,30 @@ bool MainWindow::eventFilter(QObject *watched, QEvent *event) {
             m_videoFloatingWindow->hide();
             return true; // Accept the close event
         }
+        if (event->type() == QEvent::MouseButtonDblClick) {
+            QMouseEvent *mouseEvent = static_cast<QMouseEvent *>(event);
+            if (mouseEvent->button() == Qt::LeftButton) {
+                m_clickTimer->stop(); // cancel pending single-click
+                toggleFullScreen(); // your existing fullscreen function
+                return true;
+            }
+        }
 
         if (event->type() == QEvent::MouseButtonRelease) {
             QMouseEvent *mouseEvent = static_cast<QMouseEvent *>(event);
             if (mouseEvent->button() == Qt::LeftButton) {
-                if (m_videoToolbar->isVisible()) {
-                    m_videoToolbar->hide();
-                } else {
-                    m_videoToolbar->show();
-                }
+                m_clickTimer->start(); // defer; if double-click comes, it cancels this
                 return true;
             }
+        }
+
+        if (watched == m_videoFloatingWindow && event->type() == QEvent::Wheel) {
+            QWheelEvent *we = static_cast<QWheelEvent *>(event);
+            int delta = (we->angleDelta().y() > 0) ? 5 : -5;
+            m_vvolumeSlider->setValue(qBound(m_vvolumeSlider->minimum(),
+                                           m_vvolumeSlider->value() + delta,
+                                           m_vvolumeSlider->maximum()));
+            return true;
         }
     }
     return QMainWindow::eventFilter(watched, event);
@@ -5327,6 +5873,11 @@ void MainWindow::onVideoPositionChanged(qint64 position) {
         return;
     }
 
+    if (m_subtitlesEnabled && m_subtitleslabel && subsManager) {
+           m_subtitleslabel->setText(subsManager->textAt(position));
+    }
+
+    //m_subtitleslabel->setText("its working\nfine now");
     updateVideoTimeDisplay(position, m_mediaPlayer->duration());
 
     m_progressSlider->setValue(position / 1000);
@@ -5512,7 +6063,9 @@ void MainWindow::toggleTheme(bool enableDark)
             metadataBrowser->setStyleSheet("color: #ffffff; background-color: #0f0f15;");
         }
 
-
+        QFont f = qApp->font();
+        f.setPointSizeF(PlayerGlobals::FONTSIZE);
+        qApp->setFont(f);
 
     } else {
         qApp->setStyleSheet("");
@@ -5565,6 +6118,9 @@ void MainWindow::toggleTheme(bool enableDark)
             metadataBrowser->setStyleSheet("");  // Reset to default
         }
 
+        QFont f = qApp->font();
+        f.setPointSizeF(PlayerGlobals::FONTSIZE);
+        qApp->setFont(f);
 
 
         statusBar()->showMessage("Light theme restored", 2000);
@@ -5603,7 +6159,14 @@ QImage MainWindow::extractCoverArt(const QString& filePath) {
     tempFile.close();
 
     QProcess ffmpeg;
-    ffmpeg.start("ffmpeg", QStringList() << "-i" << filePath
+
+#ifdef Q_OS_WIN
+    QString ffmpegPath = QCoreApplication::applicationDirPath() + "/ffmpeg.exe";
+#else
+    QString ffmpegPath = "ffmpeg";   // Linux: rely on PATH
+#endif
+
+    ffmpeg.start(ffmpegPath, QStringList() << "-i" << filePath
                  << "-map" << "0:v:0" << "-vcodec" << "copy" << tempPath);
     ffmpeg.waitForFinished(500);
 
@@ -5624,7 +6187,7 @@ void MainWindow::showPresetExtractionNotice()
         return;
     }
 
-    QString destPath = ConstantGlobals::sessionsFilePath + "/session_presets.tar.xz";
+    QString destPath = PlayerGlobals::sessionsFilePath + "/session_presets.tar.xz";
 
     if (!QFile::exists(destPath)) {
         QFile::copy(":/files/session_presets.tar.xz", destPath);
@@ -5635,7 +6198,7 @@ void MainWindow::showPresetExtractionNotice()
     msgBox.setWindowTitle("Brainwave Presets Available");
     msgBox.setIcon(QMessageBox::Information);
     QString msg = "A collection of 47+ brainwave session presets has been installed, to be used by Session Manager.\n\n"
-                  "Location: " + ConstantGlobals::sessionsFilePath + "\n\n"
+                  "Location: " + PlayerGlobals::sessionsFilePath + "\n\n"
                   "File: session_presets.tar.xz\n\n"
                   "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
                   "📦 EXTRACTION INSTRUCTIONS:\n"
@@ -5644,7 +6207,7 @@ void MainWindow::showPresetExtractionNotice()
                   "2. Select 'Extract To...' (NOT 'Extract Here')\n"
                   "3. Choose the current folder as destination\n\n"
                   "OR using terminal:\n"
-                  "cd " + ConstantGlobals::sessionsFilePath + " && tar xvf session_presets.tar.xz\n\n"
+                  "cd " + PlayerGlobals::sessionsFilePath + " && tar xvf session_presets.tar.xz\n\n"
                   "4. You can always remake them available via Presets → Populate Sessions Directory\n\n"
                   "Would you like to open this folder?";
 
@@ -5656,7 +6219,7 @@ void MainWindow::showPresetExtractionNotice()
     msgBox.addButton(QMessageBox::Cancel);
 
     if (msgBox.exec() == QMessageBox::Ok) {
-        QDesktopServices::openUrl(QUrl::fromLocalFile(ConstantGlobals::sessionsFilePath));
+        QDesktopServices::openUrl(QUrl::fromLocalFile(PlayerGlobals::sessionsFilePath));
     }
 
     if (doNotShowAgain->isChecked()) {
@@ -5664,9 +6227,10 @@ void MainWindow::showPresetExtractionNotice()
     }
 }
 
+/*
 void MainWindow::copyPresetsArchive()
 {
-    QString destPath = ConstantGlobals::sessionsFilePath + "/session_presets.tar.xz";
+    QString destPath = PlayerGlobals::sessionsFilePath + "/session_presets.tar.xz";
 
     if (QFile::exists(destPath)) {
         QMessageBox::information(this, "Already Exists",
@@ -5675,23 +6239,72 @@ void MainWindow::copyPresetsArchive()
     }
 
     QMessageBox::StandardButton reply = QMessageBox::question(this, "Copy Sessions",
-        "Copy brainwave sessions archive to:\n" + ConstantGlobals::sessionsFilePath + "?",
+        "Copy brainwave sessions archive to:\n" + PlayerGlobals::sessionsFilePath + "?",
         QMessageBox::Yes | QMessageBox::No);
 
     if (reply == QMessageBox::Yes) {
-        QDir().mkpath(ConstantGlobals::sessionsFilePath);
+        QDir().mkpath(PlayerGlobals::sessionsFilePath);
         QFile::copy(":/files/session_presets.tar.xz", destPath);
         QMessageBox::information(this, "Done", "Archive copied successfully.");
     }
 }
+*/
+
+
+void MainWindow::copyPresetsArchive()
+{
+    const QString folder   = PlayerGlobals::sessionsFilePath;
+    const QString destPath = folder + "/session_presets.tar.xz";
+
+    // ---- Ensure the archive is present ----
+    if (!QFile::exists(destPath)) {
+        QMessageBox::StandardButton reply = QMessageBox::question(this, "Copy Sessions",
+            "Copy brainwave sessions archive to:\n" + folder + "?",
+            QMessageBox::Yes | QMessageBox::No);
+
+        if (reply != QMessageBox::Yes)
+            return;
+
+        QDir().mkpath(folder);
+
+        if (!QFile::copy(":/files/session_presets.tar.xz", destPath)) {
+            QMessageBox::warning(this, "Copy Failed",
+                "Could not copy the archive to:\n" + destPath);
+            return;
+        }
+    }else {
+        QMessageBox::information(this, "Already Exists",
+            "Sessions archive already exists at:\n" + destPath +
+            "\n\nIf you want to re-copy the archive, please first remove "
+            "the old .tar.xz file.");
+        return;
+    }
+
+    // ---- Open the folder and instruct the user ----
+    QDesktopServices::openUrl(QUrl::fromLocalFile(folder));
+
+    QMessageBox::information(this, "Extract the Archive",
+        "The archive is located at:\n" + destPath +
+        "\n\nPlease extract it manually using \"Extract To...\" "
+        "(NOT \"Extract Here\"):\n\n"
+        "• Windows: right-click the .tar.xz → 7-Zip → \"Extract To...\"\n"
+        "   (extract twice: first the .tar.xz, then the resulting .tar)\n\n"
+        "• Linux: right-click the .tar.xz in your Archive Manager → "
+        "\"Extract To...\"\n"
+        "   (choose the current directory as destination and confirm)\n\n"
+        "In the current directory you will see a set of *.bsession files. "
+        "SessionManager can 'Load' them to create brainwave multistage sessions.\n\n"
+        "Access Session Manager via: Binaural toolbar → Sessions");
+}
+
 
 void MainWindow::openFolder() {
-    QDir dir(ConstantGlobals::appDirPath);
+    QDir dir(PlayerGlobals::appDirPath);
     if (!dir.exists()) {
         return;
     }
 
-    if (!QDesktopServices::openUrl(QUrl::fromLocalFile(ConstantGlobals::appDirPath))) {
+    if (!QDesktopServices::openUrl(QUrl::fromLocalFile(PlayerGlobals::appDirPath))) {
     }
 }
 
@@ -5706,7 +6319,7 @@ void MainWindow::showDenoHelpDialog()
     QTextBrowser *tb = new QTextBrowser(&dlg);
     tb->setOpenExternalLinks(true);
 
-    QString denoPath = ConstantGlobals::appDirPath + "/deno";
+    QString denoPath = PlayerGlobals::appDirPath + "/deno";
     bool installed = QFile::exists(denoPath);
 
     QString status = installed
@@ -5761,7 +6374,7 @@ void MainWindow::showDenoHelpDialog()
     buttons->addWidget(openFolderBtn);
     connect(openFolderBtn, &QPushButton::clicked, []() {
         QDesktopServices::openUrl(
-            QUrl::fromLocalFile(ConstantGlobals::appDirPath));
+            QUrl::fromLocalFile(PlayerGlobals::appDirPath));
     });
 
     buttons->addStretch();
@@ -5773,4 +6386,49 @@ void MainWindow::showDenoHelpDialog()
     layout->addLayout(buttons);
 
     dlg.exec();
+}
+
+
+void MainWindow::onLoadSubtitleFromFile()
+{
+
+    const QString lastDir = PlayerGlobals::lastMusicDirPath;
+
+    const QString path = QFileDialog::getOpenFileName(
+        this, "Open Subtitle File", lastDir,
+        "Subtitles (*.srt);;All files (*)");
+
+    if (path.isEmpty()) return;
+
+
+    if (!m_loadedSubtitles.contains(path))
+        m_loadedSubtitles.append(path);
+
+    switchToSubtitle(m_loadedSubtitles.indexOf(path));
+}
+
+void MainWindow::switchToSubtitle(int index)
+{
+    if (index < 0 || index >= m_loadedSubtitles.size()) return;
+    if (!subsManager) return;
+
+    const QString path = m_loadedSubtitles.at(index);
+    if (!subsManager->loadSrt(path)) {
+        QMessageBox::warning(this, "Subtitle Error",
+            "Failed to load subtitle file:\n" + path);
+        return;
+    }
+
+    m_activeSubtitleIndex = index;
+    m_subtitlesEnabled = true;
+    if (m_subtitleslabel)
+        m_subtitleslabel->setVisible(true);
+
+    statusBar()->showMessage(
+        QString("Loaded: %1").arg(QFileInfo(path).fileName()), 3000);
+}
+
+void MainWindow::openSubtitleDownloadDialog()
+{
+    // your SubtitleDialog opening code here
 }

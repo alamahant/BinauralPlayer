@@ -115,7 +115,7 @@ bool DynamicEngine::startDynamicPlayback()
               auto waveform = m_engine->m_currentWaveform.load();
               double sampleRate = m_engine->m_sampleRate;
               double pulseFreq = m_engine->m_pulseFrequency;
-              bool isIsochronic = (ConstantGlobals::currentToneType == 1);
+              bool isIsochronic = (PlayerGlobals::currentToneType == 1);
 
               bool noiseEnabled = m_engine->m_noiseEnabled.load();
               int noiseType = m_engine->m_noiseType.load();
@@ -270,7 +270,7 @@ void DynamicEngine::setLeftFrequency(double hz)
 
 void DynamicEngine::setRightFrequency(double hz)
 {
-    if (ConstantGlobals::currentToneType == 1) {
+    if (PlayerGlobals::currentToneType == 1) {
     } else {
         if (!validateFrequency(hz)) {
             emit errorOccurred(QString("Invalid right frequency: %1 Hz").arg(hz));
@@ -412,7 +412,7 @@ QAudioSink *DynamicEngine::audioOutput() const
 
 void DynamicEngine::setPulseFrequency(double hz)
 {
-    if (ConstantGlobals::currentToneType != 1) {
+    if (PlayerGlobals::currentToneType != 1) {
             return; // Don't set pulse for non-ISO tones
         }
     if (hz < 0.1 || hz > 100.0) {
@@ -485,7 +485,7 @@ double DynamicEngine::calculateSineSample(double phase)
 
 double DynamicEngine::calculateSquareSample(double phase)
 {
-    if (ConstantGlobals::currentToneType == 1) {
+    if (PlayerGlobals::currentToneType == 1) {
         return (std::sin(phase) >= 0.0) ? 1.0 : 0.0;
     } else {
         return (std::sin(phase) >= 0.0) ? 1.0 : -1.0;

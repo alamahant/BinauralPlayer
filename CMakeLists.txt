@@ -34,6 +34,7 @@ qt_add_executable(BinauralPlayer
     resources.qrc
     radionicsconsole.cpp radionicsconsole.h
     rssnotificationdialog.cpp rssnotificationdialog.h
+    subtitlemanager.cpp subtitlemanager.h
 )
 
 target_link_libraries(BinauralPlayer PRIVATE

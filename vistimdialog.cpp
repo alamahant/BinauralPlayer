@@ -171,21 +171,21 @@ void VisStimDialog::onStartStop()
             warned = true;
         }
         applyToFlicker();
-        if(ConstantGlobals::currentToneType == 0 || ConstantGlobals::currentToneType == 2){
-        m_flicker->setFrequency(ConstantGlobals::currentBinFreq);
+        if(PlayerGlobals::currentToneType == 0 || PlayerGlobals::currentToneType == 2){
+        m_flicker->setFrequency(PlayerGlobals::currentBinFreq);
 
         m_freqSyncBadge->setText(
             QString("⟳  %1 Hz · %2")
-                .arg(ConstantGlobals::currentBinFreq, 0, 'f', 2)
-                .arg(bandName(ConstantGlobals::currentBinFreq)));
+                .arg(PlayerGlobals::currentBinFreq, 0, 'f', 2)
+                .arg(bandName(PlayerGlobals::currentBinFreq)));
 
         }else{
 
-        m_flicker->setFrequency(ConstantGlobals::currentIsonFreq);
+        m_flicker->setFrequency(PlayerGlobals::currentIsonFreq);
         m_freqSyncBadge->setText(
             QString("⟳  %1 Hz · %2")
-                .arg(ConstantGlobals::currentBinFreq, 0, 'f', 2)
-                .arg(bandName(ConstantGlobals::currentIsonFreq)));
+                .arg(PlayerGlobals::currentBinFreq, 0, 'f', 2)
+                .arg(bandName(PlayerGlobals::currentIsonFreq)));
         }
 
         m_flicker->startFlicker();

@@ -102,6 +102,17 @@
 
   <releases>
 
+<release version="1.7.3" date="2026-10-07">
+  <description>
+    <p>Release v1.7.3:</p>
+    <ul>
+      <li>Added subtitle support</li>
+      <li>Fixed playlist loading</li>
+      <li>Playlists now open in a new tab</li>
+    </ul>
+  </description>
+</release>
+
 <release version="1.7.2" date="2026-09-20">
   <description>
     <p>Release v1.7.2:</p>

@@ -8,24 +8,33 @@
 
 int main(int argc, char *argv[])
 {
-
-    QDir().mkpath(ConstantGlobals::appDirPath);
-    QDir().mkpath(ConstantGlobals::ambientFilePath);
-    QDir().mkpath(ConstantGlobals::presetFilePath);
-    QDir().mkpath(ConstantGlobals::playlistFilePath);
-    QDir().mkpath(ConstantGlobals::musicFilePath);
-    QDir().mkpath(ConstantGlobals::ambientPresetFilePath);
-    QDir().mkpath(ConstantGlobals::radionicsFilePath);
-    QDir().mkpath(ConstantGlobals::sessionsFilePath);
-
     QApplication::setApplicationName("BinauralPlayer");
     QApplication::setOrganizationName("Alamahant");
-    QApplication::setApplicationVersion("1.7.2");
+    QApplication::setApplicationVersion("1.7.3");
+
+#ifdef Q_OS_WIN
+    QSettings::setDefaultFormat(QSettings::IniFormat);
+#endif
+
+    QDir().mkpath(PlayerGlobals::appDirPath);
+    QDir().mkpath(PlayerGlobals::ambientFilePath);
+    QDir().mkpath(PlayerGlobals::presetFilePath);
+    QDir().mkpath(PlayerGlobals::playlistFilePath);
+    QDir().mkpath(PlayerGlobals::musicFilePath);
+    QDir().mkpath(PlayerGlobals::ambientPresetFilePath);
+    QDir().mkpath(PlayerGlobals::radionicsFilePath);
+    QDir().mkpath(PlayerGlobals::sessionsFilePath);
+
+    QSettings settings;
+
+    double factor = settings.value("ui/scaleFactor", 1.0).toDouble();
+    qputenv("QT_SCALE_FACTOR", QByteArray::number(factor));
+    PlayerGlobals::FONTSIZE = settings.value("ui/fontSize", PlayerGlobals::DEFAULTFONTSIZE).toReal();
 
     QApplication a(argc, argv);
 
-#ifndef FLATPAK_BUILD
 
+#ifdef Q_OS_WIN
     a.setStyle(QStyleFactory::create("Fusion"));
 
     QPalette lightPalette;
@@ -39,7 +48,16 @@ int main(int argc, char *argv[])
     lightPalette.setColor(QPalette::HighlightedText, Qt::white);
 
     a.setPalette(lightPalette);
+    a.setStyleSheet("QLineEdit { placeholder-text-color: #999999; }");
 #endif
+
+    if (PlayerGlobals::FONTSIZE > 0.0) {
+           QFont appFont = a.font();
+           appFont.setPointSizeF(PlayerGlobals::FONTSIZE);
+           a.setFont(appFont);
+    } else {
+           PlayerGlobals::FONTSIZE = PlayerGlobals::DEFAULTFONTSIZE;
+    }
 
 
     MainWindow w;

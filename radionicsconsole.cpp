@@ -8,6 +8,7 @@
 #include"constants.h"
 #include<QJsonDocument>
 #include<QJsonObject>
+#include<QSettings>
 
 
 SpinKnob::SpinKnob(const QString &label, QWidget *parent)
@@ -112,7 +113,11 @@ RadionicsConsole::~RadionicsConsole()
 void RadionicsConsole::setupUI()
 {
     setWindowTitle("Radionics Console");
-    setMinimumSize(900, 850);
+    QSettings settings;
+
+    double factor = settings.value("ui/scaleFactor", 1.0).toDouble();
+
+    setMinimumSize(900 / factor, 850 / factor);
     setStyleSheet("background: #1a1a1a;");
 
     QVBoxLayout *mainLayout = new QVBoxLayout(this);
@@ -431,7 +436,7 @@ void RadionicsConsole::setupUI()
 void RadionicsConsole::onUploadTargetImage()
 {
     QString filePath = QFileDialog::getOpenFileName(this, "Select Target Image",
-        ConstantGlobals::appDirPath,
+        PlayerGlobals::appDirPath,
         "Images (*.png *.jpg *.jpeg *.bmp *.gif)");
 
     if (!filePath.isEmpty()) {
@@ -448,7 +453,7 @@ void RadionicsConsole::onUploadTargetImage()
 void RadionicsConsole::onUploadTrendImage()
 {
     QString filePath = QFileDialog::getOpenFileName(this, "Select Trend Image",
-        ConstantGlobals::appDirPath,
+        PlayerGlobals::appDirPath,
         "Images (*.png *.jpg *.jpeg *.bmp *.gif)");
 
     if (!filePath.isEmpty()) {
@@ -638,7 +643,7 @@ void RadionicsConsole::onSave()
 
     QString filePath = QFileDialog::getSaveFileName(this,
         "Save Radionics Session",
-        ConstantGlobals::radionicsFilePath + "/session_" + QDateTime::currentDateTime().toString("yyyyMMdd_hhmmss") + ".json",
+        PlayerGlobals::radionicsFilePath + "/session_" + QDateTime::currentDateTime().toString("yyyyMMdd_hhmmss") + ".json",
         "JSON Files (*.json)");
 
     if (!filePath.isEmpty()) {
@@ -687,7 +692,7 @@ void RadionicsConsole::loadSession()
 {
     QString filePath = QFileDialog::getOpenFileName(this,
         "Load Radionics Session",
-        ConstantGlobals::radionicsFilePath,
+        PlayerGlobals::radionicsFilePath,
         "JSON Files (*.json)");
 
     if (!filePath.isEmpty()) {

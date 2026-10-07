@@ -36,6 +36,7 @@
 #include<QProcess>
 #include"radionicsconsole.h"
 #include"rssnotificationdialog.h"
+#include"subtitlemanager.h"
 
 class MainWindow : public QMainWindow
 {
@@ -459,7 +460,22 @@ private:
 
 private slots:
     void showDenoHelpDialog();
-
+    void onLoadSubtitleFromFile();
+    void openSubtitleDownloadDialog();
+    void switchToSubtitle(int index);
+private:
+    QTimer *m_clickTimer = nullptr;
+    //subititles
+    QLabel* m_subtitleslabel = nullptr;
+    SubtitleManager* subsManager = nullptr;
+    QStringList m_loadedSubtitles;
+    int         m_activeSubtitleIndex = -1;
+    bool        m_subtitlesEnabled = false;
+    void clearSubtitles();
+    void updateSubtitleOverlayGeometry();
+    int subsFontSize = 20;
+    int height = -1;
+    QString ytdlpPath();
 
 };
 #endif // MAINWINDOW_H

@@ -1,5 +1,18 @@
 # Changelog 
 
+## [2026-10-07] - Release v1.7.3
+
+### Added
+- **Subtitle Support**
+  - Added subtitle support
+
+### Fixed
+- **Playlist Loading**
+  - Fixed playlist loading
+  - Playlists now open in a new tab
+
+---
+
 ## [2026-09-20] - Release v1.7.2
 
 ### Fixed

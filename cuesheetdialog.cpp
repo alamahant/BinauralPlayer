@@ -65,7 +65,7 @@ void CueSheetDialog::onLoadCue()
 {
     QString cuePath = QFileDialog::getOpenFileName(this,
             "Open CUE Sheet",
-            ConstantGlobals::appDirPath,  // Opens at this directory
+            PlayerGlobals::appDirPath,  // Opens at this directory
             "CUE files (*.cue);;All files (*.*)");
 
 
@@ -78,9 +78,9 @@ void CueSheetDialog::onLoadCue()
 
 void CueSheetDialog::onLoadCue()
 {
-    QString initialDir = !ConstantGlobals::lastMusicDirPath.isEmpty()
-                          ? ConstantGlobals::lastMusicDirPath
-                          : ConstantGlobals::appDirPath;
+    QString initialDir = !PlayerGlobals::lastMusicDirPath.isEmpty()
+                          ? PlayerGlobals::lastMusicDirPath
+                          : PlayerGlobals::appDirPath;
 
     QString cuePath = QFileDialog::getOpenFileName(this,
         "Open CUE Sheet", initialDir,
@@ -294,7 +294,7 @@ void CueSheetDialog::onNextTrack()
     m_currentTrackIndex = (m_currentTrackIndex + 1) % m_tracks.size();
     m_trackList->setCurrentRow(m_currentTrackIndex);
 
-    if (ConstantGlobals::playbackState == QMediaPlayer::PlayingState){
+    if (PlayerGlobals::playbackState == QMediaPlayer::PlayingState){
     const CueTrack &track = m_tracks[m_currentTrackIndex];
 
     qint64 startSeconds = track.startMs / 1000;
@@ -309,7 +309,7 @@ void CueSheetDialog::onPreviousTrack()
     m_currentTrackIndex = (m_currentTrackIndex - 1 + m_tracks.size()) % m_tracks.size();
     m_trackList->setCurrentRow(m_currentTrackIndex);
 
-    if (ConstantGlobals::playbackState == QMediaPlayer::PlayingState){
+    if (PlayerGlobals::playbackState == QMediaPlayer::PlayingState){
 
     const CueTrack &track = m_tracks[m_currentTrackIndex];
 

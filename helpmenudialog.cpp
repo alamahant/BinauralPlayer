@@ -495,6 +495,26 @@ QString HelpMenuDialog::getWhatsNewContent()
     return R"(
 
 <div style="background-color: #e8f5e9; padding: 15px; border-radius: 8px; margin-bottom: 25px; border-left: 5px solid #2e7d32;">
+    <h2 style="color: #1b5e20; margin-top: 0;">Playlist &amp; Subtitle Support — Version 1.7.3 <span style="font-size: 0.75em; background-color: #2e7d32; color: white; padding: 2px 8px; border-radius: 12px; vertical-align: middle;">NEW</span></h2>
+    <p>Version 1.7.3 fixes playlist loading and adds subtitle support.</p>
+
+    <div style="background-color: #e8f5e9; padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #2e7d32;">
+        <h3 style="color: #1b5e20; margin-top: 0;">Added: Subtitle Support</h3>
+        <ul>
+            <li><strong>Subtitle support</strong> — subtitles are now displayed during playback</li>
+        </ul>
+    </div>
+
+    <div style="background-color: #e8f5e9; padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #2e7d32;">
+        <h3 style="color: #1b5e20; margin-top: 0;">Fixed: Playlist Loading</h3>
+        <ul>
+            <li><strong>Playlist loading fixed</strong> — playlists now load reliably</li>
+            <li><strong>New tab</strong> — playlists now open in a new tab</li>
+        </ul>
+    </div>
+</div>
+
+<div style="background-color: #e8f5e9; padding: 15px; border-radius: 8px; margin-bottom: 25px; border-left: 5px solid #2e7d32;">
     <h2 style="color: #1b5e20; margin-top: 0;">yt-dlp Update &amp; Runtime Support — Version 1.7.2 <span style="font-size: 0.75em; background-color: #2e7d32; color: white; padding: 2px 8px; border-radius: 12px; vertical-align: middle;">NEW</span></h2>
     <p>Version 1.7.2 updates yt-dlp and adds JavaScript runtime support for reliable YouTube extraction.</p>
 
@@ -1103,67 +1123,71 @@ QString HelpMenuDialog::getShortcutsContent()
 }
 QString HelpMenuDialog::getAboutContent() {
     return QString(R"(
-        <div style="text-align: center; font-family: Arial, sans-serif;">
-            <h1 style="color: #2c3e50; margin-bottom: 10px;">BinauralPlayer</h1>
-            <h3 style="color: #7f8f8d; margin-bottom: 20px;">Multimedia & Brainwave Audio Engine</h3>
-            <p style="font-size: 16px; margin-bottom: 20px;">
-                A powerful desktop application for media playback, binaural and isochronic
-                tone generation, and real-time brainwave entrainment. Built with modern Qt 6
-                technologies and a high-performance C++17 audio engine.
-            </p>
-
-            <div style="background-color: #ecf0f1; padding: 15px; border-radius: 8px; margin: 20px 0;">
-                <p style="margin: 5px 0;"><strong>Version:</strong> %1</p>
-                <p style="margin: 5px 0;"><strong>Built with:</strong> Qt Framework (Qt 6)</p>
-                <p style="margin: 5px 0;"><strong>Platform:</strong> Cross-platform</p>
-            </div>
-
-            <div style="margin: 30px 0;">
-                <h4 style="color: #2c3e50;">Key Features</h4>
-
-                <p style="text-align: left; margin: 10px 20px;">
-                    • Multi-format media playback (MP3, FLAC, OGG, WAV, MP4, MKV)<br>
-                    • Real-time binaural & isochronic tone generation<br>
-                    • Dynamic waveform engine (Sine, Square, Triangle, Sawtooth)<br>
-                    • Tabbed playlist management with drag & drop<br>
-                    • Streaming support for direct audio URLs<br>
-                    • JSON presets and playlist saving<br>
-                    • Safety warnings and customizable UI elements
+            <div style="text-align: center; font-family: Arial, sans-serif;">
+                <h1 style="color: #2c3e50; margin-bottom: 10px;">BinauralPlayer</h1>
+                <h3 style="color: #7f8f8d; margin-bottom: 20px;">Multimedia & Brainwave Audio Engine</h3>
+                <p style="font-size: 16px; margin-bottom: 20px;">
+                    A powerful desktop application for media playback, binaural and isochronic
+                    tone generation, and real-time brainwave entrainment. Built with modern Qt 6
+                    technologies and a high-performance C++17 audio engine.
                 </p>
 
-                <p><strong style="color: #27ae60;">Free for Linux on Flathub</strong></p>
+                <div style="background-color: #ecf0f1; padding: 15px; border-radius: 8px; margin: 20px 0;">
+                    <p style="margin: 5px 0;"><strong>Version:</strong> %1</p>
+                    <p style="margin: 5px 0;"><strong>Built with:</strong> Qt Framework (Qt 6)</p>
+                    <p style="margin: 5px 0;"><strong>Platform:</strong> Cross-platform</p>
+                </div>
 
-                <p><strong>Windows & macOS Binaries:</strong><br>
-                <a href="https://jnanadhakini.gumroad.com/l/ffllx">
-                → https://jnanadhakini.gumroad.com/l/ffllx</a></p>
+                <div style="margin: 30px 0;">
+                    <h4 style="color: #2c3e50;">Key Features</h4>
 
-                <p><strong>All Windows/macOS apps:</strong><br>
-                <a href="https://jnanadhakini.gumroad.com">
-                → https://jnanadhakini.gumroad.com</a></p>
+                    <p style="text-align: left; margin: 10px 20px;">
+                        • Multi-format media playback (MP3, FLAC, OGG, WAV, MP4, MKV)<br>
+                        • Real-time binaural & isochronic tone generation<br>
+                        • Dynamic waveform engine (Sine, Square, Triangle, Sawtooth)<br>
+                        • Tabbed playlist management with drag & drop<br>
+                        • Streaming support for direct audio URLs<br>
+                        • JSON presets and playlist saving<br>
+                        • Safety warnings and customizable UI elements
+                    </p>
 
-                <p><strong>Source Code & Linux Version:</strong><br>
-                <a href="https://github.com/alamahant/BinauralPlayer">
-                → https://github.com/alamahant/BinauralPlayer</a></p>
+                    <p><strong style="color: #27ae60;">Free for Linux on Flathub</strong></p>
+
+                    <p><strong>Windows available on the Microsoft Store:</strong><br>
+                    <a href="https://apps.microsoft.com/detail/9mxzstrwk98b?hl=en-US&gl=GR">
+                    → https://apps.microsoft.com/detail/9mxzstrwk98b</a></p>
+
+                    <p><strong>Windows & macOS Binaries:</strong><br>
+                    <a href="https://jnanadhakini.gumroad.com/l/ffllx">
+                    → https://jnanadhakini.gumroad.com/l/ffllx</a></p>
+
+                    <p><strong>All Windows/macOS apps:</strong><br>
+                    <a href="https://jnanadhakini.gumroad.com">
+                    → https://jnanadhakini.gumroad.com</a></p>
+
+                    <p><strong>Source Code & Linux Version:</strong><br>
+                    <a href="https://github.com/alamahant/BinauralPlayer">
+                    → https://github.com/alamahant/BinauralPlayer</a></p>
+                </div>
+
+                <hr style="margin: 30px 0; border: 1px solid #bdc3c7;">
+
+                <div style="margin: 20px 0;">
+                    <p style="margin: 5px 0; color: #7f8f8d;">
+                        <strong>Copyright © 2026 Alamahant</strong>
+                    </p>
+                    <p style="margin: 5px 0; font-size: 12px; color: #95a5a6;">
+                        This software is open source (GPL-3.0). Linux version free on Flathub.
+                    </p>
+                </div>
+
+                <div style="margin: 20px 0;">
+                    <p style="font-size: 14px; color: #7f8f8d;">
+                        Crafted with for audio explorers, meditators, and frequency enthusiasts
+                    </p>
+                </div>
             </div>
-
-            <hr style="margin: 30px 0; border: 1px solid #bdc3c7;">
-
-            <div style="margin: 20px 0;">
-                <p style="margin: 5px 0; color: #7f8f8d;">
-                    <strong>Copyright © 2025 Alamahant</strong>
-                </p>
-                <p style="margin: 5px 0; font-size: 12px; color: #95a5a6;">
-                    This software is open source (GPL-3.0). Linux version free on Flathub.
-                </p>
-            </div>
-
-            <div style="margin: 20px 0;">
-                <p style="font-size: 14px; color: #7f8f8d;">
-                    Crafted with for audio explorers, meditators, and frequency enthusiasts
-                </p>
-            </div>
-        </div>
-    )").arg(QApplication::applicationVersion());
+        )").arg(QApplication::applicationVersion());
 }
 
 

@@ -1,6 +1,6 @@
 #include "constants.h"
 #include<QApplication>
-namespace ConstantGlobals {
+namespace PlayerGlobals {
 
 const QString appDirPath = QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation) + "/BinauralPlayer";
 const QString ambientFilePath = appDirPath + "/ambient-tracks";
@@ -131,5 +131,12 @@ QString getAllMediaFilterString() {
     }
     return cachedFilterString;
 }
+
+#ifdef Q_OS_WIN
+    const qreal DEFAULTFONTSIZE = 11;
+#else
+    const qreal DEFAULTFONTSIZE = 12;
+#endif
+qreal FONTSIZE = DEFAULTFONTSIZE;
 
 }// namespace

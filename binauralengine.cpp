@@ -151,7 +151,7 @@ void BinauralEngine::setLeftFrequency(double hz)
 /*
 void BinauralEngine::setRightFrequency(double hz)
 {
-        if (ConstantGlobals::currentToneType == 1) {
+        if (PlayerGlobals::currentToneType == 1) {
                     if (hz < 0.5 || hz > 30.0) {
                         emit errorOccurred(QString("Invalid pulse frequency: %1 Hz").arg(hz));
                         return;
@@ -175,7 +175,7 @@ void BinauralEngine::setRightFrequency(double hz)
 */
 
 void BinauralEngine::setRightFrequency(double hz) {
-    if (ConstantGlobals::currentToneType == 1) {
+    if (PlayerGlobals::currentToneType == 1) {
 
     } else {
         if (!validateFrequency(hz)) {
@@ -331,7 +331,7 @@ bool BinauralEngine::isEngineActive() const
 
 void BinauralEngine::generateAudioBuffer(int durationMs)
 {
-    if (ConstantGlobals::currentToneType == 1) {
+    if (PlayerGlobals::currentToneType == 1) {
            generateIsochronicBuffer(durationMs);
            return;
        }
@@ -484,7 +484,7 @@ double BinauralEngine::calculateSineSample(double phase)
 double BinauralEngine::calculateSquareSample(double phase)
 {
 
-        if (ConstantGlobals::currentToneType == 1) {
+        if (PlayerGlobals::currentToneType == 1) {
             return (std::sin(phase) >= 0.0) ? 1.0 : 0.0;  // On/Off
         } else {
             return (std::sin(phase) >= 0.0) ? 1.0 : -1.0; // Original +1/-1

@@ -184,7 +184,7 @@ void AmbientPlayerDialog::onBrowseClicked()
 {
     QString filePath = QFileDialog::getOpenFileName(this,
         tr("Select Audio File"),
-        ConstantGlobals::ambientFilePath,
+        PlayerGlobals::ambientFilePath,
         tr("Audio Files (*.mp3 *.wav *.ogg *.flac *.m4a);;All Files (*.*)"));
 
     if (!filePath.isEmpty()) {
