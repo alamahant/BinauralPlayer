@@ -9,8 +9,8 @@ A sophisticated desktop application for multimedia playback, binaural/isochronic
 | Platform | Where to Get It |
 | :--- | :--- |
 | **Linux** | [Flathub](https://flathub.org/en/apps/io.github.alamahant.BinauralPlayer) |
-| **Windows and Mac** | [Buy on Gumroad](https://jnanadhakini.gumroad.com/) - Pre-compiled binary, no compilation needed |
-
+| **Windows and Mac** | [Buy on Gumroad](https://jnanadhakini.gumroad.com/) — Pre-compiled binary, no compilation needed |
+| **Microsoft Store** | [BinauralPlayer on Microsoft Store](https://apps.microsoft.com/detail/9mxzstrwk98b?hl=en-US&gl=GR) |
 
 ![Qt](https://img.shields.io/badge/Qt-6.0%2B-green)
 ![C++17](https://img.shields.io/badge/C%2B%2B-17-blue)
