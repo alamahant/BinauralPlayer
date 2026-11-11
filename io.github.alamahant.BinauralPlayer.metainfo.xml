@@ -102,6 +102,19 @@
 
   <releases>
 
+<release version="1.7.4" date="2026-11-11">
+  <description>
+    <p>Release v1.7.4:</p>
+    <ul>
+      <li>Fixed dark theme toolbar buttons clipping at the edges</li>
+      <li>Slider handles are now round in both light and dark themes</li>
+      <li>Reduced the harshness of the dark palette</li>
+      <li>Improved spacing and padding across toolbar controls</li>
+      <li>Consistent button sizing in the binaural toolbar</li>
+    </ul>
+  </description>
+</release>
+
 <release version="1.7.3" date="2026-10-07">
   <description>
     <p>Release v1.7.3:</p>

@@ -10,7 +10,7 @@ int main(int argc, char *argv[])
 {
     QApplication::setApplicationName("BinauralPlayer");
     QApplication::setOrganizationName("Alamahant");
-    QApplication::setApplicationVersion("1.7.3");
+    QApplication::setApplicationVersion("1.7.4");
 
 #ifdef Q_OS_WIN
     QSettings::setDefaultFormat(QSettings::IniFormat);
@@ -34,7 +34,7 @@ int main(int argc, char *argv[])
     QApplication a(argc, argv);
 
 
-#ifdef Q_OS_WIN
+//#ifdef Q_OS_WIN
     a.setStyle(QStyleFactory::create("Fusion"));
 
     QPalette lightPalette;
@@ -49,7 +49,7 @@ int main(int argc, char *argv[])
 
     a.setPalette(lightPalette);
     a.setStyleSheet("QLineEdit { placeholder-text-color: #999999; }");
-#endif
+//#endif
 
     if (PlayerGlobals::FONTSIZE > 0.0) {
            QFont appFont = a.font();

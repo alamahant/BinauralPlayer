@@ -1,5 +1,20 @@
 # Changelog 
 
+## [2026-11-11] - Release v1.7.4
+
+### Fixed
+- **Dark Theme**
+  - Toolbar buttons no longer clip at the edges
+  - Slider handles are now round in both light and dark themes
+  - Reduced the harshness of the dark palette for better readability
+
+### Changed
+- **UI Polish**
+  - Improved spacing and padding across toolbar controls
+  - Consistent button sizing in the binaural toolbar
+
+---
+
 ## [2026-10-07] - Release v1.7.3
 
 ### Added

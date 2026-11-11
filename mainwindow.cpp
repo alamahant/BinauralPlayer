@@ -298,13 +298,13 @@ QToolBar *MainWindow::createMediaToolbar() {
     toolbar->addWidget(timeEdit);
 
     openCueButton = new QPushButton("Cue", toolbar);
-    openCueButton->setMaximumWidth(50);
+    openCueButton->setMaximumWidth(60);
     openCueButton->setToolTip("Open Cue file importer");
     openCueButton->setCheckable(true);
     openCueButton->setChecked(false);
     toolbar->addWidget(openCueButton);
 
-    toolbar->addSeparator();
+    //toolbar->addSeparator();
     openVideoButton = new QPushButton("Video", toolbar);
     openVideoButton->setCheckable(true);
     openVideoButton->setChecked(false);
@@ -345,7 +345,7 @@ QToolBar *MainWindow::createBinauralToolbar() {
     m_leftFreqInput->setValue(360.0);
     m_leftFreqInput->setDecimals(2);
     m_leftFreqInput->setSuffix(" Hz");
-    m_leftFreqInput->setMaximumWidth(100);
+    m_leftFreqInput->setMaximumWidth(110);
     m_leftFreqInput->setToolTip("Left channel frequency (20-20000 Hz)");
     m_leftFreqInput->setEnabled(false);
     toolbar->addWidget(m_leftFreqInput);
@@ -360,7 +360,7 @@ QToolBar *MainWindow::createBinauralToolbar() {
     m_rightFreqInput->setValue(367.83);
     m_rightFreqInput->setDecimals(2);
     m_rightFreqInput->setSuffix(" Hz");
-    m_rightFreqInput->setMaximumWidth(100);
+    m_rightFreqInput->setMaximumWidth(110);
     m_rightFreqInput->setToolTip("Right channel frequency (20-20000 Hz)");
     m_rightFreqInput->setEnabled(false);
     toolbar->addWidget(m_rightFreqInput);
@@ -419,7 +419,7 @@ QToolBar *MainWindow::createBinauralToolbar() {
     m_binauralVolumeInput->setEnabled(false);
     toolbar->addWidget(m_binauralVolumeInput);
 
-    toolbar->addSeparator();
+    //toolbar->addSeparator();
 
     return toolbar;
 }
@@ -526,7 +526,7 @@ QToolBar *MainWindow::createBinauralToolbarExt() {
     noiseTypeCombo->addItem("Grey");
 
     noiseTypeCombo->setCurrentIndex(0);
-    noiseTypeCombo->setFixedWidth(70);
+    //noiseTypeCombo->setFixedWidth(70);
 
     noiseLevelSpin = new QDoubleSpinBox(this);
     height = noiseLevelSpin->sizeHint().height();
@@ -536,7 +536,7 @@ QToolBar *MainWindow::createBinauralToolbarExt() {
     noiseLevelSpin->setSingleStep(0.05);
     noiseLevelSpin->setValue(0.30);
     noiseLevelSpin->setDecimals(2);
-    noiseLevelSpin->setFixedWidth(55);
+    //noiseLevelSpin->setFixedWidth(55);
 
     toolbar->addWidget(noiseEnableBtn);
     toolbar->addWidget(noiseTypeCombo);
@@ -725,7 +725,7 @@ QToolBar *MainWindow::createNatureToolbar() {
 
     m_masterPlayButton = new QPushButton("▶", toolbar);
     m_masterPlayButton->setToolTip("Play all ON nature sounds");
-    m_masterPlayButton->setMaximumWidth(30);
+    m_masterPlayButton->setMaximumWidth(40);
     m_masterPlayButton->setStyleSheet(
                 "QPushButton { font-weight: bold; color: #2E8B57; }");
     m_masterPlayButton->setEnabled(false);
@@ -733,7 +733,7 @@ QToolBar *MainWindow::createNatureToolbar() {
 
     m_masterPauseButton = new QPushButton("||", toolbar);
     m_masterPauseButton->setToolTip("Pause all ON nature sounds");
-    m_masterPauseButton->setMaximumWidth(30);
+    m_masterPauseButton->setMaximumWidth(40);
     m_masterPauseButton->setStyleSheet(
                 "QPushButton { font-weight: bold; color: #FF8C00; }");
     m_masterPauseButton->setEnabled(false);
@@ -742,7 +742,7 @@ QToolBar *MainWindow::createNatureToolbar() {
 
     m_masterStopButton = new QPushButton("■", toolbar);
     m_masterStopButton->setToolTip("Stop all ON nature sounds");
-    m_masterStopButton->setMaximumWidth(30);
+    m_masterStopButton->setMaximumWidth(40);
     m_masterStopButton->setStyleSheet(
                 "QPushButton { font-weight: bold; color: #DC143C; }");
     m_masterStopButton->setEnabled(false);
@@ -771,7 +771,7 @@ QToolBar *MainWindow::createNatureToolbar() {
         }
     }
 
-    toolbar->addSeparator();
+    //toolbar->addSeparator();
 
     volumeLabel = new QLabel("VOL:", toolbar);
     volumeLabel->setVisible(false);
@@ -816,7 +816,7 @@ void MainWindow::setupLayout() {
     renamePlaylistBtn->setToolTip("Rename Current Playlist");
     addPlaylistBtn->setMaximumWidth(80);
     addPlaylistBtn->setToolTip("Add New Playlist");
-    renamePlaylistBtn->setMaximumWidth(80);
+    //renamePlaylistBtn->setMaximumWidth(80);
     searchLabel = new QLabel("Search: ", this);
     searchEdit = new QLineEdit(this);
     searchEdit->setMaximumWidth(120);
@@ -898,6 +898,20 @@ void MainWindow::setupLayout() {
     playlistButtonLayout->addWidget(m_clearPlaylistButton);
 
     playlistButtonLayout->addSpacing(8);
+
+    QString sliderStyle =
+        "QSlider::handle:horizontal {"
+        "    background: #b0b0b0;"
+        "    border: 1px solid #808080;"
+        "    width: 14px;"
+        "    height: 14px;"
+        "    margin: -4px 0;"
+        "    border-radius: 7px;"
+        "}";
+   m_musicVolumeSlider->setStyleSheet(sliderStyle);
+   m_seekSlider->setStyleSheet(sliderStyle);
+
+
     playlistButtonLayout->addWidget(volumeIcon);
     playlistButtonLayout->addWidget(m_musicVolumeSlider);
     playlistButtonLayout->addWidget(m_musicVolumeLabel);
@@ -974,6 +988,17 @@ void MainWindow::setupConnections() {
     connect(m_mediaPlayer, &QMediaPlayer::sourceChanged, this, [this](const QUrl &url) {
         // A new media was loaded
         clearSubtitles();
+
+        if (url.isEmpty()) {
+            m_videoFloatingWindow->setWindowTitle("Video Player");
+            return;
+        }
+
+        QString name = QFileInfo(url.toLocalFile()).fileName();
+        if (name.isEmpty())
+            name = url.fileName();   // fallback for non-local URLs
+
+        m_videoFloatingWindow->setWindowTitle("Video Player - " + name);
     });
 
     connect(timeEditButton, &QPushButton::clicked, this, [this](bool checked) {
@@ -1854,6 +1879,7 @@ void MainWindow::onPlaybackStateChanged(QMediaPlayer::PlaybackState state) {
         m_pauseMusicButton->setEnabled(false);
         m_stopMusicButton->setEnabled(false);
         PlayerGlobals::playbackState = QMediaPlayer::StoppedState;
+        //m_videoFloatingWindow->setWindowTitle("Video Player");
 
         break;
     }
@@ -2246,7 +2272,10 @@ void MainWindow::addNewPlaylist(const QString &name) {
 
 
     QListWidget *newPlaylist = new QListWidget();
-    newPlaylist->setAlternatingRowColors(true);
+    //newPlaylist->setAlternatingRowColors(true);
+//#ifndef Q_OS_WIN
+    newPlaylist->setAlternatingRowColors(false);
+//#endif
     newPlaylist->setSelectionMode(QAbstractItemView::SingleSelection);
     QString playlistName =
             name.isEmpty() ? QString("Playlist %1").arg(m_playlistTabs->count())

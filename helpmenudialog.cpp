@@ -495,6 +495,28 @@ QString HelpMenuDialog::getWhatsNewContent()
     return R"(
 
 <div style="background-color: #e8f5e9; padding: 15px; border-radius: 8px; margin-bottom: 25px; border-left: 5px solid #2e7d32;">
+    <h2 style="color: #1b5e20; margin-top: 0;">Dark Theme &amp; UI Polish — Version 1.7.4 <span style="font-size: 0.75em; background-color: #2e7d32; color: white; padding: 2px 8px; border-radius: 12px; vertical-align: middle;">NEW</span></h2>
+    <p>Version 1.7.4 fixes dark theme clipping, rounds the slider handles, and softens the overall palette.</p>
+
+    <div style="background-color: #e8f5e9; padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #2e7d32;">
+        <h3 style="color: #1b5e20; margin-top: 0;">Fixed: Dark Theme</h3>
+        <ul>
+            <li><strong>Toolbar buttons</strong> — no longer clip at the edges</li>
+            <li><strong>Slider handles</strong> — now round in both light and dark themes</li>
+            <li><strong>Palette</strong> — pure black replaced with a warmer, lifted dark tone</li>
+        </ul>
+    </div>
+
+    <div style="background-color: #e8f5e9; padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #2e7d32;">
+        <h3 style="color: #1b5e20; margin-top: 0;">Changed: UI Polish</h3>
+        <ul>
+            <li><strong>Spacing</strong> — improved padding across toolbar controls</li>
+            <li><strong>Button sizing</strong> — consistent sizing in the binaural toolbar</li>
+        </ul>
+    </div>
+</div>
+
+<div style="background-color: #e8f5e9; padding: 15px; border-radius: 8px; margin-bottom: 25px; border-left: 5px solid #2e7d32;">
     <h2 style="color: #1b5e20; margin-top: 0;">Playlist &amp; Subtitle Support — Version 1.7.3 <span style="font-size: 0.75em; background-color: #2e7d32; color: white; padding: 2px 8px; border-radius: 12px; vertical-align: middle;">NEW</span></h2>
     <p>Version 1.7.3 fixes playlist loading and adds subtitle support.</p>
 
