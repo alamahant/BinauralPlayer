@@ -584,7 +584,7 @@ QToolBar *MainWindow::createBinauralToolbarExt() {
     }
     m_brainwaveDuration->setValue(45);
     m_brainwaveDuration->setSuffix(" min");
-    m_brainwaveDuration->setMaximumWidth(75);
+    //m_brainwaveDuration->setMaximumWidth(75);
     m_brainwaveDuration->setToolTip(
                 "Auto-stop brainwave audio after X minutes (1-45)");
     m_brainwaveDuration->setEnabled(false); // Enabled when binaural power is on
