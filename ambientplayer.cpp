@@ -18,7 +18,7 @@ AmbientPlayer::AmbientPlayer(QObject *parent)
 
     m_button = new QPushButton(m_name);
     m_button->setMinimumWidth(80);
-    m_button->setMaximumWidth(100);
+    //m_button->setMaximumWidth(100);
     m_button->setCheckable(false);
 
     setupConnections();
